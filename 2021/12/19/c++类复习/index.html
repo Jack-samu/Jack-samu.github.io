@@ -553,7 +553,7 @@ ptr的行为却是属于转换行为，是非法的。在派生类对象和基�
     <script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
     <script>
         let idOption = '1639901070000'
-            idOption = location.pathname
+            idOption = decodeURI(location.pathname)
         const gitalk = new Gitalk({
             clientID: 'Ov23lip8ZhRIqbSSgHJ9',
             clientSecret: '2a7c5c44e970a6ca9da7a343bcec542a91418c99',
@@ -916,6 +916,10 @@ ptr的行为却是属于转换行为，是非法的。在派生类对象和基�
                 <span class="iconfont-archer">&#xe606;</span>
                 cpp
             </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
             <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
                 <span class="iconfont-archer">&#xe606;</span>
                 cpp, 函数, gdb
@@ -923,10 +927,6 @@ ptr的行为却是属于转换行为，是非法的。在派生类对象和基�
             <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
                 <span class="iconfont-archer">&#xe606;</span>
                 cpp, 面向对象, 多态
-            </span>
-            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
-                <span class="iconfont-archer">&#xe606;</span>
-                cpp, 面向对象, GNU, llvm
             </span>
             <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
                 <span class="iconfont-archer">&#xe606;</span>
@@ -1000,13 +1000,13 @@ ptr的行为却是属于转换行为，是非法的。在派生类对象和基�
                 <span class="iconfont-archer">&#xe606;</span>
                 c, TCP/UDP
             </span>
-            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
-                <span class="iconfont-archer">&#xe606;</span>
-                ubuntu, docker
-            </span>
             <span class="sidebar-tag-name" data-tags="websocket">
                 <span class="iconfont-archer">&#xe606;</span>
                 websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
             </span>
             <span class="sidebar-tag-name" data-tags="websocket, python">
                 <span class="iconfont-archer">&#xe606;</span>
