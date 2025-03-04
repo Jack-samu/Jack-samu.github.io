@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概览：针对TCP&#x2F;UDP的一个c语言实战记录，由于之前在c站发过，所以直接拿下来放这里">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tcp&#x2F;udp底层实操第四篇">
+<meta property="og:url" content="https://jack-samu.github.io/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概览：针对TCP&#x2F;UDP的一个c语言实战记录，由于之前在c站发过，所以直接拿下来放这里">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E5%A4%9A%E8%BF%9B%E7%A8%8B%E6%A8%A1%E5%9E%8B.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.png">
+<meta property="article:published_time" content="2021-12-06T12:26:00.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:34:00.643Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="c, TCP&#x2F;UDP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jack-samu.github.io/images/%E5%A4%9A%E8%BF%9B%E7%A8%8B%E6%A8%A1%E5%9E%8B.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>tcp/udp底层实操第四篇 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">tcp/udp底层实操第四篇</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                tcp/udp底层实操第四篇
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="c, TCP/UDP">c, TCP/UDP</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">8.1k</span>阅读时长: <span class="post-count reading-time">35 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2021/12/06</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概览：针对TCP/UDP的一个c语言实战记录，由于之前在c站发过，所以直接拿下来放这里</p>
+<span id="more"></span>
+<p>前面有进行了并发服务器的多进程实现和IO复用实现，现在进行多线程实现的并发服务器。</p>
+<h2 id="一linux下的多线程">一、linux下的多线程</h2>
+<p>进程作为系统下最小的执行单位，多进程模型中每个进程都具有独立的内存空间，从而给进程间通信带来极大阻碍，需要使用进程间通信技术(IPC：管道、信号量、套接字、共享存储等)，而且由于创建进程带来的开销使得该程序效率不高。</p>
+<p>其实最大的问题是多进程的实现--“上下文切换”带来的开销，所以后面才有了轻量级进程--“线程”，线程的上下文切换比进程快，而且它们共享进程内空间，数据交换不用其他技术支持。</p>
+<h3 id="多线程的实现">1.1 多线程的实现</h3>
+<p>进程内存空间由保存全局变量的数据区、malloc等动态申请空间的堆区和函数运行所用的栈区(大致是这样，细致的分别可以不用追究)。对于线程，它们之间共享的就是数据区和堆区，自己拥有自己的栈区来执行代码，如下是多进程运行起来的效果模型，不代表实际物理硬件中状态：
+<img src="/images/多进程模型.png" alt="多进程" /> 下面是多线程模型：
+<img src="/images/多线程模型.png" alt="多线程" /></p>
+<p>多线程和多进程其实都是为了获得多个代码执行流，而进程是操作系统内的单独执行流，线程则是进程内的单独执行流单位。</p>
+<h3 id="线程的创建和销毁">1.2 线程的创建和销毁</h3>
+<p>对于线程的创建方法，其实是依据POSIX的API规范实现的，这是一个适用于linux和大部分UNIX系统的一个可移植操作系统接口规范。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pthread_create</span><span class="params">(<span class="type">pthread_t</span> * thread, <span class="type">const</span> <span class="type">pthread_attr_t</span> *attr, </span></span><br><span class="line"><span class="params">			<span class="type">void</span> *(*start_routine)(<span class="type">void</span> *), <span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败返回出错编号</span></span><br></pre></td></tr></table></figure>
+<p>上面是linux等系统中创建线程的函数原型，在编译时需要链接外部库，加上-lpthread即可。</p>
+<p>参数解读： thread，用来保存新线程的ID；
+attr，传递线程属性，一般使用NULL创建默认属性线程即可；
+start_routine，用来分配给新线程的函数执行流，相当于main函数；
+arg，用来传递参数到start_routine中的变量地址。</p>
+<p>其实关于上面的函数原型还有另一个版本，就是在参数前面添加关键字restrict是，这是用来告诉编译器，不能通过指针以外的直接或间接的方式修改对象内容，只用于指针。</p>
+<p>通过上面的模型我们可以知道，多线程之间都可以访问同一份全局数据区，所以全局数据存在被两个线程同时访问的情况，但这是非常危险的。不过，首先要讲明一点，我们在创建线程以后，其他线程会随着进程的终止而终止，就是main函数返回的时候。但如果其他线程还没来得及完成任务就结束了呢？正常来说，我们可以用sleep函数使得main函数暂停一下下，使得其他线程有足够的时间来运行，但这需要对程序走向有着绝对的预测，是很不合理的。让我们看看其他选择。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pthread_join</span><span class="params">(<span class="type">pthread_t</span> thread, <span class="type">void</span> **status)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败时返回错误号</span></span><br></pre></td></tr></table></figure>
+<p>该函数可以使得我们的main函数负责的主流程在等待thread对应线程结束后才返回，且能得到线程的函数返回值，就像main返回值那样。不过切记不能返回指向栈上局部变量的指针，具体原因大家应该都懂。让我们看一个多线程访问共享数据的例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="comment">//volatile关键字用于通知计算机代理可以改变该值，这里表示共享数据，不加static volatile也行</span></span><br><span class="line"><span class="type">static</span> <span class="keyword">volatile</span> <span class="type">long</span> <span class="type">long</span> sum = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">incr</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] begin\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>;i &lt; <span class="number">1e7</span>; i++)</span><br><span class="line">                sum += <span class="number">1</span>;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] done\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="comment">//线程结束</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">des</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] begin\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1e7</span>; i++)</span><br><span class="line">                sum -= <span class="number">1</span>;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] done\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="comment">//线程结束</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//创建两个线程，传入不同字符作为another_main的参数</span></span><br><span class="line">        <span class="type">pthread_t</span> p1, p2;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;main begin, sum = %lld\n&quot;</span>, sum);</span><br><span class="line">        pthread_create(&amp;p1, <span class="literal">NULL</span>, incr, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">        pthread_create(&amp;p2, <span class="literal">NULL</span>, des, <span class="string">&quot;B&quot;</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">//等待p1、p2对应的线程结束才结束main运行</span></span><br><span class="line">        pthread_join(p1, <span class="literal">NULL</span>);</span><br><span class="line">        pthread_join(p2, <span class="literal">NULL</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[main] sum: %lld\n&quot;</span>, sum);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的程序就我们日常的角度来看，就是两个线程都对sum自加或自减相同的次数，然后最后在main函数中输出，所以结果应该是0，对吧？让我们看看运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ gcc thread_simple.c -o thread_simple -lpthread</span><br><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./thread_simple</span><br><span class="line">main begin, <span class="built_in">sum</span> = 0</span><br><span class="line">[A] begin</span><br><span class="line">[B] begin</span><br><span class="line">[A] <span class="keyword">done</span></span><br><span class="line">[B] <span class="keyword">done</span></span><br><span class="line">[main] <span class="built_in">sum</span>: -1727789</span><br><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./thread_simple</span><br><span class="line">main begin, <span class="built_in">sum</span> = 0</span><br><span class="line">[A] begin</span><br><span class="line">[B] begin</span><br><span class="line">[A] <span class="keyword">done</span></span><br><span class="line">[B] <span class="keyword">done</span></span><br><span class="line">[main] <span class="built_in">sum</span>: -3319087</span><br><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./thread_simple</span><br><span class="line">main begin, <span class="built_in">sum</span> = 0</span><br><span class="line">[A] begin</span><br><span class="line">[B] begin</span><br><span class="line">[A] <span class="keyword">done</span></span><br><span class="line">[B] <span class="keyword">done</span></span><br><span class="line">[main] <span class="built_in">sum</span>: 2994460</span><br></pre></td></tr></table></figure>
+<p>哦豁？结果怎么是这样的？这是因为共享数据区的sum不是只存在一个的物体，当我们对sum进行计算时，需要把值传给CPU，运算完毕再写回来新值。而我们有两个线程，理想情况下是你拿去sum放进CPU加一，写回去我再拿来减一，但实际上可能你还没写进去，它就已经切换线程2了，这时候线程2读到的就是之前没自加的值，然后它拿去减一，然后写进sum中去，结果就变成只进行了减一运算了；同样的思路，线程1和线程2的工作反过来，就只进行了加一运算了。</p>
+<p>所以结果就变成难以预测的了，对于这种数据，我们应该设定一个时间内对其进行访问的只能有一个线程，另外的线程要访问只能等待当前线程用完，这就是同步。</p>
+<h3 id="线程同步">1.3 线程同步</h3>
+<p>同步对于解决线程访问顺序的问题，一方面，指的是同时访问同一内存空间发生的情况，另一方面指的是需要指定访问同一内存空间的线程执行顺序的情况。第一种情况，大家都用它，后面这种情况是一个塞东西进去另一个拿东西出来，就是很多人都知道的生产者-消费者模型。下面介绍一下同步所用技术：互斥量和信号量。</p>
+<h4 id="基于互斥量的同步">1.3.1 基于互斥量的同步</h4>
+<p>互斥量就是给需要限定访问的代码区上锁，我要用的时候我就锁上，悄咪咪地用，用完再开锁，让其他人用。具体实现就是下面两个函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_lock</span><span class="params">(<span class="type">pthread_mutex_t</span> *lock)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_unlock</span><span class="params">(<span class="type">pthread_mutex_t</span> *lock)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败返回其他值</span></span><br></pre></td></tr></table></figure>
+<p>上面锁的使用需要用到pthread_mutex_t变量，很多情况下都是定义为全局变量，然后在main函数中进行初始化，要注意，当你只调用了pthread_mutex_lock函数上锁，而没有pthread_mutex_unlock解锁，那代码临界区就会无法摆脱阻塞状态，这种状态被称为死锁。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="type">long</span> sum = <span class="number">0</span>;</span><br><span class="line"><span class="type">pthread_mutex_t</span> lock;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">incr</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] begin\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="comment">//上锁</span></span><br><span class="line">        pthread_mutex_lock(&amp;lock);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>;i &lt; <span class="number">1e7</span>; i++)</span><br><span class="line">                sum += <span class="number">1</span>;</span><br><span class="line">        <span class="comment">//开锁</span></span><br><span class="line">        pthread_mutex_unlock(&amp;lock);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] done\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="comment">//线程结束</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">des</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] begin\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1e7</span>; i++) &#123;</span><br><span class="line">                <span class="comment">//上锁</span></span><br><span class="line">                pthread_mutex_lock(&amp;lock);</span><br><span class="line">                sum -= <span class="number">1</span>;</span><br><span class="line">                <span class="comment">//开锁</span></span><br><span class="line">                pthread_mutex_unlock(&amp;lock);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] done\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="comment">//线程结束</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">pthread_t</span> p1, p2;</span><br><span class="line">        <span class="comment">//初始化pthread_mutex_t变量</span></span><br><span class="line">        pthread_mutex_init(&amp;lock, <span class="literal">NULL</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;main begin, sum = %lld\n&quot;</span>, sum);</span><br><span class="line">        pthread_create(&amp;p1, <span class="literal">NULL</span>, incr, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">        pthread_create(&amp;p2, <span class="literal">NULL</span>, des, <span class="string">&quot;B&quot;</span>);</span><br><span class="line"></span><br><span class="line">        pthread_join(p1, <span class="literal">NULL</span>);</span><br><span class="line">        pthread_join(p2, <span class="literal">NULL</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[main] sum: %lld\n&quot;</span>, sum);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//销毁pthread_mutex_t变量</span></span><br><span class="line">        pthread_mutex_destroy(&amp;lock);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用如上，然后运行时就可以发现没啥问题了，pthread_mutex_t变量主要使用pthread_mutex_init进行初始化，没有特别需要就给NULL作为第二参数即可，然后最后记得销毁，养成好习惯(pthread_mutex_destroy干掉lock)。</p>
+<h4 id="基于信号量的同步">1.3.2 基于信号量的同步</h4>
+<p>信号量和互斥量类似，不过我们完成这里的需要，用二进制信号量完成即可。和上面pthread_mutex_lock和pthread_mutex_unlock实现锁机制，完成临界区的保护类似，这里使用sem_post和sem_wait来实现锁机制。函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sem_post</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">sem_wait</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败返回其他值</span></span><br><span class="line"><span class="comment">//sem为保存信号量变量，传递给sem_post加一，传递给sem_wait时减一</span></span><br></pre></td></tr></table></figure>
+<p>它的初始化和销毁同样使用特定函数在main中进行，声明为全局变量。注意，信号量的值不能小于0，由于sem_wait对其进行减一运算，如果参数sem对应信号量为0值，函数会阻塞直至其他线程增加了信号量。初始化和销毁信号量的函数原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sem_init</span><span class="params">(<span class="type">sem_t</span> *sem, <span class="type">int</span> pshared, <span class="type">unsigned</span> <span class="type">int</span> value)</span>;</span><br><span class="line"><span class="comment">//sem，创建信号量时保存信号量变量地址值</span></span><br><span class="line"><span class="comment">//pshared，值为0表示只允许进程内部使用，其他值表示多个进程间共享</span></span><br><span class="line"><span class="comment">//value，新创建信号量初始值</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sem_destroy</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br></pre></td></tr></table></figure>
+<p>上面函数成功时返回0，失败时返回其他值。简单例子如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> num = <span class="number">0</span>;</span><br><span class="line"><span class="type">sem_t</span> sem1, sem2;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">read</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> i;</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>;i &lt; <span class="number">3</span>;i++) &#123;</span><br><span class="line">                sem_wait(&amp;sem2);</span><br><span class="line">                <span class="built_in">fputs</span>(<span class="string">&quot;输入：&quot;</span>, <span class="built_in">stdout</span>);</span><br><span class="line">                <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;num);</span><br><span class="line">                sem_post(&amp;sem1);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">inc</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="type">int</span> i, sum = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>;i &lt; <span class="number">3</span>; i++) &#123;</span><br><span class="line">                sem_wait(&amp;sem1);</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;输入值加1:%d\n&quot;</span>, num + <span class="number">1</span>);</span><br><span class="line">                sem_post(&amp;sem2);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//线程结束</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">pthread_t</span> p1, p2;</span><br><span class="line">        <span class="comment">//初始化信号量变量</span></span><br><span class="line">        sem_init(&amp;sem1, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">        sem_init(&amp;sem2, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        pthread_create(&amp;p1, <span class="literal">NULL</span>, read, <span class="literal">NULL</span>);</span><br><span class="line">        pthread_create(&amp;p2, <span class="literal">NULL</span>, inc, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">        pthread_join(p1, <span class="literal">NULL</span>);</span><br><span class="line">        pthread_join(p2, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//销毁信号量变量</span></span><br><span class="line">        sem_destroy(&amp;sem1);</span><br><span class="line">        sem_destroy(&amp;sem2);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>信号量的使用主要是用来确保线程间的合作，使之输出如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./thread_simple</span><br><span class="line">输入：2</span><br><span class="line">输入值加1:3</span><br><span class="line">输入：4</span><br><span class="line">输入值加1:5</span><br><span class="line">输入：5</span><br><span class="line">输入值加1:6</span><br></pre></td></tr></table></figure>
+<p>一个负责读取输入信息存储到变量，一个负责读取变量值进行输出，这个就是同步的第二种情况的例子。</p>
+<h2
+id="二多线程服务器的实现简单聊天室">二、多线程服务器的实现：简单聊天室</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span> *message)</span>;</span><br><span class="line"><span class="type">void</span> *<span class="title function_">handlerClnt</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">sendMsg</span><span class="params">(<span class="type">char</span> *msg, <span class="type">int</span> len)</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF 100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXCLNT 256</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> clnt_num = <span class="number">0</span>;</span><br><span class="line"><span class="type">int</span> clnt_socks[MAXCLNT];</span><br><span class="line"><span class="type">pthread_mutex_t</span> mutex;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> serv_sock, clnt_sock;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">serv_addr</span>, <span class="title">clnt_addr</span>;</span></span><br><span class="line">        <span class="type">socklen_t</span> addr_size;</span><br><span class="line">        <span class="type">pthread_t</span> thread_id;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(argc != <span class="number">2</span>) &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;Usage: %s &lt;port&gt;\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">                <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//初始化一个没有特别属性的互斥量</span></span><br><span class="line">        pthread_mutex_init(&amp;mutex, <span class="literal">NULL</span>);</span><br><span class="line">        serv_sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (serv_sock == <span class="number">-1</span>)</span><br><span class="line">                errorHandling(<span class="string">&quot;socket() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="built_in">memset</span>(&amp;serv_addr, <span class="number">0</span>, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">        serv_addr.sin_family = AF_INET;</span><br><span class="line">        serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);</span><br><span class="line">        serv_addr.sin_port = htons(atoi(argv[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (bind(serv_sock, (<span class="keyword">struct</span> sockaddr*) &amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr)) == <span class="number">-1</span>)</span><br><span class="line">                errorHandling(<span class="string">&quot;bind() error!&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (listen(serv_sock, <span class="number">5</span>) == <span class="number">-1</span>)</span><br><span class="line">                errorHandling(<span class="string">&quot;listen() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">                addr_size = <span class="keyword">sizeof</span>(clnt_addr);</span><br><span class="line">                clnt_sock = accept(serv_sock, (<span class="keyword">struct</span> sockaddr*) &amp;clnt_addr, &amp;addr_size);</span><br><span class="line">                <span class="keyword">if</span> (clnt_sock == <span class="number">-1</span>)</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                pthread_mutex_lock(&amp;mutex);</span><br><span class="line">                clnt_socks[clnt_num++] = clnt_sock;</span><br><span class="line">                pthread_mutex_unlock(&amp;mutex);</span><br><span class="line"></span><br><span class="line">                pthread_create(&amp;thread_id, <span class="literal">NULL</span>, handlerClnt, (<span class="type">void</span>*)&amp;clnt_sock);</span><br><span class="line">                pthread_detach(thread_id);</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;已连接客户端%d，IP：%s\n&quot;</span>, clnt_sock, inet_ntoa(clnt_addr.sin_addr));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        close(serv_sock);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//服务客户端信息传输</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">handlerClnt</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="type">int</span> clnt_sock = *((<span class="type">int</span>*)arg);</span><br><span class="line">        <span class="type">int</span> i, str_len = <span class="number">0</span>;</span><br><span class="line">        <span class="type">char</span> msg[BUF];</span><br><span class="line"></span><br><span class="line">        <span class="comment">//当收到信息，群发出去</span></span><br><span class="line">        <span class="keyword">while</span> ((str_len = read(clnt_sock, msg, <span class="keyword">sizeof</span>(msg))) != <span class="number">0</span>)</span><br><span class="line">                sendMsg(msg, str_len);</span><br><span class="line">        <span class="comment">//客户端执行close，主动断开</span></span><br><span class="line">        pthread_mutex_lock(&amp;mutex);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; clnt_num; i++) &#123;</span><br><span class="line">                <span class="comment">//从客户端连接套接字集合中删除当前连接客户端的记录</span></span><br><span class="line">                <span class="keyword">if</span> (clnt_sock == clnt_socks[i]) &#123;</span><br><span class="line">                        <span class="keyword">while</span>(i++ &lt; clnt_num - <span class="number">1</span>)</span><br><span class="line">                                clnt_socks[i] = clnt_socks[i + <span class="number">1</span>];</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        clnt_num--;</span><br><span class="line"></span><br><span class="line">        pthread_mutex_unlock(&amp;mutex);</span><br><span class="line">        close(clnt_sock);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送信息给所有客户端</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">sendMsg</span><span class="params">(<span class="type">char</span> *msg, <span class="type">int</span> len)</span> &#123;</span><br><span class="line">        <span class="type">int</span> i;</span><br><span class="line">        pthread_mutex_lock(&amp;mutex);</span><br><span class="line">        <span class="comment">//逐个客户端发送接收到的信息</span></span><br><span class="line">        <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; clnt_num; i++)</span><br><span class="line">                write(clnt_socks[i], msg, len);</span><br><span class="line">        pthread_mutex_unlock(&amp;mutex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span> *message)</span> &#123;</span><br><span class="line">        <span class="built_in">fputs</span>(message, <span class="built_in">stderr</span>);</span><br><span class="line">        fputc(<span class="string">&#x27;\n&#x27;</span>, <span class="built_in">stderr</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面是我们的服务器运行程序，接收所有客户端的信息，然后把收到的信息逐个发出去，创造一个群聊效果。和前面的一样，该服务端运行在云服务器上，下面是客户端代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">sendMsg</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="type">void</span> *<span class="title function_">readMsg</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span> *message)</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF 100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NAME 20</span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span> name[NAME] = <span class="string">&quot;[DEFAULT]&quot;</span>;</span><br><span class="line"><span class="type">char</span> msg[BUF];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> sock;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">serv_addr</span>;</span></span><br><span class="line">        <span class="type">pthread_t</span> send_thread, recv_thread;</span><br><span class="line">        <span class="type">void</span> *thread_back;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (argc != <span class="number">4</span>) &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;Usage: %s &lt;IP&gt; &lt;port&gt; &lt;ID&gt;\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">                <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">sprintf</span>(name, <span class="string">&quot;[%s]&quot;</span>, argv[<span class="number">3</span>]);</span><br><span class="line">        sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (sock == <span class="number">-1</span>)</span><br><span class="line">                errorHandling(<span class="string">&quot;socket() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="built_in">memset</span>(&amp;serv_addr, <span class="number">0</span>, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">        serv_addr.sin_family = AF_INET;</span><br><span class="line">        serv_addr.sin_addr.s_addr = inet_addr(argv[<span class="number">1</span>]);</span><br><span class="line">        serv_addr.sin_port = htons(atoi(argv[<span class="number">2</span>]));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (connect(sock, (<span class="keyword">struct</span> sockaddr*) &amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr)) == <span class="number">-1</span>)</span><br><span class="line">                errorHandling(<span class="string">&quot;connect() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">        pthread_create(&amp;send_thread, <span class="literal">NULL</span>, sendMsg, (<span class="type">void</span>*)&amp;sock);</span><br><span class="line">        pthread_create(&amp;recv_thread, <span class="literal">NULL</span>, readMsg, (<span class="type">void</span>*)&amp;sock);</span><br><span class="line">        pthread_join(send_thread, &amp;thread_back);</span><br><span class="line">        pthread_join(recv_thread, &amp;thread_back);</span><br><span class="line"></span><br><span class="line">        close(sock);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送信息给客户端</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">sendMsg</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="type">int</span> sock = *((<span class="type">int</span> *)arg);</span><br><span class="line">        <span class="type">char</span> message[NAME + BUF];</span><br><span class="line">        <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">                fgets(msg, BUF, <span class="built_in">stdin</span>);</span><br><span class="line">                <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(msg, <span class="string">&quot;q\n&quot;</span>)||!<span class="built_in">strcmp</span>(msg, <span class="string">&quot;Q\n&quot;</span>)) &#123;</span><br><span class="line">                        close(sock);</span><br><span class="line">                        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="built_in">sprintf</span>(message, <span class="string">&quot;%s %s&quot;</span>, name, msg);</span><br><span class="line">                write(sock, message, <span class="built_in">strlen</span>(message));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//接收服务端信息</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">readMsg</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="type">int</span> sock = *((<span class="type">int</span> *)arg);</span><br><span class="line">        <span class="type">char</span> message[BUF + NAME];</span><br><span class="line">        <span class="type">int</span> str_len;</span><br><span class="line">        <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">                str_len = read(sock, message, NAME + BUF <span class="number">-1</span>);</span><br><span class="line">                <span class="keyword">if</span> (str_len == <span class="number">-1</span>)</span><br><span class="line">                        <span class="keyword">return</span> (<span class="type">void</span>*)<span class="number">-1</span>;</span><br><span class="line">                message[str_len] = <span class="number">0</span>;</span><br><span class="line">                <span class="built_in">fputs</span>(message, <span class="built_in">stdout</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span> *message)</span> &#123;</span><br><span class="line">        <span class="built_in">fputs</span>(message, <span class="built_in">stderr</span>);</span><br><span class="line">        fputc(<span class="string">&#x27;\n&#x27;</span>, <span class="built_in">stderr</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后运行结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#centos7云服务器</span></span><br><span class="line">[root@VM-0-17-centos ~]# ./chat_server 9999</span><br><span class="line">已连接客户端4，IP：203.168.14.66</span><br><span class="line">已连接客户端5，IP：203.168.14.66</span><br><span class="line"></span><br><span class="line"><span class="comment">#ubuntu子系统下两个客户端</span></span><br><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./chat_client 121.5.47.242 9999 Ben</span><br><span class="line">Hi, I<span class="string">&#x27;m Ben.What&#x27;</span>s your name?</span><br><span class="line">[Ben] Hi, I<span class="string">&#x27;m Ben.What&#x27;</span>s your name?</span><br><span class="line">[Jam] I<span class="string">&#x27; m Jam.Nice to meet you.</span></span><br><span class="line"><span class="string">q</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./chat_client 121.5.47.242 9999 Jam</span></span><br><span class="line"><span class="string">[Ben] Hi, I&#x27;</span>m Ben.What<span class="string">&#x27;s your name?</span></span><br><span class="line"><span class="string">I&#x27;</span> m Jam.Nice to meet you.</span><br><span class="line">[Jam] I<span class="string">&#x27; m Jam.Nice to meet you.</span></span><br><span class="line"><span class="string">q</span></span><br></pre></td></tr></table></figure>
+<p>可以看到效果，然后我们看看他们的后台访问如何</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-17-centos ~]# pstree -p 30517</span><br><span class="line">chat_server(30517)─┬─&#123;chat_server&#125;(30589)</span><br><span class="line">                   └─&#123;chat_server&#125;(30683)</span><br><span class="line">[root@VM-0-17-centos ~]# pstack 30517</span><br><span class="line">Thread 3 (Thread 0x7f2dfb13a700 (LWP 30589)):</span><br><span class="line"><span class="comment">#0  0x00007f2dfb51775d in read () from /lib64/libpthread.so.0</span></span><br><span class="line"><span class="comment">#1  0x0000000000400d65 in handlerClnt ()</span></span><br><span class="line"><span class="comment">#2  0x00007f2dfb510ea5 in start_thread () from /lib64/libpthread.so.0</span></span><br><span class="line"><span class="comment">#3  0x00007f2dfb239b0d in clone () from /lib64/libc.so.6</span></span><br><span class="line">Thread 2 (Thread 0x7f2dfa939700 (LWP 30683)):</span><br><span class="line"><span class="comment">#0  0x00007f2dfb51775d in read () from /lib64/libpthread.so.0</span></span><br><span class="line"><span class="comment">#1  0x0000000000400d65 in handlerClnt ()</span></span><br><span class="line"><span class="comment">#2  0x00007f2dfb510ea5 in start_thread () from /lib64/libpthread.so.0</span></span><br><span class="line"><span class="comment">#3  0x00007f2dfb239b0d in clone () from /lib64/libc.so.6</span></span><br><span class="line">Thread 1 (Thread 0x7f2dfb93a740 (LWP 30517)):</span><br><span class="line"><span class="comment">#0  0x00007f2dfb5179dd in accept () from /lib64/libpthread.so.0</span></span><br><span class="line"><span class="comment">#1  0x0000000000400c94 in main ()</span></span><br><span class="line"><span class="comment">#客户端断开连接后</span></span><br><span class="line">[root@VM-0-17-centos ~]# pstack 30517</span><br><span class="line"><span class="comment">#0  0x00007f2dfb5179dd in accept () from /lib64/libpthread.so.0</span></span><br><span class="line"><span class="comment">#1  0x0000000000400c94 in main ()</span></span><br></pre></td></tr></table></figure>
+<p>上面是云服务器上面的查看信息，使用pstree
+-p查看实在无法区分线程进程(因为linux中似乎不论进程线程都会分配task_struct，线程没有专属自己的描述符)，所以使用pstack来查看，pstack可以查看特定进程ID的线程情况。原本想在ubuntu子系统使用pstack来查看线程情况的，结果它报错，pstack是个脚本，具体问题我也还没排查，先记录吧。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ pstack 124</span><br><span class="line"></span><br><span class="line">124: ./chat_client 121.5.47.242 9999 Ben</span><br><span class="line">pstack: Input/output error</span><br><span class="line">failed to <span class="built_in">read</span> target.</span><br></pre></td></tr></table></figure>
+<h2 id="三windows下多线程">三、windows下多线程</h2>
+<p>windows和linux有很大的不同，就目前而言，linux中一切皆文件，什么都可以统一为文件进行管理，而windows中是区分开的。这个是我现在知道的最大不同。对于windows中的线程、进程以及文件等资源的管理，都统一联系在内核对象。</p>
+<h3 id="句柄和内核对象">3.1 句柄和内核对象</h3>
+<p>为了管理各种资源，windows系统在内存中分配内存块，针对对应成员(进程等资源)进行信息记录，这个内存块就是一个数据结构，记录下文件数据IO、打开模式等信息。</p>
+<p>注：内核对象是操作系统所有，操作系统创建分配并且只有操作系统可以访问的内存，由于装载有各种信息，因此是一个数据结构。</p>
+<p>操作系统封装好了一系列API，我们可以使用这些函数申请创建内核对象，函数会返回一个句柄(根据操作系统位数而定的整数)，我们对内核对象的操作都是通过句柄进行，操作系统识别句柄可以识别对应内核对象。学习过面向对象特性的程序猿应该知道，所谓封装就是隐藏内部特征暴露功能，我们虽说可以通过句柄操作内核对象，但内核里面是怎样我们是不知道的，因为我们是通过句柄调用系统API进行的操作，中间隔了一个操作系统。</p>
+<h3 id="线程创建">3.2 线程创建</h3>
+<p>和之前的pthread_create一样，windows的线程创建函数名字也有一个create，如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">HANDLE <span class="title function_">CreateThread</span><span class="params">(</span></span><br><span class="line"><span class="params">	LPSECURITY_ATTRIBUTES lpThreadAttributes,</span></span><br><span class="line"><span class="params">	SIZE_T dwStackSize,</span></span><br><span class="line"><span class="params">	LPTHREAD_START_ROUTINE lpStartAddress,</span></span><br><span class="line"><span class="params">	LPVOID lpParameter,</span></span><br><span class="line"><span class="params">	DWORD dwCreationFlags,</span></span><br><span class="line"><span class="params">	LPDWORD lpThreadId</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line"><span class="comment">//成功时返回线程句柄，失败返回NULL</span></span><br></pre></td></tr></table></figure>
+<p>上面线程创建函数和pthread_create非常类似，我们如果只定义一个默认线程，关注lpStartAddress和lpParameter即可，前者是传入一个函数指针使得新开线程有个执行流，后者是传入函数指针对应函数的参数，其他的传入0或者NULL即可。</p>
+<p><strong>参数说明</strong>：
+lpThreadAttributes，线程安全相关信息，默认传入NULL(指针的意思啦)；
+dwStackSize，分配给线程的栈大小，默认传入0；
+lpStartAddress，传递给线程执行的函数的函数指针；
+lpParameter，上面函数需要的参数；
+dwCreationFlags，指定线程创建后的行为，传递0则线程马上执行；
+lpThreadId，保存线程ID的变量地址</p>
+<p>上面是很多问某乎朋友如何创建windows线程都会回复的一个函数，可见非常基础和常见，但创造的线程调用c/c++函数会不稳定，所以安全起见，有这么一个函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;process.h&gt;</span></span></span><br><span class="line"><span class="type">uintptr_t</span> _beginthreadex(</span><br><span class="line">	<span class="type">void</span> *security,</span><br><span class="line">	<span class="type">unsigned</span> stack_size,</span><br><span class="line">	<span class="type">unsigned</span> (*start_address)(<span class="type">void</span> *),</span><br><span class="line">	<span class="type">void</span> *arg_list,</span><br><span class="line">	<span class="type">unsigned</span> initflag,</span><br><span class="line">	<span class="type">unsigned</span> *threadaddr</span><br><span class="line">);</span><br><span class="line"><span class="comment">//成功返回线程句柄，失败返回0</span></span><br></pre></td></tr></table></figure>
+<p>这个函数参数意义和上面的CreateThread一致，对应使用即可，而且上面应该看得更加明了参数信息。</p>
+<h3 id="类似pthread_join的函数">3.3类似pthread_join的函数</h3>
+<p>前面linux中有pthread_join这样的函数，通过阻塞main等待函数参数指定的线程结束再运行，这样的函数windows中也有。我们知道线程在windows中是归于内核对象管理，所以线程是否终结，可以通过内核对象得到信息，终止状态即为"signaled"，未终止就是"non_signaled"。</p>
+<p>关注内核对象这两个状态的函数如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">DWORD <span class="title function_">WaitForSingleObject</span><span class="params">(HANDLE hHandle, DWORD dwMilliseconds)</span>;</span><br><span class="line"><span class="comment">//进入signaled状态就返回WAIT_OBJECT_0，超时返回WAIT_FAILED</span></span><br><span class="line">DWORD <span class="title function_">WaitForMultipleObjects</span><span class="params">(DWORD count, <span class="type">const</span> HANDLE *lpHandleds, BOOL bWaitAll, DWORD dwMilliseconds)</span>;</span><br><span class="line"><span class="comment">//失败返回WAIT_FAILED，成功则返回事件信息</span></span><br></pre></td></tr></table></figure>
+<p>前者针对单个内核对象，后者关注多个内核对象，主要是lpHandleds所指定的HANDLE型数组地址中的众多内核对象句柄。注意，这两个函数主要是用来关注内核对象的状态，如果内核对象没有进入这个状态，那函数在dwMilliseconds参数为INFINITE的情况下会一直阻塞程序进行。</p>
+<h3 id="线程同步-1">3.4 线程同步</h3>
+<p>windows系统比较贴合日常，大家基本都用过，那应该知道程序运行有个用户模式和内核模式吧。用户模式下，应用程序基本模式，访问物理设备会有权限限制，对于内存也是；内核模式下没有用户模式下的限制，可以自由访问物理设备和内存。</p>
+<p>windows的线程同步也根据两个模式分为两种，用户模式下线程同步是基于"CRITICAL_SECTION"，内核模式下则是基于事件、信号量、互斥量的同步。</p>
+<h4 id="基于critical_section的同步">3.4.1
+基于CRITICAL_SECTION的同步</h4>
+<p>和前面的互斥量使用一样，CRITICAL_SECTION对象作为钥匙存在，定义为全局变量，在main函数中初始化，在main中被销毁，并在上锁和解锁时都使用该对象作为参数。如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">EnterCriticalSection</span><span class="params">(LPCRITICAL_SECTION lpCriticalSection)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">LeaveCriticalSection</span><span class="params">(LPCRITICAL_SECTION lpCriticalSection)</span>;</span><br></pre></td></tr></table></figure>
+<p>LPCRITICAL_SECTION是指CRITICAL_SECTION对象地址值，该类型的初始化函数和销毁函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">InitializeCriticalSection</span><span class="params">(LPCRITICAL_SECTION lpCriticalSection)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">DeleteCriticalSection</span><span class="params">(LPCRITICAL_SECTION lpCriticalSection)</span>;</span><br></pre></td></tr></table></figure>
+<p>总结一下上面的linux使用锁机制，CRITICAL_SECTION对象及锁的使用场景如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">thread_main</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line">CRITICAL_SECTION cs;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	...</span><br><span class="line">	InitializeCriticalSection(&amp;cs);</span><br><span class="line">	<span class="comment">//创建线程等动作</span></span><br><span class="line">	DeleteCriticalSection(&amp;cs);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">thread_main</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">	...</span><br><span class="line">	EnterCriticalSection(&amp;cs);</span><br><span class="line">	<span class="comment">//临界区</span></span><br><span class="line">	LeaveCriticalSection(&amp;cs);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面介绍过，临界区其实是指示进行访问全局变量等操作的代码段，这里重提一下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;process.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="type">long</span> sum = <span class="number">0</span>;</span><br><span class="line">CRITICAL_SECTION cs;</span><br><span class="line"><span class="comment">//WINAPI是一个宏，代表__stdcall，具体含义可以自己查一下，这个是一个windows编程约定来的</span></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">another_main</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">	<span class="comment">//输出传入参数作为线程标志</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[%s] begin.\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	EnterCriticalSection(&amp;cs);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">1e7</span>; i++)</span><br><span class="line">		sum += <span class="number">1</span>;</span><br><span class="line">	LeaveCriticalSection(&amp;cs);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[%s] done.\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">	HANDLE handles[<span class="number">2</span>];</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;main, begin.\n&quot;</span>);</span><br><span class="line">	<span class="comment">//初始化CRITICAL_SECTION对象</span></span><br><span class="line">	InitializeCriticalSection(&amp;cs);</span><br><span class="line">	<span class="comment">//创建两个线程，传入参数A和B</span></span><br><span class="line">	handles[<span class="number">0</span>] = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, another_main, <span class="string">&quot;A&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	handles[<span class="number">2</span>] = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, another_main, <span class="string">&quot;B&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	WaitForMultipleObjects(<span class="number">2</span>, handles, TRUE, INFINITE);</span><br><span class="line"></span><br><span class="line">	DeleteCriticalSection(&amp;cs);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;At last, the sum is %lld\n&quot;</span>, sum);</span><br><span class="line">	system(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后编译运行，哦豁出错了，我以为是我的环境没设置好，因为很多材料都说要设置运行时库为"Multithread
+DLL"。后来看代码才发现，哦豁，数组访问越界了，handles数组一共就两个元素，handles[2]却是访问数组第三个成员就是尾部NULL，那当然就出错了。改正后运行结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">main, begin.</span><br><span class="line">[A] begin.</span><br><span class="line">[B] begin.</span><br><span class="line">[A] <span class="keyword">done</span>.</span><br><span class="line">[B] <span class="keyword">done</span>.</span><br><span class="line">At last, the <span class="built_in">sum</span> is 20000000</span><br><span class="line">请按任意键继续. . .</span><br><span class="line">//不上锁的话，结果如下</span><br><span class="line">main, begin.</span><br><span class="line">[A] begin.</span><br><span class="line">[B] begin.</span><br><span class="line">[A] <span class="keyword">done</span>.</span><br><span class="line">[B] <span class="keyword">done</span>.</span><br><span class="line">At last, the <span class="built_in">sum</span> is 10820740</span><br><span class="line">请按任意键继续. . .</span><br></pre></td></tr></table></figure>
+<p>可以看到，上面结果和linux中多线程基本一致，而且很多资料都可以在windows中使用pthread函数，对应实现大家可以去查一下然后自己做一下。</p>
+<h4 id="内核模式中基于互斥量的同步">3.4.2
+内核模式中基于互斥量的同步</h4>
+<p>windows中的互斥量使用和linux中的互斥量的使用一致，不过上锁的机制是WaitForSingleObject函数和ReleaseMutex函数实现，前者上锁后者解锁，为何？因为互斥量也是一个内核对象，而互斥量被线程拥有时为non-signaled状态，释放时为signaled状态。signaled状态的互斥量使用WaitForSingleObject函数调用后自动进入non-signaled状态，如果是non-signaled状态，调用WaitForSingleObject函数就会处于阻塞状态。对于可以再次进入non-signaled状态的内核对象，称为内核对象的"auto-reset"模式，不会自动跳转的称为"manual-reset"模式，两种模式区分不同内核对象。创建互斥量和释放互斥量的函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">HANDLE <span class="title function_">CreateMutex</span><span class="params">(LPSECURITY_ATTRIBUTES lpMutexAttributes, </span></span><br><span class="line"><span class="params">		BOOL bInitialOwner, LPCTSTR lpName)</span>;</span><br><span class="line"><span class="comment">//成功时返回创建的互斥量对象句柄，失败返回NULL</span></span><br><span class="line"><span class="comment">//lpMutexAttributes为NULL默认安全设置</span></span><br><span class="line"><span class="comment">//lpName为NULL默认创建无名互斥量对象</span></span><br><span class="line"><span class="comment">//bInitialOwner为TRUE，创建互斥量属于调用函数线程，为non-signaled状态；</span></span><br><span class="line"><span class="comment">//为FALSE，创建的互斥量对象不属于任何线程，状态为signaled</span></span><br><span class="line"></span><br><span class="line">BOOL <span class="title function_">ReleaseMutex</span><span class="params">(HANDLE hMutex)</span>;</span><br><span class="line"><span class="comment">//成功时返回TRUE， 失败时返回FALSE</span></span><br><span class="line"><span class="comment">//这个函数用来释放互斥量，对应WaitForSingleObject的获取互斥量，这样就相当于上锁了</span></span><br><span class="line"></span><br><span class="line">BOOL <span class="title function_">CloseHandle</span><span class="params">(HANDLE hObject)</span>;</span><br><span class="line"><span class="comment">//成功时返回TRUE， 失败返回FALSE</span></span><br><span class="line"><span class="comment">//用来销毁内核对象，可用于销毁互斥量和后面的信号量</span></span><br></pre></td></tr></table></figure>
+<p>同样是上面的例子，修改一下看看用法即可：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;process.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="type">long</span> sum = <span class="number">0</span>;</span><br><span class="line">HANDLE mutex;</span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">another_main</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">	<span class="comment">//输出传入参数作为线程标志</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[%s] begin.\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	WaitForSingleObject(mutex, INFINITE);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">1e7</span>; i++)</span><br><span class="line">		sum += <span class="number">1</span>;</span><br><span class="line">	ReleaseMutex(mutex);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;[%s] done.\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	</span><br><span class="line">	HANDLE handles[<span class="number">2</span>];</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;main, begin.\n&quot;</span>);</span><br><span class="line">	<span class="comment">//初始化互斥量对象</span></span><br><span class="line">	mutex = CreateMutex(<span class="literal">NULL</span>, FALSE, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="comment">//创建两个线程，传入参数A和B</span></span><br><span class="line">	handles[<span class="number">0</span>] = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, another_main, <span class="string">&quot;A&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	handles[<span class="number">1</span>] = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, another_main, <span class="string">&quot;B&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	WaitForMultipleObjects(<span class="number">2</span>, handles, TRUE, INFINITE);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;At last, the sum is %lld\n&quot;</span>, sum);</span><br><span class="line">	CloseHandle(mutex);</span><br><span class="line">	system(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果和上面的是一样的，可以对照来看。</p>
+<h4 id="内核模式中基于信号量的同步">3.4.3
+内核模式中基于信号量的同步</h4>
+<p>上面linux中基于信号量的例子已经介绍过了信号量，可以知道的是，信号量的使用可以确保线程间的流程顺序能够按照我们的意愿来进行，而windows下的信号量除了注册于内核对象以外，其他和linux信号量基本一致。创建信号量对象和释放信号量对象使用的函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">HANDLE <span class="title function_">CreateSemaphore</span><span class="params">(</span></span><br><span class="line"><span class="params">	LPSECURITY_ATTRIBUTES lpSemaphoreAttributes,</span></span><br><span class="line"><span class="params">	LONG lInitialCount,</span></span><br><span class="line"><span class="params">	LONG lMaximumCount,</span></span><br><span class="line"><span class="params">	LPCT STRlpName</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line"><span class="comment">//成功时返回信号量对象的句柄，失败返回NULL</span></span><br><span class="line"><span class="comment">//lpSemaphoreAttributes传入NULL默认安全</span></span><br><span class="line"><span class="comment">//lInitialCount，指定信号量初始值；lMaximumCount指定信号量最大值</span></span><br><span class="line"><span class="comment">//STRlpName命名信号量对象，默认传入NULL</span></span><br><span class="line"></span><br><span class="line">BOOL <span class="title function_">ReleaseSemaphore</span><span class="params">(</span></span><br><span class="line"><span class="params">	HANDLE hSemaphore,</span></span><br><span class="line"><span class="params">	LONG lReleaseCount,</span></span><br><span class="line"><span class="params">	LPLONG lpPreviousCount</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line"><span class="comment">//成功时返回TRUE，失败时返回FALSE</span></span><br><span class="line"><span class="comment">//hSemaphore，释放信号量对象</span></span><br><span class="line"><span class="comment">//lReleaseCount，可以指定信号量增加的值，不能大于前面设定的信号量最大值</span></span><br><span class="line"><span class="comment">//lpPreviousCount，保存修改之前值的变量地址，不需要就传入NULL</span></span><br></pre></td></tr></table></figure>
+<p>由于销毁信号量同样可以使用前面用过的CloseHandle函数，所以这里就不做介绍了。关于windows信号量实现锁的方法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">WaitForSingleObject(sem, INFINITE);</span><br><span class="line"><span class="comment">//临界区</span></span><br><span class="line">ReleaseSemaphore(sem, <span class="number">1</span>, <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+<p>再把上面linux中信号量的例子实现一下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> _CRT_SECURE_NO_WARNINGS</span></span><br><span class="line"><span class="comment">//使得scanf的使用不报错</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;process.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> num = <span class="number">0</span>;</span><br><span class="line">HANDLE sem1, sem2;</span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">read</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) &#123;</span><br><span class="line">		WaitForSingleObject(sem2, INFINITE);</span><br><span class="line">		<span class="built_in">fputs</span>(<span class="string">&quot;输入：&quot;</span>, <span class="built_in">stdout</span>);</span><br><span class="line">		<span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;num);</span><br><span class="line">		ReleaseSemaphore(sem1, <span class="number">1</span>, <span class="literal">NULL</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">inc</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">	<span class="type">int</span> i, sum = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">3</span>; i++) &#123;</span><br><span class="line">		WaitForSingleObject(sem1, INFINITE);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;输入值加1:%d\n&quot;</span>, num + <span class="number">1</span>);</span><br><span class="line">		ReleaseSemaphore(sem2, <span class="number">1</span>, <span class="literal">NULL</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//线程结束</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">	HANDLE thread1, thread2;</span><br><span class="line">	<span class="comment">//初始化信号量变量</span></span><br><span class="line">	sem1 = CreateSemaphore(<span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="literal">NULL</span>);</span><br><span class="line">	sem2 = CreateSemaphore(<span class="literal">NULL</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	thread1 = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, read, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	thread2 = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, inc, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	WaitForSingleObject(thread1, INFINITE);</span><br><span class="line">	WaitForSingleObject(thread2, INFINITE);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//销毁信号量变量</span></span><br><span class="line">	CloseHandle(sem1);</span><br><span class="line">	CloseHandle(sem2);</span><br><span class="line">	system(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果可以参考上面的例子，互斥量在被线程拥有时为non-signaled状态，释放时为signaled状态；调用WaitForSingleObject会阻塞直到信号量大于0。函数返回会将信号量减一并进入non-signaled状态，这适用于二进制信号量的情况下。</p>
+<h3 id="windows多线程服务器的实现">3.5 windows多线程服务器的实现</h3>
+<p>实现例子是个聊天室项目，收到客户端连接就新开线程单独服务，收到信息就群发出去。</p>
+<p>服务端实现代码如下： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> _WINSOCK_DEPRECATED_NO_WARNINGS</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;process.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF 100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAX 256</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;ws2_32.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">handler</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">sendMsg</span><span class="params">(<span class="type">char</span> *msg, <span class="type">int</span> len)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span>* message)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> clnt_num = <span class="number">0</span>;</span><br><span class="line">SOCKET clnt_socks[MAX];</span><br><span class="line">HANDLE lock;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span> &#123;</span><br><span class="line"></span><br><span class="line">	WSADATA wsa_data;</span><br><span class="line">	SOCKET serv_sock, clnt_sock;</span><br><span class="line">	SOCKADDR_IN serv_addr, clnt_addr;</span><br><span class="line">	HANDLE thread;</span><br><span class="line"></span><br><span class="line">	<span class="type">char</span> message[BUF];</span><br><span class="line">	<span class="type">int</span> addr_size;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (argc != <span class="number">2</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Usage: %s &lt;port&gt;\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (WSAStartup(MAKEWORD(<span class="number">2</span>, <span class="number">2</span>), &amp;wsa_data) != <span class="number">0</span>)</span><br><span class="line">		errorHandling(<span class="string">&quot;WSAStartup() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//初始化互斥量和监听套接字</span></span><br><span class="line">	lock = CreateMutex(<span class="literal">NULL</span>, FALSE, <span class="literal">NULL</span>);</span><br><span class="line">	serv_sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span> (serv_sock == INVALID_SOCKET)</span><br><span class="line">		errorHandling(<span class="string">&quot;socket() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构建用于绑定监听套接字的本机地址信息</span></span><br><span class="line">	<span class="built_in">memset</span>(&amp;serv_addr, <span class="number">0</span>, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">	serv_addr.sin_family = AF_INET;</span><br><span class="line">	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);</span><br><span class="line">	serv_addr.sin_port = htons(atoi(argv[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">	<span class="comment">//绑定监听套接字和服务器地址信息，并且开始监听客户端连接请求</span></span><br><span class="line">	<span class="keyword">if</span> (bind(serv_sock, (SOCKADDR*)&amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr)) == SOCKET_ERROR)</span><br><span class="line">		errorHandling(<span class="string">&quot;bind() error!&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (listen(serv_sock, <span class="number">5</span>) == SOCKET_ERROR)</span><br><span class="line">		errorHandling(<span class="string">&quot;listen() error!&quot;</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;服务器socket%d\n&quot;</span>, serv_sock);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		addr_size = <span class="keyword">sizeof</span>(clnt_addr);</span><br><span class="line">		clnt_sock = accept(serv_sock, (SOCKADDR*) &amp;clnt_addr, &amp;addr_size);</span><br><span class="line"></span><br><span class="line">		<span class="comment">//接受连接后，在客户端套接字数组中对现在新连接的客户端套接字进行更新，这个是互斥量，所以需要上锁</span></span><br><span class="line">		WaitForSingleObject(lock, INFINITE);</span><br><span class="line">		clnt_socks[clnt_num++] = clnt_sock;</span><br><span class="line">		ReleaseMutex(lock);</span><br><span class="line">		<span class="comment">//新开线程服务，为新连接的客户端提供信息传输服务</span></span><br><span class="line">		thread = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, handler, (<span class="type">void</span>*)&amp;clnt_sock, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;客户端%d已连接，IP: %d\n&quot;</span>, clnt_sock, inet_ntoa(clnt_addr.sin_addr));</span><br><span class="line">	&#125;</span><br><span class="line">	closesocket(serv_sock);</span><br><span class="line">	WSACleanup();</span><br><span class="line"></span><br><span class="line">	system(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//读取客户端发送信息并回送</span></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">handler</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">	SOCKET sock = *((SOCKET*)arg);</span><br><span class="line">	<span class="type">char</span> msg[BUF];</span><br><span class="line">	<span class="type">int</span> i, str_len = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//只要客户端没断开，就一直调用sendMsg向所有客户端发送本线程收到的对应客户端发送过来的信息</span></span><br><span class="line">	<span class="keyword">while</span> ((str_len = recv(sock, msg, <span class="keyword">sizeof</span>(msg), <span class="number">0</span>)) != <span class="number">0</span>)</span><br><span class="line">		sendMsg(msg, str_len);</span><br><span class="line"></span><br><span class="line">	WaitForSingleObject(lock, INFINITE);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; clnt_num; i++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (sock == clnt_socks[i]) &#123;</span><br><span class="line">			<span class="keyword">while</span> (i++ &lt; clnt_num - <span class="number">1</span>)</span><br><span class="line">				clnt_socks[i] = clnt_socks[i + <span class="number">1</span>];</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	clnt_num--;</span><br><span class="line">	ReleaseMutex(lock);</span><br><span class="line">	closesocket(sock);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//负责给各个客户端发送信息</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">sendMsg</span><span class="params">(<span class="type">char</span> *msg, <span class="type">int</span> len)</span> &#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	WaitForSingleObject(lock, INFINITE);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; clnt_num; i++)</span><br><span class="line">		send(clnt_socks[i], msg, len, <span class="number">0</span>);</span><br><span class="line">	ReleaseMutex(lock);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span>* message)</span> &#123;</span><br><span class="line">	<span class="built_in">fputs</span>(message, <span class="built_in">stderr</span>);</span><br><span class="line">	fputc(<span class="string">&#x27;\n&#x27;</span>, <span class="built_in">stderr</span>);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure> 客户端代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> _CRT_SECURE_NO_WARNINGS</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _WINSOCK_DEPRECATED_NO_WARNINGS</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;process.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF 100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NAME 20</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;ws2_32.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">sendMsg</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">recvMsg</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span>* message)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> name[NAME] = <span class="string">&quot;[God]&quot;</span>;</span><br><span class="line"><span class="type">char</span> msg[BUF];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span> &#123;</span><br><span class="line"></span><br><span class="line">	WSADATA wsa_data;</span><br><span class="line">	SOCKET sock;</span><br><span class="line">	SOCKADDR_IN serv_addr;</span><br><span class="line">	HANDLE send_thread, recv_thread;</span><br><span class="line"></span><br><span class="line">	<span class="type">char</span> message[BUF];</span><br><span class="line">	<span class="type">int</span> addr_size;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (argc != <span class="number">4</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Usage: %s &lt;IP&gt; &lt;port&gt; &lt;NAME&gt;\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (WSAStartup(MAKEWORD(<span class="number">2</span>, <span class="number">2</span>), &amp;wsa_data) != <span class="number">0</span>)</span><br><span class="line">		errorHandling(<span class="string">&quot;WSAStartup() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">	sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">if</span> (sock == INVALID_SOCKET)</span><br><span class="line">		errorHandling(<span class="string">&quot;socket() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构建用于连接的服务端地址信息</span></span><br><span class="line">	<span class="built_in">memset</span>(&amp;serv_addr, <span class="number">0</span>, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">	serv_addr.sin_family = AF_INET;</span><br><span class="line">	serv_addr.sin_addr.s_addr = inet_addr(argv[<span class="number">1</span>]);</span><br><span class="line">	serv_addr.sin_port = htons(atoi(argv[<span class="number">2</span>]));</span><br><span class="line"></span><br><span class="line">	<span class="built_in">sprintf</span>(name, <span class="string">&quot;[%s]&quot;</span>, argv[<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//发起连接请求</span></span><br><span class="line">	<span class="keyword">if</span> (connect(sock, (SOCKADDR*)&amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr)) == SOCKET_ERROR)</span><br><span class="line">		errorHandling(<span class="string">&quot;connect() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">	send_thread = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, sendMsg, (<span class="type">void</span>*)&amp;sock, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	recv_thread = (HANDLE)_beginthreadex(<span class="literal">NULL</span>, <span class="number">0</span>, recvMsg, (<span class="type">void</span>*)&amp;sock, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">	</span><br><span class="line">	WaitForSingleObject(send_thread, INFINITE);</span><br><span class="line">	WaitForSingleObject(recv_thread, INFINITE);</span><br><span class="line">	closesocket(sock);</span><br><span class="line">	WSACleanup();</span><br><span class="line"></span><br><span class="line">	system(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送信息给服务端</span></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">sendMsg</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">	SOCKET sock = *((SOCKET*)arg);</span><br><span class="line">	<span class="type">char</span> message[NAME + BUF];</span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		fgets(msg, BUF, <span class="built_in">stdin</span>);</span><br><span class="line">		<span class="keyword">if</span> (!<span class="built_in">strcmp</span>(msg, <span class="string">&quot;q\n&quot;</span>) || !<span class="built_in">strcmp</span>(msg, <span class="string">&quot;Q\n&quot;</span>)) &#123;</span><br><span class="line">			closesocket(sock);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">sprintf</span>(message, <span class="string">&quot;%s %s&quot;</span>, name, msg);</span><br><span class="line">		send(sock, message, <span class="built_in">strlen</span>(message), <span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//接收服务端信息</span></span><br><span class="line"><span class="type">unsigned</span> WINAPI <span class="title function_">recvMsg</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">	SOCKET sock = *((SOCKET*)arg);</span><br><span class="line">	<span class="type">char</span> message[NAME + BUF];</span><br><span class="line">	<span class="type">int</span> str_len;</span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		str_len = recv(sock, message, NAME + BUF <span class="number">-1</span>, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">if</span> (str_len == <span class="number">-1</span>)</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">		message[str_len] = <span class="number">0</span>;</span><br><span class="line">		<span class="built_in">fputs</span>(message, <span class="built_in">stdout</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span>* message)</span> &#123;</span><br><span class="line">	<span class="built_in">fputs</span>(message, <span class="built_in">stderr</span>);</span><br><span class="line">	fputc(<span class="string">&#x27;\n&#x27;</span>, <span class="built_in">stderr</span>);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用本机通信实在没意思，所以我把云服务器和win10互为服务端-客户端来进行连接通信，结果，win10作为服务端时，云服务器会连接失败，但反过来倒是可以，哎头疼。先告一段落吧。</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">https://jack-samu.github.io/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">December 6th 2021, 8:26:00 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">March 2nd 2025, 11:34:00 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/" title="Boost库学习_时间处理篇">
+                    <div class="nextTitle">Boost库学习_时间处理篇</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/" title="tcp/udp底层实操第三篇">
+                    <div class="prevTitle">tcp/udp底层实操第三篇</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80linux%E4%B8%8B%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">一、linux下的多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 多线程的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E9%94%80%E6%AF%81"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 线程的创建和销毁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 线程同步</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E4%BA%92%E6%96%A5%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.3.1 基于互斥量的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">1.3.2.</span> <span class="toc-text">1.3.2 基于信号量的同步</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E8%81%8A%E5%A4%A9%E5%AE%A4"><span class="toc-number">2.</span> <span class="toc-text">二、多线程服务器的实现：简单聊天室</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89windows%E4%B8%8B%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">三、windows下多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%A5%E6%9F%84%E5%92%8C%E5%86%85%E6%A0%B8%E5%AF%B9%E8%B1%A1"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 句柄和内核对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%88%9B%E5%BB%BA"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 线程创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E4%BC%BCpthread_join%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-number">3.3.</span> <span class="toc-text">3.3类似pthread_join的函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5-1"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 线程同步</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Ecritical_section%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">3.4.1.</span> <span class="toc-text">3.4.1
+基于CRITICAL_SECTION的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%AD%E5%9F%BA%E4%BA%8E%E4%BA%92%E6%96%A5%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">3.4.2.</span> <span class="toc-text">3.4.2
+内核模式中基于互斥量的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%AD%E5%9F%BA%E4%BA%8E%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">3.4.3.</span> <span class="toc-text">3.4.3
+内核模式中基于信号量的同步</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#windows%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.5.</span> <span class="toc-text">3.5 windows多线程服务器的实现</span></a></li></ol></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

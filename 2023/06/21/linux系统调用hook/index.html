@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="在求职中碰到的，经常见到的一个概念，就了解一下。针对hook技术，很多都是一种劫持的解读，linux系统调用hook，就是在linux系统中的系统调用劫持了，主要是安防的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux系统调用hook">
+<meta property="og:url" content="https://jack-samu.github.io/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="在求职中碰到的，经常见到的一个概念，就了解一下。针对hook技术，很多都是一种劫持的解读，linux系统调用hook，就是在linux系统中的系统调用劫持了，主要是安防的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-21T11:03:59.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:59.055Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="安防">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>linux系统调用hook · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">linux系统调用hook</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                linux系统调用hook
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="安防">安防</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">3.2k</span>阅读时长: <span class="post-count reading-time">14 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/06/21</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>在求职中碰到的，经常见到的一个概念，就了解一下。针对hook技术，很多都是一种劫持的解读，linux系统调用hook，就是在linux系统中的系统调用劫持了，主要是安防的。</p>
+<span id="more"></span>
+<h2 id="一基础知识">一、基础知识</h2>
+<p>在cpp中，一个可执行文件的生成，会有很多中间文件的生成，其中就有.o目标文件，目标文件内含符号表，用于在链接环节进行特定链接，而hook一个系统调用，就是修改内核符号表从而达到劫持作用。如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// test.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Hello, test.&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后编译出目标文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop\test&gt; g++ -c test.cpp -o test.o</span><br><span class="line">PS D:\Desktop\test&gt; nm test.o</span><br><span class="line">0000000000000000 b .bss</span><br><span class="line">0000000000000000 d .ctors</span><br><span class="line">0000000000000000 d .data</span><br><span class="line">0000000000000000 p .pdata</span><br><span class="line">0000000000000000 r .rdata</span><br><span class="line">0000000000000000 r .rdata$.refptr._ZSt4cout</span><br><span class="line">0000000000000000 r .rdata$.refptr._ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</span><br><span class="line">0000000000000000 r .rdata$zzz</span><br><span class="line">0000000000000000 R .refptr._ZSt4cout</span><br><span class="line">0000000000000000 R .refptr._ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</span><br><span class="line">0000000000000000 t .text</span><br><span class="line">0000000000000000 r .xdata</span><br><span class="line">                 U __main</span><br><span class="line">000000000000003a t __tcf_0</span><br><span class="line">0000000000000091 t _GLOBAL__sub_I_main</span><br><span class="line">0000000000000055 t _Z41__static_initialization_and_destruction_0ii</span><br><span class="line">                 U _ZNSolsEPFRSoS_E</span><br><span class="line">                 U _ZNSt8ios_base4InitC1Ev</span><br><span class="line">                 U _ZNSt8ios_base4InitD1Ev</span><br><span class="line">                 U _ZSt4cout</span><br><span class="line">                 U _ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</span><br><span class="line">0000000000000000 r _ZStL19piecewise_construct</span><br><span class="line">0000000000000000 b _ZStL8__ioinit</span><br><span class="line">                 U _ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc</span><br><span class="line">                 U atexit</span><br><span class="line">0000000000000000 T main</span><br><span class="line">PS D:\Desktop\test&gt;</span><br></pre></td></tr></table></figure>
+<p>可执行文件也有很多符号，但用nm来检查就太多了，有很多标准库链接进来了的多余符号。</p>
+<h2 id="二机制介绍">二、机制介绍</h2>
+<p>嗯，要知道的是，Intel的CPU的执行级别分四种：Ring0、Ring1、Ring2、Ring3，内核就处于Ring0级别；在windows中，普通程序如果有执行Ring0指令，windows会显示非法指令的错误信息。我们的日常程序，就运行在Ring3级别，在需要对文件进行读写的情况下，往往需要通过系统调用来进行，这也往往被称为陷入内核，期间，CPU执行级别从Ring3切换到Ring0，然后代替程序完成读写操作。</p>
+<h3 id="利用0x80劫持system_call">2.1 利用0x80劫持system_call</h3>
+<p>针对进程地址空间，可执行文件的各种地址都是制定了的，除非运行时确定的特性，而系统调用，就会引入0x80处的软中断，从而引入系统调用处理程序，跳转到其入口system_call，system_call会根据系统调用号来确定调用服务，然后根据内核符号表来进行特定跳转。所以，修改这里内核符号表，就可以跳转到自己编写的函数中，完成hook。</p>
+<p>这里的做法，普遍是获取sys_call_table的基地址，也就是获取终端描述符的地址；在里面查找0x80中断的服务，获取其内存空间，从而获取sys_call_table的基地址，即可修改指定偏移对应的系统调用。不过这一步笔者不太熟悉。</p>
+<h3 id="利用ld_preload动态链接进行hook">2.2
+利用LD_PRELOAD动态链接进行hook</h3>
+<p>linux中，LD_PRELOAD可以影响程序的运行时链接，允许用户在运行前优先加载指定库，可以通过这个指定我们预定义的库，指定库中符号为程序动态链接所需库的同名符号，这样就能实现覆盖，使得程序只访问我们指定符号。如下为一段正常代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> msg[<span class="number">30</span>];</span><br><span class="line">    <span class="built_in">strcpy</span>(msg, <span class="string">&quot;test\0&quot;</span>);</span><br><span class="line">    <span class="type">int</span> res = <span class="built_in">strcmp</span>(msg, <span class="string">&quot;aaa&quot;</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, res);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后编译执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ gcc test.c -o test</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ./test</span><br><span class="line">test.</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ldd test</span><br><span class="line">	linux-vdso.so.1 (0x00007ffeb89f2000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f5c80200000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007f5c8047f000)</span><br></pre></td></tr></table></figure>
+<p>简单查看了一下，test的正常运行和依赖如上，现在要做的就是针对libc.so.6的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="type">int</span> <span class="title function_">strcmp</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *s1, <span class="type">const</span> <span class="type">char</span> *s2)</span>&#123;   </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;传入参数：&lt;%s&gt; &lt;%s&gt;\n&quot;</span>, s1, s2);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上，因为是展示，所以专门做了个strcmp的同名函数，因为没有实际的需求，所以就给一个printf就算了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ gcc -fPIC -shared hook.c -o hook.so</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ LD_PRELOAD=./hook.so ./test</span><br><span class="line">传入参数：&lt;test&gt; &lt;aaa&gt;</span><br><span class="line">0</span><br></pre></td></tr></table></figure>
+<p>这样就一个利用LD_PRELOAD来达成的系统调用hook了，如果是针对这个变量进行export短暂生效的，可以使用unset来复原，然后继续实验。本来准备hook一下strcpy的，但参数都对上了，怎么都没有链接上自己的动态库。实验了一下只带strcpy的测试代码，发现动态依赖没变，所以也是没法子了，先放一放。或许是符号。嗯，除了编译器来生成符号链接以外，我们也可以显式声明来进行特定库的调用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;dlfcn.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">int</span><span class="params">(*STRCMP)</span><span class="params">(<span class="type">const</span> <span class="type">char</span>*, <span class="type">const</span> <span class="type">char</span>*)</span></span>;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">strcmp</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *s1, <span class="type">const</span> <span class="type">char</span> *s2)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">static</span> <span class="type">void</span> *handle = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="type">static</span> STRCMP old_strcmp = <span class="literal">NULL</span>;</span><br><span class="line">    </span><br><span class="line">    handle = <span class="built_in">dlopen</span> (<span class="string">&quot;libc.so.6&quot;</span>, RTLD_LAZY);  </span><br><span class="line">    <span class="keyword">if</span> (!handle) &#123;  </span><br><span class="line">        <span class="built_in">fprintf</span> (stderr, <span class="string">&quot;%s &quot;</span>, <span class="built_in">dlerror</span>());  </span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);  </span><br><span class="line">    &#125;</span><br><span class="line">    old = (STRCMP)<span class="built_in">dlsym</span>(handle, <span class="string">&quot;strcmp&quot;</span>); </span><br><span class="line">   </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;传入参数：&lt;%s&gt; &lt;%s&gt;\n&quot;</span>, s1, s2);</span><br><span class="line">    <span class="built_in">dlclose</span>(handle);</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">old</span>(s1, s2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上的示例代码，使用dlopen来获得lib.so.6的操作权，然后声明与hook函数同类型的函数指针，再用dlsym来对这个函数指针进行初始化，然后调用。这样一来，程序正常进行，我们也进行了自己的操作，如果没有显式的一些输出或者记录，这就相当于隐身偷了别人的家了吧。</p>
+<h2 id="三一些hook例子">三、一些hook例子</h2>
+<p>下面是针对一些系统调用的hook，然后进行尝试的例子。</p>
+<h3 id="针对malloc的hook">3.1 针对malloc的hook</h3>
+<p>malloc是C中资源分配的重点，也是各种面试的重点。所以这里也针对malloc进行一下hook，来查看一下它的一些信息“</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;dlfcn.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="type">static</span> <span class="type">void</span>* (*hook_malloc)(<span class="type">size_t</span>) = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">init</span><span class="params">()</span>&#123;</span><br><span class="line">    hook_malloc = dlsym(RTLD_NEXT, <span class="string">&quot;malloc&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(!hook_malloc)&#123;</span><br><span class="line">        <span class="built_in">fputs</span>(<span class="string">&quot;无法获取malloc符号\n&quot;</span>, <span class="built_in">stderr</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fputs</span>(<span class="string">&quot;成功初始化\n&quot;</span>, <span class="built_in">stdout</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">malloc</span><span class="params">(<span class="type">size_t</span> size)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!hook_malloc)</span><br><span class="line">        init();</span><br><span class="line">    <span class="type">void</span> *res = hook_malloc(size);</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;size: %ld, ptr: %p\n&quot;</span>, size, res);</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上，<code>gcc -fPIC -shared hook.c -o hook.so</code>编译得出一个共享库，然后这个库就可以供给c或者cpp进行调用了，如果cpp中有用到对应malloc的话。测试代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> *msg = (<span class="type">char</span>*)<span class="built_in">malloc</span>(<span class="number">10</span>);</span><br><span class="line">    <span class="built_in">strcpy</span>(msg, <span class="string">&quot;test\0&quot;</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s, %ld\n&quot;</span>, msg, <span class="built_in">strlen</span>(msg));</span><br><span class="line">    <span class="built_in">free</span>(msg);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后进行测试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-ubuntu:~/Desktop/test$ cc test.c -o test</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ./test</span><br><span class="line">test, 4</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ldd test</span><br><span class="line">	linux-vdso.so.1 (0x00007fff2cd66000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f6422a00000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007f6422d17000)</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ gcc -fPIC -shared hook.c -o hook.so</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ LD_PRELOAD=./hook.so ./test</span><br><span class="line">size: 1024, ptr: 0x562eb2a842a0</span><br><span class="line">成功初始化</span><br><span class="line">size: 10, ptr: 0x562eb2a846b0</span><br><span class="line">test, 4</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>如上，就一个简单分配char内存的例子，然后ldd设置了LD_PRELOAD的test可以发现：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   linux-vdso.so.1 (0x00007ffc36357000)</span><br><span class="line">./hook.so (0x00007fb0cfcda000)</span><br><span class="line">libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb0cfa00000)</span><br><span class="line">/lib64/ld-linux-x86-64.so.2 (0x00007fb0cfce6000)</span><br></pre></td></tr></table></figure>
+<p>实际上，输出并不像上面那样，那么简洁，甚至有着很多其他的各种输出，因为好像有部分操作会持续用到malloc，不止我们的测试代码，所以这段时间应用到malloc系统调用的，都在这输出了。另外，还有一个问题，就是上面的自己重写的malloc中，最后的fprintf的输出方向，如果不选择stderr，就会出现coredump，因为我也是不是很熟悉内存泄露这块，就没有找出问题所在，如果有明白的可以联系一下笔者。</p>
+<p>因为上面重写的malloc是系统调用，而且编译出了动态库，也就意味着，咱们cpp也能用，下面来测试一下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">A</span>()&#123;a = <span class="keyword">new</span> <span class="type">int</span>;&#125;;</span><br><span class="line">    ~<span class="built_in">A</span>()&#123;</span><br><span class="line">        <span class="keyword">if</span>(a)&#123;</span><br><span class="line">            <span class="keyword">delete</span> a;</span><br><span class="line">            a = <span class="literal">nullptr</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> *a;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    A a;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>好的，跑起来：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-ubuntu:~/Desktop/test$ LD_PRELOAD=./hook.so ./test</span><br><span class="line">size: 1024, ptr: 0x558ca65232a0</span><br><span class="line">成功初始化</span><br><span class="line">size: 72704, ptr: 0x558ca65236b0</span><br><span class="line">size: 4, ptr: 0x558ca65352c0</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>如上，证明了new和malloc都是同源的，最终落到系统调用上，都是一个底子，所以专注语言的使用，方便工作的推进，但了解底层，似乎对调优有着更大的帮助。把上面的自定义类，换成vector，也能得到malloc调用的一些信息，因为它的底层，用到的内存分配std::allocator在底层，用到了malloc的逻辑。</p>
+<h3 id="劫持命令">3.2 劫持命令</h3>
+<p>在c语言中，很多接口都是和系统直接相关的，而这些个函数，在经编译器编译后符号也没有变化，所以它算是直接拿系统调用来编程的，而这些个系统调用，也是很多的命令的底层接口，所以完全可以通过LD_PRELOAD来对系统命令进行hook。比如，常用的ls命令，首先看看它都调用了什么库函数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-ubuntu:~/Desktop/test$ readelf -Ws /usr/bin/ls | head -n 15</span><br><span class="line"> </span><br><span class="line">Symbol table &#x27;.dynsym&#x27; contains 123 entries:</span><br><span class="line">   Num:    Value          Size Type    Bind   Vis      Ndx Name</span><br><span class="line">     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND </span><br><span class="line">     1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __ctype_toupper_loc@GLIBC_2.3 (2)</span><br><span class="line">     2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getenv@GLIBC_2.2.5 (3)</span><br><span class="line">     3: 0000000000000000     0 OBJECT  GLOBAL DEFAULT  UND __progname@GLIBC_2.2.5 (3)</span><br><span class="line">     4: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sigprocmask@GLIBC_2.2.5 (3)</span><br><span class="line">     5: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __snprintf_chk@GLIBC_2.3.4 (4)</span><br><span class="line">     6: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND raise@GLIBC_2.2.5 (3)</span><br><span class="line">     7: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.34 (5)</span><br><span class="line">     8: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND abort@GLIBC_2.2.5 (3)</span><br><span class="line">     9: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@GLIBC_2.2.5 (3)</span><br><span class="line">    10: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strncmp@GLIBC_2.2.5 (3)</span><br><span class="line">    11: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTable</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ldd /usr/bin/ls</span><br><span class="line">	linux-vdso.so.1 (0x00007ffc6a794000)</span><br><span class="line">	libselinux.so.1 =&gt; /lib/x86_64-linux-gnu/libselinux.so.1 (0x00007f2648dfc000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f2648a00000)</span><br><span class="line">	libpcre2-8.so.0 =&gt; /lib/x86_64-linux-gnu/libpcre2-8.so.0 (0x00007f2648d61000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007f2648e66000)</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>主要是想展示一下readelf的用法，所以就只显示前面15行，而且上面也有需要的信息了，比如strncmp，那么我们就实现这么一个函数，对应的动态库也就那么几个，没毛病，可以进行。实现一个strncmp函数。先上简单测试代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> res = <span class="built_in">strncmp</span>(<span class="string">&quot;test&quot;</span>, <span class="string">&quot;aaa&quot;</span>, <span class="number">4</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, res);</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>测试一下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-ubuntu:~/Desktop/test$ gcc test.c -o test</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ./test</span><br><span class="line">19</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ldd test</span><br><span class="line">	linux-vdso.so.1 (0x00007ffcd2d9a000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f2748400000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007f27487a9000)</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>如上，可以看出对系统的依赖有很大的重合，所以也验证了系统命令多是基于系统调用的想法，还有初步锁定libc.so.6动态库吧。现在准备一下hook库，初步还是只看参数，而且不妨碍命令的正常执行，所以还是会调用系统库的strncmp，但自己会加一点输出：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;dlfcn.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="type">static</span> <span class="title function_">int</span> <span class="params">(*hook_strncmp)</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *__s1, <span class="type">const</span> <span class="type">char</span> *__s2, <span class="type">size_t</span> __n)</span>=<span class="literal">NULL</span>;</span><br><span class="line"> </span><br><span class="line"><span class="type">void</span> <span class="title function_">init</span><span class="params">()</span>&#123;</span><br><span class="line">    hook_strncmp = dlsym(RTLD_NEXT, <span class="string">&quot;strncmp&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span>(!hook_strncmp)&#123;</span><br><span class="line">        <span class="built_in">fputs</span>(<span class="string">&quot;无法获取strncmp符号\n&quot;</span>, <span class="built_in">stderr</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fputs</span>(<span class="string">&quot;初始化成功\n&quot;</span>, <span class="built_in">stdout</span>);</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> <span class="title function_">strncmp</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *__s1, <span class="type">const</span> <span class="type">char</span> *__s2, <span class="type">size_t</span> __n)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!hook_strncmp)</span><br><span class="line">        init();</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;参数：%s, %s, %ld\n&quot;</span>, __s1, __s2, __n);</span><br><span class="line">    <span class="keyword">return</span> hook_strncmp(__s1, __s2, __n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-ubuntu:~/Desktop/test$ ./test</span><br><span class="line">19</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ LD_PRELOAD=./hook.so ./test</span><br><span class="line">19</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ LD_PRELOAD=./hook.so ls</span><br><span class="line">初始化成功</span><br><span class="line">参数：always, auto, 4</span><br><span class="line">参数：yes, auto, 4</span><br><span class="line">参数：force, auto, 4</span><br><span class="line">参数：never, auto, 4</span><br><span class="line">参数：no, auto, 4</span><br><span class="line">参数：none, auto, 4</span><br><span class="line">参数：auto, auto, 4</span><br><span class="line">client.cpp  clnt      hook.c   libhi.so  server      test    test.cpp  test.s        unix_domain_socket.txt  unix_server.c</span><br><span class="line">client.h    clnt.cpp  hook.so  main.cpp  server.cpp  test.c  test.o    unix_clnt.py  unix_server             unix_server.py</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>有意思的是，自己编写的测试程序对hook.so没反应，但ls却来劲了，之前的strcpy可能也是同样的原因失败的，照理来说，参数应该没问题的，毕竟ls调用都是成功的，那么为什么test程序一直没响应呢？</p>
+<h2 id="个人推荐">个人推荐</h2>
+<p>嗯，最后分享一个在线网站，它支持c++的一些语法糖的比较详细的解释，是一个，从cpp代码到代码的在线网站，对，从cpp代码到代码，哈哈哈。比如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">  std::vector&lt;<span class="type">int</span>&gt; num = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>经网站解析后，是这样的：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  std::vector&lt;<span class="type">int</span>, std::allocator&lt;<span class="type">int</span>&gt; &gt; num = std::vector&lt;<span class="type">int</span>, std::allocator&lt;<span class="type">int</span>&gt; &gt;&#123;std::initializer_list&lt;<span class="type">int</span>&gt;&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;&#125;;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对了解语法糖非常有帮助，还有着根据代码，查看汇编码的网站，支持各种语言，比如之前就用过golang查看一个Println输出hello,
+world的例子，实在是。。。。。。杂(关于golang)。</p>
+<p><a target="_blank" rel="noopener" href="https://cppinsights.io/">地址</a> <a
+target="_blank" rel="noopener" href="https://godbolt.org/">在线查看汇编码</a></p>
+<p></font></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">https://jack-samu.github.io/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">June 21st 2023, 7:03:59 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">March 2nd 2025, 11:33:59 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/" title="sqlite在c/c++中的应用">
+                    <div class="nextTitle">sqlite在c/c++中的应用</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/" title="c++11线程特性">
+                    <div class="prevTitle">c++11线程特性</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">一、基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E6%9C%BA%E5%88%B6%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">二、机制介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A80x80%E5%8A%AB%E6%8C%81system_call"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 利用0x80劫持system_call</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8ld_preload%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E8%BF%9B%E8%A1%8Chook"><span class="toc-number">2.2.</span> <span class="toc-text">2.2
+利用LD_PRELOAD动态链接进行hook</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E4%B8%80%E4%BA%9Bhook%E4%BE%8B%E5%AD%90"><span class="toc-number">3.</span> <span class="toc-text">三、一些hook例子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%92%88%E5%AF%B9malloc%E7%9A%84hook"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 针对malloc的hook</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%AB%E6%8C%81%E5%91%BD%E4%BB%A4"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 劫持命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AA%E4%BA%BA%E6%8E%A8%E8%8D%90"><span class="toc-number">4.</span> <span class="toc-text">个人推荐</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

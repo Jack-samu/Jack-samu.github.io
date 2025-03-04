@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概览：针对cpp的一些总结。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cpp总结">
+<meta property="og:url" content="https://jack-samu.github.io/2023/05/16/cpp%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概览：针对cpp的一些总结。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-15T16:53:30.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:57.649Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="cpp">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>cpp总结 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">cpp总结</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                cpp总结
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="cpp">cpp</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">5.7k</span>阅读时长: <span class="post-count reading-time">20 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/05/16</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概览：针对cpp的一些总结。</p>
+<span id="more"></span>
+<h4
+id="简述智能指针的特点简述new和malloc的区别">1.简述智能指针的特点，简述new和malloc的区别。</h4>
+<ul>
+<li>shared_ptr，显现共享式特点，多个同类型的shared指针可以共享一个对象，当持有者的计数归0，shared_ptr指向的指针就会被释放；</li>
+<li>weak_ptr，share的小弟，可以和shared_ptr共享同一个对象，但不会纳入持有者计数，并且在shared_ptr指向对象被释放后，指针自动归空，所以使用前需要有个检测；</li>
+<li>unique_ptr，和shared不同，显现独占式的特点，同一时间只有一个拥有，一旦更换指向对象，原有对象被销毁，对应资源就会被释放。</li>
+</ul>
+<p>new是运算符，malloc是函数，这是最基础的不同，另外由于malloc是基于c编程继承过来的，主要用于内置对象的动态资源申请，对应free用于释放，针对面向对象大放光彩的c++就显得不够用了。针对于此，new和delete两个运算符就可以针对自定义类对象来进行构造和析构的调用来达到对应对象的构造和释放。要注意的就是单个对象和对应成序列的数组的new和delete了，这种情况下是使用的new[]和delete[]。</p>
+<h4 id="c中虚函数和纯虚函数的区别">2.c++中虚函数和纯虚函数的区别</h4>
+<p>首先，虚函数是类中用virtual进行修饰的成员函数，而纯虚函数则是更进一步在虚函数的基础上，给成员函数添加"=0"的标识的虚函数，这是声明时的区别。另外，虚函数是用来实现动态绑定的一个c++的特色，基类声明了虚函数，继承了该基类的子类重写了该虚函数，在声明了一个基类指针的情况下调用该虚函数，其根据其指向的实际对象是子类对象还是基类对象，虚函数呈现不同的响应，这就是c++的动态多态，需要注意的是，如果不是通过指针，而是简单的普通对象，那就没有动态绑定的特性的呈现。</p>
+<p>纯虚函数，则是另外的标识，声明了纯虚函数的类就是抽象类，是没有具体对象的特殊类，声明了就为了继承，产生不同的类，从而展现不同的特性。就好比书这个类，可以派生出哲学书、历史书、教科书和技工书种等类，但它本身不应该产生实际对象，在这个意义上，这情况就该实现抽象类然后使用纯虚函数。</p>
+<h4
+id="stl中vector和list的实现常见操作的时间复杂度">3.STL中vector和list的实现，常见操作的时间复杂度。</h4>
+<p>作为STL中的两个经典容器，vector是动态数组的实现，list是链式表的实现，我们经常探究系统存储的发现两大存储形式，一种就是连续元素的成块存储，另一种就是散列式的元素，互相指引成链的链式存储。
+就实现而言，vector是拥有连续内存的动态数组，针对随机访问的时间复杂度为O(1)，但正因为存储是连续的，想要往数组首部和中部插入元素就会导致大块的数据拷贝或者移动，所以时间复杂度为O(n)；list则是由双向链表实现，因为内存是散列式的，不连续的，所以插入和删除的操作都很快，事件复杂度为O(1)，而查询就需要顺着链表一路向下或向上来逐个查询，所以时间复杂度为O(n)。</p>
+<h4 id="c11的新特性">4.c++11的新特性</h4>
+<ul>
+<li>使用using来定义别名，而非typedef；</li>
+<li>constexpr，用在编译时的常量和常量函数，相对于const表示只读语义保证了运行时不被修改，但它修饰的依然是动态的变量，constexper对应修饰的则是真正的常量，是在编译时就计算确认了的值，另外它用来修饰函数，就会使得该函数的返回值在编译期间尽量被计算出来当做真正的常量，如果不能，就当做正经函数；</li>
+<li>nullptr，表示空指针的常量值，从c继承下来的NULL实质上是一个int类型的0，并不是指针；</li>
+<li>final和override，final修饰类，表示这个类是不能被继承的，这条派生线到此为止了，override则是用在子类的虚函数上的，被修饰的虚函数一定要重写，不然就会编译报错，算是提醒；</li>
+<li>default，和switch的default不同，这个default是用来修饰构造函数或者析构函数的，显式的向编译器要求，生成默认的函数版本；</li>
+<li>explicit，修饰类的构造函数，表示该构造函数不能被隐式的调用，禁止这种构造函数方式的隐式转换；</li>
+</ul>
+<h4
+id="c中智能指针和普通指针的区别">5.c++中智能指针和普通指针的区别</h4>
+<p>智能指针是行为类似指针的类对象，智能指针实现的原理： *
+将一个计数器与类指向对象关联，引用技术跟踪有多少个类对象共享同一指针； *
+创建类的新对象，初始化指针，引用计数置1，析构函数调用，指针置空，引用计数减一；</p>
+<h4 id="简述c右值引用和转移语义">6.简述c++右值引用和转移语义</h4>
+<ul>
+<li>先点明左值，左值是在表达式左边，在堆或栈上的实名对象，有明确的的内存地址；右值就是和左值反过来，在表达式右边的没有实际内存地址的，只存在于临时寄存器的。常见的左值引用是不能和右值绑定的，但const
+type&amp;可以，因为const常量不可修改，是存在于内存中的临时量，具有只读语义，用在函数传参中，可以避免创建不必要的临时对象，但这种使用不能被修改，基于此，引入右值引用--type&amp;&amp;。</li>
+</ul>
+<p>左值可以寻址，右值不能寻址，这是根本区别，函数传参使用左右值作为形参可以避免拷贝，但右值引用更加灵活，可以修改。</p>
+<ul>
+<li>转移语义是右值引用支持的特性，是相对于深拷贝的一个改良式语义，针对被拷贝对象在拷贝动作以后不再使用的场景，使用移动语义，直接构造一个对象得到被拷贝对象的所有信息，并且避免深拷贝，从而提升性能。与之想配合的新特性是std::move。move语义的底层实现实际上是一个static_cast给强制转换成右值引用类型。在针对临时构建的一些个右值对象并用来对新对象进行初始化的时候，没有实现移动构造的要比实现了移动构造的多一次资源分配和释放。</li>
+</ul>
+<h4 id="简述c深拷贝和浅拷贝">7.简述c++深拷贝和浅拷贝</h4>
+<p>浅拷贝和深拷贝其实是针对拷贝对象是否存在指针成员的情况而言的，当存在指针成员而且浅拷贝发生，就会使得指针被拷贝一份但指针指向内容没有拷贝，也就是它们指向的内容是同一份，会存在内存释放时造成内存泄漏的风险，而两个对象被释放也会因为两次调用delete，而实际指向内容只有一份而程序崩溃，另外这样也会出现竞争。深拷贝就是基于这种情况，把指针指向的内容也拷贝了一份，一个类要实现深拷贝就要实现拷贝构造函数。</p>
+<h4 id="c中的多态的实现">8.c++中的多态的实现</h4>
+<p>多态分两种，一种是静态多态，一种是动态多态，第一种是同名普通函数的实现，这些函数名字一样，但传入参数和返回参数不同，就会出现一个函数，不同传参得到不同响应的多态效果，这种实现是编译器给后续命名上进行加工实现的，但对于程序员而言，它们还是一个名字，而且是编译确定的多态关系所以是静态多态；动态多态则是运行时确定的关系，实现机制是虚函数，一个声明定义了虚函数的基类，它的子类重写了该虚函数，这样一份基类指针，在可以指向父类也可以指向子类的情况下，调用该虚函数，根据指针实际指向的对象可以呈现不同的响应，这种实现就被称为动态多态。</p>
+<h4 id="const和static关键字的区别">9.const和static关键字的区别</h4>
+<p>const是表示只读语义，表示运行时不可修改，根据它修饰的具体对象来决定不可变的对象是什么；被static修饰的对象会修改它的声明域和存放区域，但不改变作用域，局部变量还是作用于局部，全局变量依然作用于全局，但它们从声明开始，就一直存在到程序运行结束，因为它们处于静态区。因为c++是类特性鲜明的语言，所以const和static又有另外意义，被const修饰的成员函数，表明它是不会修改调用对象的内容的，一般被修饰的函数都是只读取信息的函数，而被static修饰的成员函数不再为类对象所拥有，而是被类特有，而且这种函数只可访问同样的静态成员。</p>
+<h4 id="简述c内存对齐场景和规则">10.简述c++内存对齐场景和规则</h4>
+<p>内存对齐最早是出现在c结构体中的成员偏移，然后继承了c的c++用类似的方法实现了类，所以类也存在内存对齐的现象。内存对齐的存在，是为了使得CPU对内存的访问更有效率，对齐的方法有手动使用#pragma
+pack(n)来设置，也有让编译器自己拿主意。对齐的规则(n为手动设置或者默认的对齐值)：
+*
+1.第一个成员首地址为0，某成员类型所占字节数为k，该成员的首地址就是对齐值和k的最小值的整数倍；
+*
+2.整体对齐，结构体或者类的整体大小，就是对齐值和最大成员字节类型字节数的最小值，的整数倍，不够就后面占位。</p>
+<h4 id="指针和引用的区别">11.指针和引用的区别</h4>
+<p>在底层上看，其实两者应该是没有区别的，引用和指针对应的都是指向某个地址，但在实际语言特性上看，又是有区别的：
+* 引用在声明的时候就需要初始化，指针可以简单声明，不急着初始化； *
+引用在初始化以后，就不能更改指向了，它就是初始化时对象的一个别名，所以不能乱安在其他人头上，而指针可以一直变化，除非是常指针，一旦定了指向就不能改了；
+* 引用使用的时候不需要解引用，当做正常变量即可，指针则需要解引用； *
+引用没有const，指针有const； *
+sizeof一个引用，得到的是指向对象的大小，sizeof一个指针则是固定的4或者8；
+* 指针是一个独立类型，需要分配内存，引用只是别名，不会分配内存</p>
+<h4 id="c中类模板和模板类的区别">12.c++中类模板和模板类的区别</h4>
+<p>类模板，template提前修饰，不明确定义其数据成员、成员函数的参数和返回值，这种类是一个模板，可以传入任意符合要求的类型，最后实例化成一个具体的类；
+模板类就是类模板实例化后的具体类，就好比一个类模板是做糕点的模具，模板类就是做出来的搞点。</p>
+<h4 id="简述c中的内联函数">13.简述c++中的内联函数</h4>
+<p>内联函数的实现是在函数声明或者实现前添加inline修饰，内联函数一般短小精悍，在编译后直接把函数替换到函数调用处，算是早期宏来替换的升级，不过宏定义的函数是没有类型安全检查的，也不能进行调试，但内联函数都有。这样的函数存在大大提升了效率，所以很多在类声明处实现的普通成员函数，基本都是默认内联。不过inline修饰的函数，只是一个对编译器的建议，要不要做成内联函数，实际还要看编译器调动。</p>
+<h4 id="c编译过程">14.c++编译过程</h4>
+<p>编译过程没有太大变动，预处理进行宏替换；然后经编译器进行词法语法分析，翻译生成中间代码或者汇编指令，其中会经过适当的优化；汇编得到上面的成果后转换翻译成目标机器指令，然后经链接器链接动态库或者静态库生成可执行文件。需要注意的是是静态链接和动态链接，前者是把需要函数的二进制代码全部包含到可执行文件中，这样的链接方式是库和可执行文件已经一体了，发行时不需要再发布依赖库，就是体积太大了；后者动态链接是不拷贝可执行代码，只在对应函数执行时，通过标记的参数和签名记录发送给操作系统由系统os把动态库加载到内存中，然后执行，因为是运行时加载，会影响程序前期执行性能。</p>
+<h4
+id="c中哪些函数不能声明为虚函数">15.c++中哪些函数不能声明为虚函数</h4>
+<p>普通函数，因为虚函数的动态绑定是基于类的概念的，声明普通函数为虚函数也没什么意义，编译器没有这方面的优化规则；
+构造函数，构造函数是为了初始化对象而制作的，虚函数是为了对象基于某个信息产生不同响应而制作的，两者目的不一样，编译器就不会给这方面的实现；
+内联函数，内联函数是在编译时就确定了的，用来替换调用处的，虚函数是运行时确定的，两者没办法归为一起；
+静态成员函数，静态成员函数对于类来说是独一份的，没有动态绑定的需要；
+友元函数，c++不支持友元的继承，另外友元函数不算类的成员函数，所以没办法。</p>
+<h4 id="c的内存管理">16.c++的内存管理</h4>
+<p>c++程序内存分静态区、堆区和栈区，代码区，静态区存放全局数据和静态数据，栈区存放函数调用的局部变量数据，堆区则是程序员自行申请和释放的内存区域，代码区就是执行命令的存放区域。</p>
+<h4 id="一个空类">17.一个空类</h4>
+<p>一个空类可以被实例化，每个实例在内存中都是有地址的，编译器会给空类隐式添加一字节；一个空类会包含默认构造、默认拷贝、默认析构、默认赋值、默认取址、默认const取址。</p>
+<h4 id="stl中内存分配器原理标标标">18.STL中内存分配器原理（标标标）</h4>
+<p>内存分配器有两层，第一层，分配大于128kb，直接用operator
+new，这就是一级内存分配器；第二层，小于128kb，使用二级内存分配器，即内存池。</p>
+<h4 id="类的默认构造函数">19.类的默认构造函数</h4>
+<p>没有定义的情况，默认构造就是一个由编译器提供的，不接受任何参数也不执行任何操作的函数；针对于不显式初始化对象，需要显式定义默认构造；带参数的构造也可以是默认构造，需要所有的参数都有默认值。</p>
+<h4
+id="lambda函数特点和普通函数相比的优点">20.lambda函数特点，和普通函数相比的优点</h4>
+<p>c++11后引入，可以理解为匿名的内联函数，和普通函数相比，少了函数名，多了中括号[]，lambda的基本语法：
+<code>[capture](parameters) specifiers exception attr -&gt; return type &#123; /*code; */ &#125;</code></p>
+<p>capture，捕获列表，外部变量的传递方式；
+parameters，参数列表，也即是形参列表； specifiers exception
+attr，附加说明符，可以是mutable、noexcept等；
+-&gt;return，返回类型，大多数情况不需要，编译器会推导，然后后面就是函数体了。
+(暂时这么点)</p>
+<h4 id="简述协程">21.简述协程</h4>
+<p>协程，函数对象，可以设置描点暂停，然后后面在这描点重新运行。后续实现方面和应用方面再添加，具体参考可以看boost方面。</p>
+<h4 id="c菱形继承问题和解决方案">22.c++菱形继承问题和解决方案</h4>
+<p>在c++继承中，可以声明一个基类A，然后由两个子类分别继承，然后得到子类B和子类C，在此基础上，有一个继承了B和C的子类D，当它想要修改最早基类A的成员的时候，就会出现问题，这就是菱形继承带来的麻烦，解决办法就是B类和C类对基类A进行虚继承，这样得到的就只有一份基类A的元素。</p>
+<h4
+id="只定义析构函数会自动生成哪些构造函数">23.只定义析构函数，会自动生成哪些构造函数？</h4>
+<p>存疑</p>
+<h4 id="变量的声明和定义的区别">24.变量的声明和定义的区别</h4>
+<p>在c++中，变量声明就是只声明了这么个变量，但它没有初始值，这时候对他进行读值的操作得到的是不明确的值，定义就是给一个变量进行初始化使其有值，就是针对一个已经声明的函数进行实现，这就是定义。</p>
+<h4 id="c中struct和class的区别">25.c++中struct和class的区别</h4>
+<p>c++中实现类有struct和class两种，前者的成员默认为公有的，后者成员默认是私有的，在继承上看，前者默认公有继承，后者默认私有继承。</p>
+<h4
+id="实现一个函数判断当前是大端序还是小端序">26.实现一个函数判断当前是大端序还是小端序</h4>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">isBigEndian</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">0x1234</span>;</span><br><span class="line">    <span class="type">char</span> b = *(<span class="type">char</span>*)&amp;a;</span><br><span class="line">    <span class="keyword">if</span>(b == <span class="number">0x12</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//2</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">isLittle</span><span class="params">()</span></span>&#123;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">union</span>&#123;</span><br><span class="line">            <span class="type">int</span> a;</span><br><span class="line">            <span class="type">char</span> b;</span><br><span class="line">        &#125;c;</span><br><span class="line">        c.a = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">return</span> (c.b==<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4
+id="按照内存地址顺序从低到高输出一个变量">27.按照内存地址顺序，从低到高输出一个变量</h4>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">show</span><span class="params">(<span class="type">char</span>* start, <span class="type">size_t</span> len)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">size_t</span> i = <span class="number">0</span>;i&lt;len;++i)</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%.2x&quot;</span>, start[i]);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n:&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> a = <span class="number">12345</span>;</span><br><span class="line"><span class="built_in">show</span>((<span class="type">char</span>*)&amp;a, <span class="built_in">sizeof</span>(<span class="type">int</span>));</span><br></pre></td></tr></table></figure>
+<h4 id="几种强制转换">28.几种强制转换</h4>
+<p>static_cast，非多态类型的转换，不执行运行时类型检查，通常来说只用于转换数值数据类型，可以实现子类的向上转换；
+dynamic_cast，用于多态类型的转换，转换时进行类型检查，只适用于指针或引用，不明确的指针的转换会返回空指针但不引发异常，可以实现向上转换或者向下转换；
+const_cast，取消const的只读语义；
+reinterpret_cast，对位的简单重新解释，能实现任何指针转换成其他指针类型，但不安全；
+bad_cast，这是一个异常，当强制转换为引用类型失败，dynamic_cast就会引发这个异常。</p>
+<h4 id="运行时类型信息rtti">29.运行时类型信息(RTTI)</h4>
+<p>typeid，可以在运行时确定对象类型，返回一个type_info对象的引用，只获取对象的实际类型；
+type_info，一个类，用来描述编译器在程序中生成的类型信息，可以有效存储指向
+类型名 的指针。</p>
+<h4 id="关于单例">30.关于单例</h4>
+<ul>
+<li>c++实现一个不能被继承的类</li>
+<li>定义一个只能在堆上(或栈上)生成对象的类</li>
+<li>实现一个线程安全的类</li>
+</ul>
+<p>上面的问题拆开来其实都是和单例有关，单例模式是保证一个类只有一个实例，类会提供一个全局访问点。要实现一个单例，就需要将构造函数的访问权限设置为protected或者private并提供一个全局访问点也就是一个静态函数来返回实例。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//简单单例</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">    ~<span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">    <span class="type">static</span> Singleton *pInstance;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">static</span> Singleton *<span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!pInstance)</span><br><span class="line">            pInstance = <span class="keyword">new</span> <span class="built_in">Singleton</span>();</span><br><span class="line">        <span class="keyword">return</span> pInstance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">destroy</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(pInstance)&#123;</span><br><span class="line">            <span class="keyword">delete</span> pInstance;</span><br><span class="line">            pInstance = <span class="literal">nullptr</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这么一个构造和析构都是私有的类，是不能被继承的，并且它的构造方式只能是通过静态方法getInstance来申请堆上的内存，并通过destroy来销毁，还有一点就是编译器会在编译时检查类的析构函数的可访问性，如果析构是私有的，编译器就不会在栈空间为类对象分配内存，这样就直接实现了上面的两个条件，就差线程安全了。针对只能在栈上生成对象的类：
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="type">size_t</span> t)</span></span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span> *ptr)</span></span>&#123;&#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">    ~<span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure> 如上，禁用了new和delete就可以了，做法就是operator
+new()设为私有。至于如何做到线程安全，那就需要引入锁机制了，一般可以是互斥锁，直接在申请实例的时候给上锁，申请结束，解锁：
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">    ~<span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">    <span class="type">static</span> Singleton *pInstance;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">static</span> Singleton *<span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!pInstance)</span><br><span class="line">            pInstance = <span class="keyword">new</span> <span class="built_in">Singleton</span>();</span><br><span class="line">        <span class="keyword">return</span> pInstance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">destroy</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(pInstance)&#123;</span><br><span class="line">            <span class="built_in">lock</span>();         <span class="comment">//伪代码上锁</span></span><br><span class="line">            <span class="keyword">delete</span> pInstance;</span><br><span class="line">            pInstance = <span class="literal">nullptr</span>;</span><br><span class="line">            <span class="built_in">unlock</span>();       <span class="comment">//伪代码解锁</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+延伸一下的话，还可以优化一下代码，使得它能自动释放，而不用手动调用destroy，因此引入c++的RAII机制，意思是资源获取即初始化机制，有别于RTTI，不同的。这里引入的机制，主要是表示构造中申请资源，析构中释放资源的意思，智能指针就是RAII的代表。具体做法，就是在Singleton类内声明一个静态类，把Singleton的destroy动作交给这个静态类的析构函数：
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//简单单例引入RAII</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">    ~<span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">    <span class="type">static</span> Singleton *pInstance;</span><br><span class="line"></span><br><span class="line"><span class="comment">//存在只为销毁实例</span></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Garbo</span>&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        ~<span class="built_in">Garbo</span>()&#123;</span><br><span class="line">            <span class="keyword">if</span>(!pInstance)&#123;</span><br><span class="line">                <span class="keyword">delete</span> pInstance;</span><br><span class="line">                pInstance = <span class="literal">nullptr</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">static</span> Garbo garbo;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">static</span> Singleton *<span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!pInstance)</span><br><span class="line">            pInstance = <span class="keyword">new</span> <span class="built_in">Singleton</span>();</span><br><span class="line">        <span class="keyword">return</span> pInstance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+如上所示，garbo静态成员不需要构造，所以不用考虑类外定义的问题，当Singleton退出作用域时，它会被销毁，静态实例的析构会被自动调用，最终得以把pInstance释放掉，不过上面的太大了，还可以进一步优化：
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Singleton</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    ~<span class="built_in">Singleton</span>()&#123;&#125;</span><br><span class="line">    <span class="function"><span class="type">static</span> Singleton* <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="type">static</span> Singleton instance;</span><br><span class="line">        <span class="keyword">return</span> &amp;instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure> 这样就好了，这部分内容是学习自：<a
+target="_blank" rel="noopener" href="https://www.cnblogs.com/xiehongfeng100/p/4781013.html">峰子_仰望阳光的博文</a>，挺受用的。</p>
+<hr />
+<p>Jack，不要停。</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/05/16/cpp%E6%80%BB%E7%BB%93/">https://jack-samu.github.io/2023/05/16/cpp%E6%80%BB%E7%BB%93/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/05/16/cpp%E6%80%BB%E7%BB%93/">May 16th 2023, 12:53:30 am</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/05/16/cpp%E6%80%BB%E7%BB%93/">March 2nd 2025, 11:33:57 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/" title="聊天室之C语言版">
+                    <div class="nextTitle">聊天室之C语言版</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/" title="hexo自建主题">
+                    <div class="prevTitle">hexo自建主题</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E8%BF%B0%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E7%9A%84%E7%89%B9%E7%82%B9%E7%AE%80%E8%BF%B0new%E5%92%8Cmalloc%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">1.简述智能指针的特点，简述new和malloc的区别。</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E4%B8%AD%E8%99%9A%E5%87%BD%E6%95%B0%E5%92%8C%E7%BA%AF%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.</span> <span class="toc-text">2.c++中虚函数和纯虚函数的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#stl%E4%B8%ADvector%E5%92%8Clist%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C%E7%9A%84%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-number">3.</span> <span class="toc-text">3.STL中vector和list的实现，常见操作的时间复杂度。</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c11%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="toc-number">4.</span> <span class="toc-text">4.c++11的新特性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E4%B8%AD%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E5%92%8C%E6%99%AE%E9%80%9A%E6%8C%87%E9%92%88%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">5.</span> <span class="toc-text">5.c++中智能指针和普通指针的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E8%BF%B0c%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8%E5%92%8C%E8%BD%AC%E7%A7%BB%E8%AF%AD%E4%B9%89"><span class="toc-number">6.</span> <span class="toc-text">6.简述c++右值引用和转移语义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E8%BF%B0c%E6%B7%B1%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B5%85%E6%8B%B7%E8%B4%9D"><span class="toc-number">7.</span> <span class="toc-text">7.简述c++深拷贝和浅拷贝</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E4%B8%AD%E7%9A%84%E5%A4%9A%E6%80%81%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">8.</span> <span class="toc-text">8.c++中的多态的实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#const%E5%92%8Cstatic%E5%85%B3%E9%94%AE%E5%AD%97%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">9.</span> <span class="toc-text">9.const和static关键字的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E8%BF%B0c%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90%E5%9C%BA%E6%99%AF%E5%92%8C%E8%A7%84%E5%88%99"><span class="toc-number">10.</span> <span class="toc-text">10.简述c++内存对齐场景和规则</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E9%92%88%E5%92%8C%E5%BC%95%E7%94%A8%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">11.</span> <span class="toc-text">11.指针和引用的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E4%B8%AD%E7%B1%BB%E6%A8%A1%E6%9D%BF%E5%92%8C%E6%A8%A1%E6%9D%BF%E7%B1%BB%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">12.</span> <span class="toc-text">12.c++中类模板和模板类的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E8%BF%B0c%E4%B8%AD%E7%9A%84%E5%86%85%E8%81%94%E5%87%BD%E6%95%B0"><span class="toc-number">13.</span> <span class="toc-text">13.简述c++中的内联函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B"><span class="toc-number">14.</span> <span class="toc-text">14.c++编译过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E4%B8%AD%E5%93%AA%E4%BA%9B%E5%87%BD%E6%95%B0%E4%B8%8D%E8%83%BD%E5%A3%B0%E6%98%8E%E4%B8%BA%E8%99%9A%E5%87%BD%E6%95%B0"><span class="toc-number">15.</span> <span class="toc-text">15.c++中哪些函数不能声明为虚函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E7%9A%84%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="toc-number">16.</span> <span class="toc-text">16.c++的内存管理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%A9%BA%E7%B1%BB"><span class="toc-number">17.</span> <span class="toc-text">17.一个空类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#stl%E4%B8%AD%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E5%99%A8%E5%8E%9F%E7%90%86%E6%A0%87%E6%A0%87%E6%A0%87"><span class="toc-number">18.</span> <span class="toc-text">18.STL中内存分配器原理（标标标）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B1%BB%E7%9A%84%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="toc-number">19.</span> <span class="toc-text">19.类的默认构造函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#lambda%E5%87%BD%E6%95%B0%E7%89%B9%E7%82%B9%E5%92%8C%E6%99%AE%E9%80%9A%E5%87%BD%E6%95%B0%E7%9B%B8%E6%AF%94%E7%9A%84%E4%BC%98%E7%82%B9"><span class="toc-number">20.</span> <span class="toc-text">20.lambda函数特点，和普通函数相比的优点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E8%BF%B0%E5%8D%8F%E7%A8%8B"><span class="toc-number">21.</span> <span class="toc-text">21.简述协程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E8%8F%B1%E5%BD%A2%E7%BB%A7%E6%89%BF%E9%97%AE%E9%A2%98%E5%92%8C%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">22.</span> <span class="toc-text">22.c++菱形继承问题和解决方案</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AA%E5%AE%9A%E4%B9%89%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E4%BC%9A%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E5%93%AA%E4%BA%9B%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="toc-number">23.</span> <span class="toc-text">23.只定义析构函数，会自动生成哪些构造函数？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%98%E9%87%8F%E7%9A%84%E5%A3%B0%E6%98%8E%E5%92%8C%E5%AE%9A%E4%B9%89%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">24.</span> <span class="toc-text">24.变量的声明和定义的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#c%E4%B8%ADstruct%E5%92%8Cclass%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">25.</span> <span class="toc-text">25.c++中struct和class的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E5%87%BD%E6%95%B0%E5%88%A4%E6%96%AD%E5%BD%93%E5%89%8D%E6%98%AF%E5%A4%A7%E7%AB%AF%E5%BA%8F%E8%BF%98%E6%98%AF%E5%B0%8F%E7%AB%AF%E5%BA%8F"><span class="toc-number">26.</span> <span class="toc-text">26.实现一个函数判断当前是大端序还是小端序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%89%E7%85%A7%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E9%A1%BA%E5%BA%8F%E4%BB%8E%E4%BD%8E%E5%88%B0%E9%AB%98%E8%BE%93%E5%87%BA%E4%B8%80%E4%B8%AA%E5%8F%98%E9%87%8F"><span class="toc-number">27.</span> <span class="toc-text">27.按照内存地址顺序，从低到高输出一个变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%A0%E7%A7%8D%E5%BC%BA%E5%88%B6%E8%BD%AC%E6%8D%A2"><span class="toc-number">28.</span> <span class="toc-text">28.几种强制转换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E7%B1%BB%E5%9E%8B%E4%BF%A1%E6%81%AFrtti"><span class="toc-number">29.</span> <span class="toc-text">29.运行时类型信息(RTTI)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E5%8D%95%E4%BE%8B"><span class="toc-number">30.</span> <span class="toc-text">30.关于单例</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

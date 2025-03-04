@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="背景 在这之前，其实已经有过把老电脑改装成windows和ubuntu双系统的经历，不过在最近突然就出现老电脑启动有问题的情况，刚好给电脑刷的ubuntu又是那种有维护期限的，干脆就再次给重装一下，并进行一个比较完整的记录。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu安装及配置记录">
+<meta property="og:url" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="背景 在这之前，其实已经有过把老电脑改装成windows和ubuntu双系统的经历，不过在最近突然就出现老电脑启动有问题的情况，刚好给电脑刷的ubuntu又是那种有维护期限的，干脆就再次给重装一下，并进行一个比较完整的记录。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jack-samu.github.io/images/rufus%E6%93%8D%E4%BD%9C.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/%E8%BD%AF%E4%BB%B6%E6%9B%B4%E6%96%B0.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/%E5%88%9B%E5%BB%BAv2raya%E8%B4%A6%E6%88%B7.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/%E8%AE%A2%E9%98%85url%E5%92%8C%E8%8A%82%E7%82%B9url%E7%9A%84%E5%AF%BC%E5%85%A5.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/%E8%8A%82%E7%82%B9%E9%80%89%E6%8B%A9.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/v2raya%E8%A7%84%E5%88%99.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/%E8%BF%9C%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%B7%BB%E5%8A%A0.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/vscode.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/snipaste%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/%E5%BF%AB%E6%8D%B7%E9%94%AE%E6%A0%8F%E7%9B%AE.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/stacer%E6%95%88%E6%9E%9C.png">
+<meta property="og:image" content="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/images/nethogs.png">
+<meta property="article:published_time" content="2025-03-02T07:44:26.000Z">
+<meta property="article:modified_time" content="2025-03-04T05:17:42.783Z">
+<meta property="article:author" content="Jack">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jack-samu.github.io/images/rufus%E6%93%8D%E4%BD%9C.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>ubuntu安装及配置记录 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">ubuntu安装及配置记录</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                ubuntu安装及配置记录
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">5.4k</span>阅读时长: <span class="post-count reading-time">21 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2025/03/02</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<h2 id="背景">背景</h2>
+<p>在这之前，其实已经有过把老电脑改装成windows和ubuntu双系统的经历，不过在最近突然就出现老电脑启动有问题的情况，刚好给电脑刷的ubuntu又是那种有维护期限的，干脆就再次给重装一下，并进行一个比较完整的记录。</p>
+<span id="more"></span>
+<h2 id="一些准备">一些准备</h2>
+<p>因为是要进行实体电脑的系统重刷，那当然是需要一个U盘实体，以及后续将这个U盘刷成系统启动盘了。进入以下系统将系统iso镜像下载以及刷一遍U盘的软件，这软件我用的是rufus，<a
+target="_blank" rel="noopener" href="https://rufus.ie/zh/">官网下载地址</a>，长得如下： <img
+src="/images/rufus官网.png" alt="rufus官网" /></p>
+<p>然后就是找一些资源网址去下载一下需要的系统iso镜像，我这找到的是国内阿里云的一个<a
+target="_blank" rel="noopener" href="https://developer.aliyun.com/mirror/">资源镜像</a>，如下： <img
+src="/images/阿里云os镜像.png" alt="os镜像页面" />
+如上，选好对应系统和系统对应版本后直接点击下载，再然后，就是漫长的等待了，暂时我不知道有啥加速的办法，毕竟是几G大的镜像。</p>
+<p>另外好像找到个官方的镜像源<a
+target="_blank" rel="noopener" href="https://ubuntu.com/download">站点</a>，记住不要下载LTS版本，会有内部软件包的维护期，下载超慢。</p>
+<h3 id="系统u盘的制作">1.1 系统U盘的制作：</h3>
+<p>插上需要使用的U盘，记得先把重要的东西都备份好，确保这U盘里没有重要的资料了。然后如下操作rufus：
+<img src="/images/rufus操作.png" alt="rufus操作" /></p>
+<p>当然，我这是旧的启动盘，重新刷会有一些个警告： <img
+src="/images/rufus的一点警告.png" alt="警告" /></p>
+<h4 id="进行刷机">进行刷机</h4>
+<p>我的老电脑是机械革命的，所以上来就插好u盘启动盘，开机f11进入安装界面即可，最新版的ubuntu24倒是很简单，选中安装以后，很顺利就走完了整个流程，注意选择语言是汉语就好，因为一些个安装交互界面是汉语比较好理解。这里因为是系统安装界面，所以没有多少截图啥的，就略过。</p>
+<h3 id="软件更新源的服务器选择">1.2 软件更新源的服务器选择</h3>
+<p>有时候进行apt的软件安装的时候，会非常慢，所以这里进行一个服务器的修改，如下进行：</p>
+<p><img src="images/软件更新.png" alt="软件更新" /> <img
+src="images/软件更新设置.png" alt="更改设置" /> <img
+src="images/点击展开.png" alt="进行选择" /> <img
+src="images/服务器选择.png" alt="服务器进行选择" /></p>
+<p>如此进行，就差不多了，apt的下载会稍微快一点。</p>
+<h2 id="二打造工作机">二、打造工作机</h2>
+<p>刚安装好的这玩意儿，最重要的当然就是安装chrome浏览器：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb</span><br><span class="line">$ sudo dpkg -i google-chrome-stable_current_amd64.deb</span><br></pre></td></tr></table></figure>
+<p>浏览器就绪后就是vpn问题的解决了。因为是ubuntu中进行使用，这里就用v2raya吧，不为别的，就因为它有图形化界面啊。操作添加v2raya的软件源信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加v2raya的apt公钥</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">wget -qO - https://apt.v2raya.org/key/public-key.asc | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/apt/keyrings/v2raya.asc</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加v2raya软件源</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">echo</span> <span class="string">&quot;deb [signed-by=/etc/apt/keyrings/v2raya.asc] https://apt.v2raya.org/ v2raya main&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/apt/sources.list.d/v2raya.list</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt update</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开始安装</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install v2raya v2ray</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动v2raya并设置开机自启动</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> systemctl start v2raya.service</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> v2raya.service</span></span><br></pre></td></tr></table></figure>
+<p>从安装并启动以后，就可以进行服务的设置了，如下进行：</p>
+<figure>
+<img src="images/创建v2raya账户.png" alt="创建账户" />
+<figcaption aria-hidden="true">创建账户</figcaption>
+</figure>
+<p>如上，进行本地账户的设置和登录，如果忘记了以后，可以进行<code>sudo v2raya --reset-password</code>来重置密码，重置前记得先停止v2raya。接下来就是进行订阅和节点url的导入了。</p>
+<figure>
+<img src="images/订阅url和节点url的导入.png" alt="导入订阅" />
+<figcaption aria-hidden="true">导入订阅</figcaption>
+</figure>
+<p>再进行节点的选择和v2raya的启动：</p>
+<p><img src="images/节点选择.png" alt="选择节点" /> <img
+src="images/启动.png" alt="启动" /></p>
+<p>在这之后，我一度以为就ok了的，结果访问一下google，md，还是不行，后来发现，还没进行规则修改哦，好的，再改改：</p>
+<figure>
+<img src="images/v2raya规则.png" alt="修改配置规则" />
+<figcaption aria-hidden="true">修改配置规则</figcaption>
+</figure>
+<p>到这，就可以科学啦！优噶哒！</p>
+<h3 id="vscode远程开发配备">2.1 vscode远程开发配备</h3>
+<p>然后就是远程开发必备的vscode服务器配置了。因为是在老电脑进行的ubuntun系统的安装，然后用另一台电脑作为工作机，所以各种的数据库以及重要的数据存储就放在老电脑上面，给它加容就好。因为这是新电脑，所以目前要进行一个ssh的一个服务配置和对外开发，不然就会出现下面效果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ping 192.168.1.10</span></span><br><span class="line"></span><br><span class="line">Pinging 192.168.1.10 with 32 bytes of data:</span><br><span class="line">Reply from 192.168.1.10: bytes=32 time=19ms TTL=64</span><br><span class="line">Reply from 192.168.1.10: bytes=32 time=40ms TTL=64</span><br><span class="line"></span><br><span class="line">192.168.1.10 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 2，已接收 = 2，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 19ms，最长 = 40ms，平均 = 29ms</span><br><span class="line">Control-C</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">telnet 192.168.1.10 22</span></span><br><span class="line">Connecting To 192.168.1.10...Could not open connection to the host, on port 22: Connect failed</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ssh jay@192.168.1.10</span> </span><br><span class="line">ssh: connect to host 192.168.1.10 port 22: Connection refused</span><br></pre></td></tr></table></figure>
+<p>看，上面就是新安装的ubuntu初始状态，同处于一个局域网下的我的windows工作机能ping通却没法进行ssh连接，所以接下来配置一下，如下在ubuntu系统上进行操作。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install openssh-server</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动ssh</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> systemctl start ssh</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置ssh开启自启动</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> ssh</span></span><br></pre></td></tr></table></figure>
+<p>这样再进行ssh服务查看的时候就会发现ssh处于active状态了(<code>systemctl status ssh</code>)，再来检测一下ssh是否可用：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ ssh jay@<span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">10</span></span><br><span class="line"># 巴拉巴拉输入密码一顿操作</span><br><span class="line">$ whoami</span><br><span class="line">jay</span><br><span class="line">$ ip a s</span><br><span class="line">...</span><br><span class="line">inet <span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">10</span>/<span class="number">24</span> brd <span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">255</span> scope global dynamic noprefixroute wlo1</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>如上，确定ssh可连接后，就进行ssh免密设置。</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ssh-keygen -t rsa</span><br><span class="line">$ ssh-<span class="built_in">copy</span>-id jay@<span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">10</span></span><br></pre></td></tr></table></figure>
+<p>嗯，ssh-copy-id的执行碰上命令不可用的情况，所以在powershell中粘贴下面文本进行解决了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">function ssh-copy-id([string]$userAtMachine, $args)&#123;   </span><br><span class="line">    $publicKey = &quot;$ENV:USERPROFILE&quot; + &quot;/.ssh/id_rsa.pub&quot;</span><br><span class="line">    if (!(Test-Path &quot;$publicKey&quot;))&#123;</span><br><span class="line">        Write-Error &quot;ERROR: failed to open ID file &#x27;$publicKey&#x27;: No such file&quot;            </span><br><span class="line">    &#125;</span><br><span class="line">    else &#123;</span><br><span class="line">        &amp; cat &quot;$publicKey&quot; | ssh $args $userAtMachine &quot;umask 077; test -d .ssh || mkdir .ssh ; cat &gt;&gt; .ssh/authorized_keys || exit 1&quot;      </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后再修改ubuntu工作机上配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> vim /etc/ssh/sshd_config</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改PubkeyAuthentication的值为<span class="built_in">yes</span>并且取消注释</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> systemctl restart ssh</span></span><br></pre></td></tr></table></figure>
+<p>正常来说，如此进行，基本就可以进行ssh免密登录了，但在我这始终是跑不通，实在不明白是为什么，检查<code>/var/log/auth.log</code>文件，只有以下类似的信息记录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">2024-12-20T16:20:32.755303+08:00 dev-jay sshd[11399]: Connection reset by authenticating user root 192.168.1.5 port 57182 [preauth]</span><br><span class="line">2024-12-20T16:20:36.340283+08:00 dev-jay sshd[11401]: Connection reset by authenticating user jay 192.168.1.5 port 57241 [preauth]</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>只有一些诸如RST等日志的显示，真的是挠破头。</p>
+<p>既然如此，那就继续进行vscode的远程开发配置吧。这个功能需要在vscode客户端上安装remote-ssh插件，这个我已经给安装上了，接下来就是进行远程服务器的添加了，如下：</p>
+<p><img src="images/远程服务器添加.png" alt="添加" /> <img
+src="images/用户及ip输入.png" alt="输入用户和服务器ip" /> <img
+src="images/选中linux.png" alt="linux选中" /> <img
+src="images/ubuntu进行vscode-server安装.png"
+alt="服务器安装vscode-server" />
+如上进行以后，就可以连接到ubuntu服务器了，不过这时候是一个简单的vscode欢迎界面，因为还没打开任何项目呢，你可以打开终端进行<code>whoami</code>的检查。其实如果ssh免密登录搞定了的话，就可以打开windows的<code>~/.ssh/config</code>文件进行如下编辑，保存以后就可以进行vscode远程免密登录了。另外，要进行远程开发也是上面同样的步骤进行连接。</p>
+<blockquote>
+<p>因为这台ubuntu工作机是台式鸡，一直放家里的，所以以后可能会用在公司进行远程操控，这时候就无法避免要对这台鸡进行内网穿透了。这种情况下，针对ubuntu的一些安全措施是很必要的。</p>
+</blockquote>
+<h3 id="ubuntu上vscode的安装">2.2 ubuntu上vscode的安装</h3>
+<p>因为有时候就不需要联动两台机来进行使用了，就直接在ubuntu上进行开发，所以vscode还是有必要安装的，要注意的是，上面安装的是对外提供vscode远程开发的vscode-server，并不是我们常用的vscode。下面开始吧：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">插入microsoft GPG key</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | <span class="built_in">sudo</span> apt-key add -</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启用vscode源仓库</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> add-apt-repository <span class="string">&quot;deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main&quot;</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">apt安装</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install code</span></span><br></pre></td></tr></table></figure>
+<p>其实，既然有vscode使用需要，这个ubuntu当然是有着图形界面的，也就是能使用浏览器进行下载安装的，不过嘛，既然是linux，当然还是用命令来进行更爽，是吧。安装好以后，vscode就会在软件菜单中看到，可以拖动它到状态栏进行固定：</p>
+<figure>
+<img src="images/vscode.png" alt="vscode" />
+<figcaption aria-hidden="true">vscode</figcaption>
+</figure>
+<h2 id="三开发工具配置">三、开发工具配置</h2>
+<p>接下来就是一些个开发工具的配备了，首先是一些个记录工具的安装，有一点要记录的就是，和之前安装的ubuntu系统不一样，这次安装完成，便是自带拼音输入法，直接像windows那样进行切换就好。</p>
+<p>现在先开始c和c++环境的配置吧：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">个人需要</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install ffmpeg vim crul</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install build-essential cmake</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install git</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">git全局配置</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git config --global user.name <span class="string">&quot;xxxx&quot;</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git config --global user.email <span class="string">&quot;xxxx@example.com&quot;</span></span></span><br></pre></td></tr></table></figure>
+<p>这里把诸多相关编译都放这算了，诸如python、java、nodejs以及golang的都丢这，一些个项目也是，所以git也不能少。还需要进行一些个数据库以及中间件的安装，所以docker不能少。首先是截图工具，我用习惯了snipaste，所以ubuntu也是用这个，ubuntu中上官网进行linux版本的下载：</p>
+<figure>
+<img src="images/snipaste下载安装.png" alt="下载snipaste" />
+<figcaption aria-hidden="true">下载snipaste</figcaption>
+</figure>
+<p>然后添加可执行权限，执行下载来的安装文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> <span class="built_in">chmod</span> +x Snipaste-2.10.3-x86_64.Appimages</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./Snipaste-2.10.3-x86_64.Appimages</span></span><br></pre></td></tr></table></figure>
+<p>如上执行，就可以在系统页面右上角看到snipaste的图标了，不过我这里的执行并不顺畅，有以下报错：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dlopen(): error loading libfuse.so.2</span><br><span class="line"></span><br><span class="line">Appimagess require FUSE to run. </span><br><span class="line">You might still be able to extract the contents of this Appimages </span><br><span class="line">if you run it with the --appimages-extract option. </span><br><span class="line">See https://github.com/Appimages/AppimagesKit/wiki/FUSE </span><br><span class="line">for more informatio</span><br></pre></td></tr></table></figure>
+<p>上面说，这里缺了FUSE依赖，最直接的错误就是在加载libfuse.so.2的时候出错，所以给进行libfuse2的依赖补上就好。好解决，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> add-apt-repository universe</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt update &amp;&amp; <span class="built_in">sudo</span> apt upgrade</span> </span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install libfuse2</span></span><br></pre></td></tr></table></figure>
+<p>然后继续执行吧，嗯这里执行了还是有报错：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">qt.qpa.xcb: could not connect to display </span><br><span class="line">qt.qpa.plugin: Could not load the Qt platform plugin &quot;xcb&quot; in &quot;/tmp/.mount_SnipasDFPJRJ/usr/plugins&quot; even though it was found.</span><br><span class="line">This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.</span><br><span class="line"></span><br><span class="line">Available platform plugins are: wayland, xcb.</span><br><span class="line"></span><br><span class="line">已中止 (核心已转储)</span><br></pre></td></tr></table></figure>
+<p>看起来都是qt的报错，看来是少了qt方面的依赖，进行下面的依赖安装一下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install libqt5gui5 libqt5core5t64 libqt5widgets5t64</span></span><br></pre></td></tr></table></figure>
+<p>然后再来执行看看，还是同样的报错，嗯，为啥？哦，好像重点应该关注最后一个可用平台是吧，要检查一下我这桌面环境是否使用的wayland或者XCB协议，看看去。在设置页面中看了系统信息，窗口系统也使用的Wayland啊，小喇叭耍我，很不爽，还是用回flameshot吧。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install flameshot</span></span><br></pre></td></tr></table></figure>
+<p>因为用习惯了windows下f1截图，所以在[设置]-[键盘快捷键]处自定义快捷键中添加f1对应flameshot的对应关系。如下：</p>
+<p><img src="images/快捷键栏目.png" alt="设置" /> <img
+src="images/快捷键设置.png" alt="快捷键自定义" /> <img
+src="images/flameshot快捷键设置.png" alt="快捷键设置" /></p>
+<p>不过，该死的是设置了以后，点击快捷键就报错，点了就报错，查看快捷键是否有冲突又没查到什么，命令行进行工具检查又没什么问题，真tmd炸了我，只隐约有个焦点无法确定切换的错误的头绪，其他就没了，真哦豁。暂且只能命令行进行flameshot截图了，系统自带的截图工具太简陋了。不过自带的录屏工具还是可以的，修改了一些快捷键为<code>alt+r</code>，这样就方便记录了。</p>
+<blockquote>
+<p>嗯，无意中发现一个解决办法，就是编辑<code>/etc/gdm3/custom.conf</code>，然后将<code>#WaylandEnable=false</code>的注释去掉，重启电脑，就可以了。</p>
+</blockquote>
+<h3 id="python环境配备">3.1 python环境配备</h3>
+<p>对于python，大多是准备做一些工具和scrapy，所以，暂时不做过多的配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install python3 python3-pip</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">pip3 install virtualenv scrapy</span></span><br></pre></td></tr></table></figure>
+<p>不过在进行pip3安装的时候出错了，如下错误：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">error: externally-managed-environment</span><br><span class="line"></span><br><span class="line">× This environment is externally managed</span><br><span class="line">╰─&gt; To install Python packages system-wide, try apt install</span><br><span class="line">    python3-xyz, where xyz is the package you are trying to</span><br><span class="line">    install</span><br></pre></td></tr></table></figure>
+<p>这种情况下只需要删除EXTERNALLY-MANAGED即可，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">find / -name EXTERNALLY-MANAGED</span></span><br><span class="line">...</span><br><span class="line">/usr/lib/python3.12/EXTERNALLY-MANAGED</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">因为担心乱删除会有问题，所以直接做成备份算了，后面如果有问题恢复回来就好</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> <span class="built_in">mv</span> /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.bak</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">pip3 install scrapy</span></span><br><span class="line">Successfully installed scrapy-2.12.0 ...</span><br></pre></td></tr></table></figure>
+<p>好的，这下可以了，pip3可以正常使用了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">pip3 install virtualenv flask opencv-python</span></span><br></pre></td></tr></table></figure>
+<p>python暂时就到这里，更多的使用还是看后面的项目需要了。</p>
+<h3 id="nodejs前端配置">3.2 nodejs前端配置</h3>
+<p>nodejs作为js的运行环境，很受开发者们喜欢，尤其是前端开发和一些web小工具的开发者，针对这个的使用也让它生态越来越完善。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install nodejs npm</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">node -v</span></span><br><span class="line">v20.16.0</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">npm -v</span></span><br><span class="line">9.2.0</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">npm list</span></span><br><span class="line">/home/jay</span><br><span class="line">└── (empty)</span><br></pre></td></tr></table></figure>
+<p>在一般的windows环境中，nodejs的安装会连带着npm一起进行，所以一般装好了nodejs就已经带上了npm包管理工具了，所以在ubuntu这里就两个都要直接装了，不过npm在国内真不够用，所以经常是用cnpm来替代，然后一些个包的下载也是依赖淘宝的镜像源：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> npm install -g cnpm --registry=https://registry.npmmirror.com</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">npm list -g</span></span><br><span class="line">/usr/local/lib</span><br><span class="line">└── cnpm@9.4.0</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">cnpm config <span class="built_in">set</span> registry=https://registry.npmmirror.com</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">cnpm config get registry</span></span><br><span class="line">https://registry.npmmirror.com/</span><br></pre></td></tr></table></figure>
+<p>因为是在ubuntu系统，所以一些全局工具的安装还是要记得sudo来提升权限才行。</p>
+<h3 id="golang配置">3.3 golang配置</h3>
+<p>如下进行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install golang</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">go version</span></span><br><span class="line">go version go1.23.2 linux/amd64</span><br></pre></td></tr></table></figure>
+<p>因为安装的是最新版的golang，所以有一些东西可能因为老旧而有所更改，后面可能根据需要而进行版本降级，毕竟要的不是最新，而是最稳定。</p>
+<h3 id="docker的安装和一些服务挂载">3.4 docker的安装和一些服务挂载</h3>
+<p>这里才是重点，因为很多时候需要用到mysql、redis、rabbitmq等中间件，这里就干脆一通用上docker了，不过听说最近docker也出事了，也让我一阵头疼，不过还是先挂着吧。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install docker.io</span></span><br></pre></td></tr></table></figure>
+<p>记录一些常用的docker命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">简单的docker命令</span></span><br><span class="line">sudo docker ps -a           # 查看容器状态，在这可以看到容器的名字，id，创建时间和端口信息</span><br><span class="line">sudo docker imagess          # 查看镜像</span><br><span class="line">sudo docker pull something      # 拉取something镜像</span><br><span class="line">sudo docker run -d --name abaaba -p src_port:container_port something      #后台运行something，链接本地src_port端口到container_port容器端口</span><br><span class="line">sudo docker exec -it container_id /bin/bash        # 进入指定id的容器</span><br><span class="line">sudo docker rm -f container_id                     # 删除指定id的容器</span><br><span class="line">sudo docker cp src_file abaaba:/d/a                # 复制主机src_file文件到abaaba容器根目录下d文件夹内的a文件中；也可以反过来用，把容器内文件复制到本地</span><br><span class="line">sudo docker inspect container                      # 查看容器的配置参数</span><br><span class="line">sudo docker logs container                         # 查看容器输出</span><br></pre></td></tr></table></figure>
+<p>接下来先进行mysql的服务安装和挂载：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> docker pull mysql</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> docker run -d --restart=always -p 3306:3306 --name mysql_service \</span></span><br><span class="line"><span class="language-bash">-v /etc/localtime:/etc/localtime \</span></span><br><span class="line"><span class="language-bash">-v /opt/service/mysql/data:/var/lib/mysql \</span></span><br><span class="line"><span class="language-bash">-v /opt/service/mysql/conf:/etc/mysql/conf.d \</span></span><br><span class="line"><span class="language-bash">-e MYSQL_ROOT_PASSWORD=123456 \</span></span><br><span class="line"><span class="language-bash">mysql</span></span><br></pre></td></tr></table></figure>
+<p>如上进行，便是挂载了一个开机即重启的mysql服务，端口照常，联系本地时间、本地日志文件、本地配置文件并且进行了密码确定的mysql服务，这个服务甚至可以在同一局域网对外开放，这也是本人搞工作机的目的所在。</p>
+<p>还有mongodb以及redis的也一起了吧：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> docker run -d --name redis_service -p 6379:6379 --restart=always \</span></span><br><span class="line"><span class="language-bash">-v /opt/service/redis/data:/data \</span></span><br><span class="line"><span class="language-bash">-v /opt/service/redis/conf/redis.conf:/usr/local/etc/redis/redis.conf \</span></span><br><span class="line"><span class="language-bash">-v /etc/localtime:/etc/localtime redis \</span></span><br><span class="line"><span class="language-bash">redis-server /usr/local/etc/redis/redis.conf \</span></span><br><span class="line"><span class="language-bash">--requirepass abaaba</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> docker run -d --name mongo_service --restart=always -p 27017:27017 \</span></span><br><span class="line"><span class="language-bash">-v /opt/service/mongo/data:/data/db \</span></span><br><span class="line"><span class="language-bash">-v /opt//service/mongo/conf:/data/configdb \</span></span><br><span class="line"><span class="language-bash">-v /opt/service/mongo/log:/var/log/mongodb \</span></span><br><span class="line"><span class="language-bash">-v /etc/localtime:/etc/localtime \</span></span><br><span class="line"><span class="language-bash">mongo --auth</span></span><br></pre></td></tr></table></figure>
+<p>不过在进行这两个的镜像拉取的时候报错了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error response from daemon: Get &quot;https://registry-1.docker.io/v2/&quot;: EOF</span><br></pre></td></tr></table></figure>
+<p>看来是网络有问题，没办法，还是得用国内镜像源加速，这里就采用阿里云的吧。如下，进入阿里云个人操作台后，在[镜像工具]-[镜像加速器]处获取个人加速地址，然后再在ubuntu中编辑docker配置信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> vim /etc/docker/daemon.json</span></span><br><span class="line">...</span><br><span class="line">&#123;</span><br><span class="line">    &quot;registry-mirrors&quot;: [&quot;xxxxx.com&quot;]</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后再进行docker服务的重启就好，再来试一下拉取redis和mongodb镜像看看吧：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> docker pull redis:latest</span></span><br><span class="line">...</span><br><span class="line">Status: Downloaded newer images for redis:latest</span><br><span class="line">docker.io/library/redis:latest</span><br></pre></td></tr></table></figure>
+<p>好的，成了，继续前面的步骤吧，挂载完成后，来查看一下情况吧：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> docker ps -a</span></span><br><span class="line">CONTAINER ID   images     COMMAND                   CREATED          STATUS          PORTS                                                  NAMES</span><br><span class="line">5755c4a56d46   mongo     &quot;docker-entrypoint.s…&quot;   13 seconds ago   Up 12 seconds   0.0.0.0:27017-&gt;27017/tcp, :::27017-&gt;27017/tcp          mongo_service</span><br><span class="line">29216baf6d0f   redis     &quot;docker-entrypoint.s…&quot;   57 seconds ago   Up 56 seconds   0.0.0.0:6379-&gt;6379/tcp, :::6379-&gt;6379/tcp              redis_service</span><br><span class="line">41bb24de76f1   mysql     &quot;docker-entrypoint.s…&quot;   29 minutes ago   Up 2 minutes    0.0.0.0:3306-&gt;3306/tcp, :::3306-&gt;3306/tcp, 33060/tcp   mysql_service</span><br></pre></td></tr></table></figure>
+<p>人生不止工作，还有游戏，是吧？整个我的世界服务器吧：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> docker run -d --name minecraft -it -p 25565:25565 -e EULA=TRUE itzg/minecraft-server</span></span><br></pre></td></tr></table></figure>
+<p>怎么下载我的世界客户端我还不太懂。</p>
+<h2 id="四安全监控和系统管理工具">四、安全监控和系统管理工具</h2>
+<p>因为ubuntu经常会被我作为对外web服务的工作机，所以要针对它进行一些个安全监控，这里首先是存储方面的top和htop以及stacer使用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install htop stacer</span></span><br></pre></td></tr></table></figure>
+<p>stacer是直接图形化查看界面的，在家就用这个，在外面联家里的ubuntu就用htop就行，效果如下：</p>
+<figure>
+<img src="images/stacer效果.png" alt="stacer监控" />
+<figcaption aria-hidden="true">stacer监控</figcaption>
+</figure>
+<p>然后是网络方面的监控，这里用的是nethogs来查看实时网络进程，用vnstat进行后台流量记录：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install nethogs</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> nethogs</span></span><br></pre></td></tr></table></figure>
+<p>效果如下：</p>
+<figure>
+<img src="images/nethogs.png" alt="流量监控" />
+<figcaption aria-hidden="true">流量监控</figcaption>
+</figure>
+<p>其实类似的工具还有iftop，这个也可以实时查看。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install vnstat</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动监控</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vnstat -d</span></span><br></pre></td></tr></table></figure>
+<p>vnstat是一个后台服务，所以其状态的查询以及启动重启等都可以通过systemctl进行。</p>
+<h3 id="一些防火墙设置">4.1 一些防火墙设置</h3>
+<p>因为会经常作为工作机为windows机提供服务，所以相互连接是少不了的，所以下面进行了一些个简单配置，如下编辑hosts.allow文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">sshd: 192.168.1.*: allow</span><br></pre></td></tr></table></figure>
+<p>如上添加，表明针对同一局域网下的PC的ssh连接全部放开，这种操作还可以使用ufw来进行实现：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> ufw allow from 192.168.1.7</span></span><br></pre></td></tr></table></figure>
+<p>因为我就这么一台，所以直接开放该ip的访问，ufw是ubuntu24开箱自带的，直接用就好。除了上面针对特定ip的操作，ufw还可以进行如下开放或者禁用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开放端口协议</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> ufw allow 22/tcp</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">针对特定ip对特定端口的访问</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> ufw allow from x.x.1.0 to any port 22</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁止特定ip的连接</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> ufw deny from x.x.x.x/24</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看状态</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> ufw status</span></span><br></pre></td></tr></table></figure>
+<p>除了配置了hosts.allow以外，这里还进行了hosts.deny的配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">sshd: ALL</span><br></pre></td></tr></table></figure>
+<p>在hosts.allow和hosts.deny都进行了ssh服务的配置以后，需要手动进行ssh服务的重启。<strong>这里一定一定要注意文件的格式，比如冒号后面带空格啥的，不要大意，我吃过亏的！！！！！！！</strong></p>
+<h3 id="设置电脑息屏系统不休眠">4.2 设置电脑息屏系统不休眠</h3>
+<p>如下修改文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">/etc/systemd/logind.conf文件</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">HandleLidSwitch=ignore</span><br></pre></td></tr></table></figure>
+<p>如上文件的该login设置项取消注释并修改成上面的值，然后进行服务重启<code>sudo service systemd-logind restart</code>，要注意的是，我这电脑在如上命令重启后，电脑就锁屏了，输入密码进入以后是黑屏界面，但可以进行ssh连接，所以我远端操控来进行机器重启了，或许干脆都不用上面的服务重启，直接电脑重启得了。</p>
+<h3 id="小问题">4.3 小问题</h3>
+<p>因为电脑整了双系统，所以往往开机重启后，电脑默认会开启windows系统，每次都要f11进入系统选择，这很麻烦，所以试着去windows界面进行设置修改，修改开机系统默认项，但可惜的是没有ubuntu系统指认，所以windows中进行设置失败了。然后再ubuntu中进行了设置，如下修改/etc/default/grub文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">GRUB_DEFAULT=0</span><br></pre></td></tr></table></figure>
+<p>如上修改GRUB_DEFAULT的值，可以修改开机默认启动项，然后重刷一下系统配置<code>sudo update-grub</code>，结果发现，不行，因为整个开机的启动是f11进入特定系统的选择，而这里ubuntu的配置实际上是进入ubuntu系统后还有个启动选择，比如ubuntu或是Advanced
+ubuntu阿巴阿巴这样的选择，所以这里也失败了，要修改还是要开机的时候在硬件设置中进行重设，说白了我这两个系统中进行的设定都是无用的。mdzz</p>
+<h2 id="后续计划">后续计划</h2>
+<p>因为这是一个linux服务器，而我对于linux内核一直很感兴趣，所以后面指不定要进行对应的开发把玩，留待后续。</p>
+<p>嗯，基本的就这样吧，暂时搁一下可以了。</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">March 2nd 2025, 3:44:26 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">March 4th 2025, 1:17:42 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/" title="测试用">
+                    <div class="nextTitle">测试用</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/" title="websocket实现的一个聊天通信">
+                    <div class="prevTitle">websocket实现的一个聊天通信</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%87%86%E5%A4%87"><span class="toc-number">2.</span> <span class="toc-text">一些准备</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9Fu%E7%9B%98%E7%9A%84%E5%88%B6%E4%BD%9C"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 系统U盘的制作：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8C%E5%88%B7%E6%9C%BA"><span class="toc-number">2.1.1.</span> <span class="toc-text">进行刷机</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E6%9B%B4%E6%96%B0%E6%BA%90%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%80%89%E6%8B%A9"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 软件更新源的服务器选择</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E6%89%93%E9%80%A0%E5%B7%A5%E4%BD%9C%E6%9C%BA"><span class="toc-number">3.</span> <span class="toc-text">二、打造工作机</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#vscode%E8%BF%9C%E7%A8%8B%E5%BC%80%E5%8F%91%E9%85%8D%E5%A4%87"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 vscode远程开发配备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ubuntu%E4%B8%8Avscode%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 ubuntu上vscode的安装</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE"><span class="toc-number">4.</span> <span class="toc-text">三、开发工具配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#python%E7%8E%AF%E5%A2%83%E9%85%8D%E5%A4%87"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 python环境配备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nodejs%E5%89%8D%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 nodejs前端配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#golang%E9%85%8D%E7%BD%AE"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 golang配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#docker%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%B8%80%E4%BA%9B%E6%9C%8D%E5%8A%A1%E6%8C%82%E8%BD%BD"><span class="toc-number">4.4.</span> <span class="toc-text">3.4 docker的安装和一些服务挂载</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E5%AE%89%E5%85%A8%E7%9B%91%E6%8E%A7%E5%92%8C%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7"><span class="toc-number">5.</span> <span class="toc-text">四、安全监控和系统管理工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E9%98%B2%E7%81%AB%E5%A2%99%E8%AE%BE%E7%BD%AE"><span class="toc-number">5.1.</span> <span class="toc-text">4.1 一些防火墙设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E7%94%B5%E8%84%91%E6%81%AF%E5%B1%8F%E7%B3%BB%E7%BB%9F%E4%B8%8D%E4%BC%91%E7%9C%A0"><span class="toc-number">5.2.</span> <span class="toc-text">4.2 设置电脑息屏系统不休眠</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%8F%E9%97%AE%E9%A2%98"><span class="toc-number">5.3.</span> <span class="toc-text">4.3 小问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E7%BB%AD%E8%AE%A1%E5%88%92"><span class="toc-number">6.</span> <span class="toc-text">后续计划</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

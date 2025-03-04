@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概览：在python中针对opencv的简单基础学习记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="opencv的学习记录">
+<meta property="og:url" content="https://jack-samu.github.io/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概览：在python中针对opencv的简单基础学习记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv_badapple%E6%92%AD%E6%94%BE.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E6%91%84%E5%83%8F1.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E6%91%84%E5%83%8F%E4%BF%9D%E5%AD%98.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E8%80%81%E8%8A%B1.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E9%80%9A%E9%81%93%E6%8B%86%E5%88%86.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv_bg%E9%80%9A%E9%81%93%E5%80%BC%E4%BA%92%E6%8D%A2%E6%95%88%E6%9E%9C.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/hsv%E8%89%B2%E5%BD%A9%E8%A1%A8.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E8%89%B2%E5%BD%A9%E5%88%86%E5%B1%82%E6%95%88%E6%9E%9C.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E6%B0%B4%E5%8D%B0%E6%8F%90%E5%8F%96.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/eason%E8%82%A4%E8%89%B2%E6%A3%80%E6%B5%8Bhsv.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/eason%E8%82%A4%E8%89%B2%E6%A3%80%E6%B5%8Bycrcv.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E5%8A%A0%E6%B3%95%E8%BF%90%E7%AE%97.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E5%8A%A0%E6%9D%83%E5%92%8C%E8%BF%90%E7%AE%97.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/opencv%E6%8C%89%E4%BD%8D%E4%B8%8Elena.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/alian1.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/alian2.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/alian3.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E5%BD%A9%E5%9B%BEalian1.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E5%BD%A9%E5%9B%BEalian3.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E9%BB%91%E7%99%BD%E6%B0%B4%E5%8D%B0%E7%AD%BE%E5%90%8D.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E6%B0%B4%E5%8D%B0%E6%B7%BB%E5%8A%A0.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E6%B0%B4%E5%8D%B0%E5%89%8D.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E5%AD%97%E7%AC%A6%E5%93%86%E5%95%A6.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/among.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/asikaj.jpg">
+<meta property="og:image" content="https://jack-samu.github.io/images/ayanamirei.jpg">
+<meta property="og:image" content="https://jack-samu.github.io/images/eason.jpg">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E6%B0%B4%E5%8D%B0%E5%89%8D.png">
+<meta property="article:published_time" content="2022-12-02T12:41:30.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:59.179Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="python, opencv">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jack-samu.github.io/images/opencv_badapple%E6%92%AD%E6%94%BE.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>opencv的学习记录 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">opencv的学习记录</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                opencv的学习记录
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="python, opencv">python, opencv</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">9.6k</span>阅读时长: <span class="post-count reading-time">41 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2022/12/02</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概览：在python中针对opencv的简单基础学习记录</p>
+<span id="more"></span>
+<p>作为最容易上手之一的语言，python拥有着大量的第三方库，这些第三方库的存在使得很多人可以专注于业务逻辑、数学逻辑而忽略繁琐的代码操作，python的opencv第三方库就是其中之一。</p>
+<h2 id="一第三方库的安装和简单使用">一、第三方库的安装和简单使用</h2>
+<h4 id="安装">安装</h4>
+<p>简单的pip安装就可以了，opencv库的使用，很经常地涉及一些矩阵运算，所以numpy算是和它一家亲了。
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install opencv-python</span><br></pre></td></tr></table></figure></p>
+<p>安装好了以后，就可以简单地打开图片、打开视频了，来个简单试验：</p>
+<p><strong>读取图片</strong> <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取图像，第一种是正常读取，第二种是读取灰度图像</span></span><br><span class="line">img = cv2.imread(<span class="string">&quot;D:\img\among.png&quot;</span>)</span><br><span class="line">gray = cv2.imread(<span class="string">&quot;D:\img\among.png&quot;</span>, <span class="number">0</span>)</span><br><span class="line"><span class="comment"># 显示图像</span></span><br><span class="line">cv2.imshow(<span class="string">&quot;colorful&quot;</span>, img)</span><br><span class="line">cv2.imshow(<span class="string">&quot;gray&quot;</span>, gray)</span><br><span class="line"><span class="comment"># 不再等待键盘输入事件，直接显示</span></span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line"><span class="comment"># 关闭所有显示窗口</span></span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure> 显示效果如下： <img
+src="/images/opencv灰色图和原图.png" alt="图像效果" /></p>
+<p><strong>读取视频并播放</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取视频</span></span><br><span class="line">video = cv2.VideoCapture(<span class="string">&#x27;badapple_color.mp4&#x27;</span>)</span><br><span class="line"><span class="comment"># 获取视频对象的帧数</span></span><br><span class="line">fps = video.get(cv2.CAP_PROP_FPS)</span><br><span class="line"><span class="comment"># 设定循环条件</span></span><br><span class="line"><span class="keyword">while</span>(video.isOpened()):</span><br><span class="line">    _, frame = video.read()</span><br><span class="line">    cv2.imshow(<span class="string">&quot;video&quot;</span>, frame)</span><br><span class="line">    <span class="comment"># 设置退出条件是输入&#x27;q&#x27;</span></span><br><span class="line">    <span class="keyword">if</span> cv2.waitKey(<span class="built_in">int</span>(fps)) <span class="keyword">in</span> [<span class="built_in">ord</span>(<span class="string">&#x27;q&#x27;</span>), <span class="number">27</span>]:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">cv2.destroyAllWindows()</span><br><span class="line">video.release()</span><br></pre></td></tr></table></figure>
+<p>注意：这里的播放是没有正常播放器那样的进度条和音频的，因为这里是读取的视频的每一帧，然后循环播放而已，并没有读取音频，而且设置了退出条件是输入q。
+<img src="/images/opencv_badapple播放.png" alt="视频播放效果" />
+<strong>获取摄像头并保存为视频文件</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line">video = cv2.VideoCapture(<span class="number">0</span>)</span><br><span class="line"><span class="keyword">while</span>(<span class="literal">True</span>):</span><br><span class="line">    <span class="comment"># 获取一帧</span></span><br><span class="line">    _, frame = video.read()</span><br><span class="line">    <span class="comment"># 将这帧转换为灰度图</span></span><br><span class="line">    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)</span><br><span class="line"></span><br><span class="line">    cv2.imshow(<span class="string">&#x27;frame&#x27;</span>, gray)</span><br><span class="line">    <span class="keyword">if</span> cv2.waitKey(<span class="number">1</span>) == <span class="built_in">ord</span>(<span class="string">&#x27;q&#x27;</span>):</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">video.release()</span><br></pre></td></tr></table></figure>
+<p>然后它就输出持续输出摄像头排到的每一帧画面，因为读取的是灰度的，这里也是灰度的，你可以由着它正常输出，不修改，也就是注释掉cvtColor那条转换语句，顺便把imshow输出对象换回开始的frame(读取到的帧)，就可以得到彩图了。
+<img src="/images/opencv摄像1.png" alt="灰度效果" />|<img
+src="/images/opencv摄像2.png" alt="原彩效果" /></p>
+<p>改一下，保存为视频:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"></span><br><span class="line">video = cv2.VideoCapture(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义编码方式并创建VideoWriter对象</span></span><br><span class="line">fourcc = cv2.VideoWriter_fourcc(*<span class="string">&#x27;mp4v&#x27;</span>)</span><br><span class="line">outfile = cv2.VideoWriter(<span class="string">&#x27;res.mp4&#x27;</span>, fourcc, <span class="number">25.</span>, (<span class="number">640</span>, <span class="number">480</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span>(video.isOpened()):</span><br><span class="line">    flag, frame = video.read()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> flag:</span><br><span class="line">        outfile.write(frame)  <span class="comment"># 写入文件</span></span><br><span class="line">        cv2.imshow(<span class="string">&#x27;frame&#x27;</span>, frame)</span><br><span class="line">        <span class="keyword">if</span> cv2.waitKey(<span class="number">1</span>) == <span class="built_in">ord</span>(<span class="string">&#x27;q&#x27;</span>):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">video.release()</span><br></pre></td></tr></table></figure>
+<figure>
+<img src="/images/opencv摄像保存.png" alt="摄像文件保存" />
+<figcaption aria-hidden="true">摄像文件保存</figcaption>
+</figure>
+<h2 id="二图像基础">二、图像基础</h2>
+<p>计算机中的图像，由一个个带有颜色的小方块组成，这些小方块就是基本的处理单位，称为像素。它的大小取决于计算机的分辨率，分辨率越高，像素点越小。简单的二值图片，其像素点的值只有0和1，用来标识黑白两种颜色；在此更进一步的灰度图片，则是把黑白色更细腻化，使得图像生动许多，也就是表示黑白的值由0-255存储，0为纯黑，1为纯白，中间的黑白色的渐变就更加细腻了；再进一步，就是彩色图像，颜色的构成基本都是由三原色以不同的比例调和出来的，而彩色图像就是有三种值共同表示三原色的值，也就是说一个彩色图像的像素点，它的颜色由三种值共同构成，这种模式也被称为RGB色彩空间。比如[0,
+0, 0]表示纯黑，[255, 255, 255]表示纯白，而[255, 0, 0]、[0, 255, 0]和[0,
+0,
+255]分别表示红绿蓝三原色，因此RGB色彩空间也被称为三通道，在opencv中，三通道顺序为BGR逆序。一幅彩色图像由三通道构成的矩阵而成，这也是处理彩色图的时候，常常引入Numpy来进行配合的原因。处理图像，也是考究数学的。</p>
+<p>简单的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment"># 黑白图</span></span><br><span class="line">b = np.zeros((<span class="number">100</span>, <span class="number">100</span>), dtype=np.uint8)</span><br><span class="line">w = np.zeors((<span class="number">100</span>, <span class="number">100</span>), dtype=np.uint8)</span><br><span class="line">w[:<span class="number">100</span>, :<span class="number">100</span>] = <span class="number">255</span></span><br><span class="line"><span class="built_in">print</span>(b, w, sep=<span class="string">&quot;\n\n&quot;</span>)</span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&quot;black&quot;</span>, b)</span><br><span class="line">cv2.imgshow(<span class="string">&quot;white&quot;</span>, w)</span><br><span class="line">cv2.waitKey()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 三个三原色图片</span></span><br><span class="line">r = np.zeros((<span class="number">300</span>, <span class="number">300</span>, <span class="number">3</span>),dtype=np.uint8)</span><br><span class="line">g = np.zeros((<span class="number">300</span>, <span class="number">300</span>, <span class="number">3</span>),dtype=np.uint8)</span><br><span class="line">b = np.zeros((<span class="number">300</span>, <span class="number">300</span>, <span class="number">3</span>),dtype=np.uint8)</span><br><span class="line">r[:,:, <span class="number">2</span>] = <span class="number">255</span></span><br><span class="line">g[:,:, <span class="number">1</span>] = <span class="number">255</span></span><br><span class="line">b[:,:, <span class="number">0</span>] = <span class="number">255</span></span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&quot;red&quot;</span>, r)</span><br><span class="line">cv2.imshow(<span class="string">&quot;green&quot;</span>, g)</span><br><span class="line">cv2.imshow(<span class="string">&quot;blue&quot;</span>, b)</span><br><span class="line">cv2.waitKey()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 包含三原色的图片</span></span><br><span class="line">img = np.zeros((<span class="number">300</span>, <span class="number">300</span>, <span class="number">3</span>), dtype=np.uint8)</span><br><span class="line">img[:, <span class="number">0</span>:<span class="number">100</span>, <span class="number">2</span>] = <span class="number">255</span></span><br><span class="line">img[:, <span class="number">100</span>:<span class="number">200</span>, <span class="number">1</span>] = <span class="number">255</span></span><br><span class="line">img[:, <span class="number">200</span>:<span class="number">300</span>, <span class="number">0</span>] = <span class="number">255</span></span><br><span class="line">cv2.imshow(<span class="string">&quot;RGB&quot;</span>, img)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 红橙黄绿蓝靛紫</span></span><br><span class="line">img = np.zeros((<span class="number">300</span>, <span class="number">700</span>, <span class="number">3</span>), dtype=np.uint8)</span><br><span class="line"><span class="comment"># 红</span></span><br><span class="line">img[:,<span class="number">0</span>:<span class="number">100</span>,<span class="number">2</span>] = <span class="number">255</span></span><br><span class="line"><span class="comment"># 橙</span></span><br><span class="line">img[:,<span class="number">100</span>:<span class="number">200</span>,<span class="number">2</span>] = <span class="number">255</span></span><br><span class="line">img[:,<span class="number">100</span>:<span class="number">200</span>,<span class="number">1</span>] = <span class="number">97</span></span><br><span class="line"><span class="comment"># 黄</span></span><br><span class="line">img[:,<span class="number">200</span>:<span class="number">300</span>,<span class="number">1</span>] = <span class="number">255</span></span><br><span class="line">img[:,<span class="number">200</span>:<span class="number">300</span>,<span class="number">2</span>] = <span class="number">255</span></span><br><span class="line"><span class="comment"># 绿</span></span><br><span class="line">img[:,<span class="number">300</span>:<span class="number">400</span>,<span class="number">1</span>] = <span class="number">255</span></span><br><span class="line"><span class="comment"># 蓝</span></span><br><span class="line">img[:,<span class="number">400</span>:<span class="number">500</span>,<span class="number">0</span>] = <span class="number">255</span></span><br><span class="line"><span class="comment"># 靛</span></span><br><span class="line">img[:,<span class="number">500</span>:<span class="number">600</span>,<span class="number">0</span>] = <span class="number">84</span></span><br><span class="line">img[:,<span class="number">500</span>:<span class="number">600</span>,<span class="number">1</span>] = <span class="number">46</span></span><br><span class="line">img[:,<span class="number">500</span>:<span class="number">600</span>,<span class="number">2</span>] = <span class="number">8</span></span><br><span class="line"><span class="comment"># 紫</span></span><br><span class="line">img[:,<span class="number">600</span>:<span class="number">700</span>,<span class="number">0</span>] = <span class="number">240</span></span><br><span class="line">img[:,<span class="number">600</span>:<span class="number">700</span>,<span class="number">1</span>] = <span class="number">32</span></span><br><span class="line">img[:,<span class="number">600</span>:<span class="number">700</span>,<span class="number">2</span>] = <span class="number">160</span></span><br><span class="line"><span class="comment"># 输出</span></span><br><span class="line">cv2.imshow(<span class="string">&quot;seven&quot;</span>, img)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure>
+<p>输出结果就不显示了，就那样。其实想要搞个颜色对照表也可以一条通道一条通道的叠代，然后叠代完整个序列就输出，那样就有个颜色表了，不过要想准备给值还是要参考一下真正的命名。</p>
+<p><strong>随机图</strong></p>
+<p>整一个随机灰度图像，就是以前那种电视没信号的状态。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">img = np.random.randint(<span class="number">0</span>, <span class="number">256</span>, size=[<span class="number">300</span>, <span class="number">300</span>], dtype=np.uint8)</span><br><span class="line">cv2.imshow(<span class="string">&quot;老花&quot;</span>, img)</span><br><span class="line">cv2.waitKey()</span><br><span class="line"></span><br><span class="line">img = np.random.randint(<span class="number">0</span>, <span class="number">256</span>, size=[<span class="number">300</span>, <span class="number">300</span>], dtype=np.uint8)</span><br><span class="line">cv2.imshow(<span class="string">&quot;彩色老花&quot;</span>, img)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/opencv老花.png" alt="灰色老花图" />|<img
+src="/images/opencv彩色老花.png" alt="彩色老花图" />
+上面已经描述了，RGB彩图是有着三通道的，而opencv提供了通道拆分的实现
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">img = cv2.imread(<span class="string">r&quot;D:\img\among.png&quot;</span>)</span><br><span class="line"><span class="comment"># b, g, r = cv2.split(img) 等同</span></span><br><span class="line">cv2.imshow(<span class="string">&quot;0&quot;</span>, img[:,:,<span class="number">0</span>])</span><br><span class="line">cv2.imshow(<span class="string">&quot;1&quot;</span>, img[:,:,<span class="number">1</span>])</span><br><span class="line">cv2.imshow(<span class="string">&quot;2&quot;</span>, img[:,:,<span class="number">2</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同样的拆分功能</span></span><br><span class="line">b, g, r = cv2.split(img)</span><br><span class="line"><span class="comment"># 合并成原图</span></span><br><span class="line">img_mer = cv2.merge([b, g, r])</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure></p>
+<figure>
+<img src="/images/opencv通道拆分.png" alt="通道拆分图" />
+<figcaption aria-hidden="true">通道拆分图</figcaption>
+</figure>
+<p><strong>三个属性值</strong></p>
+<ul>
+<li>shape，img.shape，表示img序列的长宽和深度，</li>
+<li>size ，img.size，表示像素数，行x列x通道</li>
+<li>dtype，图像数据类型</li>
+</ul>
+<h2 id="三色彩空间和转换">三、色彩空间和转换</h2>
+<p>色彩空间，表述颜色的模式，常见的色彩空间是RGB色彩空间，但在opencv中是反过来的BGR通道。除此以外的，还有GRAY即八位灰度图、XYZ色彩空间、YCrCb色彩空间、HSV色彩空间、HLS色彩空间、Bayer色彩空间。。。。。。针对不同需要的色彩空间，在需要的时候还可以进行转换，这里就是针对它们的特性和相互转换进行学习。</p>
+<h3 id="gray色彩空间">GRAY色彩空间</h3>
+<p>8位灰度图，对应8位二进制的数值范围就是0-255，刚好表示256个灰度，0表示纯黑，255表示纯白，中间数值就是从纯黑到纯白的渐变，所以是灰度。在opencv中，RGB色彩空间转变为GRAY这种灰度色彩空间，它的转变公式如下：</p>
+<p><span class="math inline">\(Gray =
+0.299*R+0.587*G+0.114*B\)</span></p>
+<p>而GRAY灰度转为RGB色彩空间就比较简单，RGB三通道的值直接就是GRAY的值，也就是
+<span class="math display">\[R = Gray\\G = Gray\\B = Gray\\\]</span></p>
+<p>关于GRAY和BGR之间的互转，其实在opencv读取的时候就已经可以实现，在应用上暂时没啥想法，这里主要是玩一下例子。
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> cv2</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mong = cv2.imread(<span class="string">&quot;among.png&quot;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>gray = cv2.cvtColor(mong, cv2.COLOR_BGR2GRAY)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;source&quot;</span>, mong)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;gray&quot;</span>, gray)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>bgr_img = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;change again&quot;</span>, bgr_img)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.waitKey()</span><br><span class="line">-<span class="number">1</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>img = np.random.randint(<span class="number">0</span>, <span class="number">256</span>, size=[<span class="number">2</span>,<span class="number">3</span>], dtype=np.uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>res = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>res_change = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>img</span><br><span class="line">array([[ <span class="number">48</span>,  <span class="number">27</span>, <span class="number">228</span>],</span><br><span class="line">       [ <span class="number">94</span>, <span class="number">144</span>, <span class="number">234</span>]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>res</span><br><span class="line">array([[[ <span class="number">48</span>,  <span class="number">48</span>,  <span class="number">48</span>],</span><br><span class="line">        [ <span class="number">27</span>,  <span class="number">27</span>,  <span class="number">27</span>],</span><br><span class="line">        [<span class="number">228</span>, <span class="number">228</span>, <span class="number">228</span>]],</span><br><span class="line"></span><br><span class="line">       [[ <span class="number">94</span>,  <span class="number">94</span>,  <span class="number">94</span>],</span><br><span class="line">        [<span class="number">144</span>, <span class="number">144</span>, <span class="number">144</span>],</span><br><span class="line">        [<span class="number">234</span>, <span class="number">234</span>, <span class="number">234</span>]]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>res_change</span><br><span class="line">array([[ <span class="number">48</span>,  <span class="number">27</span>, <span class="number">228</span>],</span><br><span class="line">       [ <span class="number">94</span>, <span class="number">144</span>, <span class="number">234</span>]], dtype=uint8)</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure> 玩脱了，没有转换回来原本的颜色。 <img
+src="/images/opencv_gray色彩空间尝试.png"
+alt="gray色彩空间测试效果图" /></p>
+<h3 id="ycrcb色彩空间">YCrCb色彩空间</h3>
+<p>针对人眼视觉系统，由于人对颜色的感知要低于对光线亮度的感知，而RGB色彩空间专注于颜色，就少了亮度这一指标，所以有了YCrCb色彩空间。在这种色彩空间里，Y表示光源亮度，Cr表示红色分量，Cb表示蓝色分量。关于RGB转换成YCrCb的转换公式为：</p>
+<p><span class="math display">\[Y = 0.299\times R + 0.587\times G +
+0.114\times B\\Cr = (R-Y)\times 0.713+delta\\Cb=(B-Y)\times
+0.564+delta\]</span></p>
+<p>关于delta的值，对应不同数位图像有不同的值：</p>
+<table>
+<thead>
+<tr class="header">
+<th>delta值</th>
+<th>图像数位</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>128</td>
+<td>8位</td>
+</tr>
+<tr class="even">
+<td>32768</td>
+<td>16位</td>
+</tr>
+<tr class="odd">
+<td>0.5</td>
+<td>单精度图像</td>
+</tr>
+</tbody>
+</table>
+<p>反过来从YCrCb转换成RGB的公式则是：</p>
+<p><span
+class="math display">\[R=Y+1.403\cdot(Cr-delta)\\G=Y-0.714\cdot(cr-delta)-0.344\cdot(Cb-delta)\\B=Y+1.773\cdot(Cb-delta)\]</span></p>
+<p>它也叫YUV，Y表示亮度，U和V表示色度，在做肤色检测上比HSV要好。</p>
+<h3 id="hsv色彩空间">HSV色彩空间</h3>
+<p>听说是针对视觉感知的颜色模型，在这个色彩空间里面，有着色调、饱和度、亮度三要素，色调是光的颜色，饱和度是色彩的深浅，亮度是人眼感受到的光的明暗。
+*
+色调H，红黄绿青蓝红六种颜色对应圆周360度(所以才说这些创造概念的人就喜欢让人费解)；
+*
+饱和度S，一个比例，也就是一个小数，范围时从0到1，表示颜色所占其颜色的最大纯度的比例，饱和度为0就是灰色，最大也就是1是这个颜色本身；
+* 亮度V，色彩明亮程度，同样是[0, 1]的取值范围。</p>
+<p>RGB转换为HSV的公式如下：</p>
+<p><span class="math display">\[V = max(R, G, B)\\亮度：
+S=
+\begin{cases}
+V-min(R, G, B), &amp;V\ne0\\
+0,&amp;其他
+\end{cases}\\色调：
+H=
+\begin{cases}
+\cfrac{60(G-B)}{v-min(R, G, B)},&amp;V=R\\
+120+\cfrac{60(B-G)}{V-min(R, G, B)}, &amp;V=G\\
+240+\cfrac{60(R-G)}{V-min(R, G, B)}, &amp;V=B
+\end{cases}\\色调：
+H=
+\begin{cases}
+H+360,&amp;H&lt;0\\
+H,&amp;其他
+\end{cases}\]</span></p>
+<p>上面就是RGB转换成HSV的公式，真可谓是贼麻烦了，知道原理也是为了方便调试，实际上都可以由opencv的内部函数给搞定了，只需要关心上面重要的三要素意义即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_b = np.ones((<span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>), dtype=np.uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_g = np.ones((<span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>), dtype=np.uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_r = np.ones((<span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>), dtype=np.uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_b[:, :, <span class="number">0</span>], rgb_g[:, :, <span class="number">1</span>], rgb_r[:, :, <span class="number">2</span>] = <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>hsv_b = cv2.cvtColor(rgb_b, cv2.COLOR_BGR2HSV)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>hsv_g = cv2.cvtColor(rgb_g, cv2.COLOR_BGR2HSV)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>hsv_r = cv2.cvtColor(rgb_r, cv2.COLOR_BGR2HSV)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_b</span><br><span class="line">array([[[<span class="number">255</span>,   <span class="number">1</span>,   <span class="number">1</span>],</span><br><span class="line">        [<span class="number">255</span>,   <span class="number">1</span>,   <span class="number">1</span>],</span><br><span class="line">        [<span class="number">255</span>,   <span class="number">1</span>,   <span class="number">1</span>]],</span><br><span class="line"></span><br><span class="line">       [[<span class="number">255</span>,   <span class="number">1</span>,   <span class="number">1</span>],</span><br><span class="line">        [<span class="number">255</span>,   <span class="number">1</span>,   <span class="number">1</span>],</span><br><span class="line">        [<span class="number">255</span>,   <span class="number">1</span>,   <span class="number">1</span>]]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>hsv_b</span><br><span class="line">array([[[<span class="number">120</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [<span class="number">120</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [<span class="number">120</span>, <span class="number">254</span>, <span class="number">255</span>]],</span><br><span class="line"></span><br><span class="line">       [[<span class="number">120</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [<span class="number">120</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [<span class="number">120</span>, <span class="number">254</span>, <span class="number">255</span>]]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_g</span><br><span class="line">array([[[  <span class="number">1</span>, <span class="number">255</span>,   <span class="number">1</span>],</span><br><span class="line">        [  <span class="number">1</span>, <span class="number">255</span>,   <span class="number">1</span>],</span><br><span class="line">        [  <span class="number">1</span>, <span class="number">255</span>,   <span class="number">1</span>]],</span><br><span class="line"></span><br><span class="line">       [[  <span class="number">1</span>, <span class="number">255</span>,   <span class="number">1</span>],</span><br><span class="line">        [  <span class="number">1</span>, <span class="number">255</span>,   <span class="number">1</span>],</span><br><span class="line">        [  <span class="number">1</span>, <span class="number">255</span>,   <span class="number">1</span>]]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>hsv_g</span><br><span class="line">array([[[ <span class="number">60</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [ <span class="number">60</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [ <span class="number">60</span>, <span class="number">254</span>, <span class="number">255</span>]],</span><br><span class="line"></span><br><span class="line">       [[ <span class="number">60</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [ <span class="number">60</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [ <span class="number">60</span>, <span class="number">254</span>, <span class="number">255</span>]]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_r</span><br><span class="line">array([[[  <span class="number">1</span>,   <span class="number">1</span>, <span class="number">255</span>],</span><br><span class="line">        [  <span class="number">1</span>,   <span class="number">1</span>, <span class="number">255</span>],</span><br><span class="line">        [  <span class="number">1</span>,   <span class="number">1</span>, <span class="number">255</span>]],</span><br><span class="line"></span><br><span class="line">       [[  <span class="number">1</span>,   <span class="number">1</span>, <span class="number">255</span>],</span><br><span class="line">        [  <span class="number">1</span>,   <span class="number">1</span>, <span class="number">255</span>],</span><br><span class="line">        [  <span class="number">1</span>,   <span class="number">1</span>, <span class="number">255</span>]]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>hsv_r</span><br><span class="line">array([[[  <span class="number">0</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [  <span class="number">0</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [  <span class="number">0</span>, <span class="number">254</span>, <span class="number">255</span>]],</span><br><span class="line"></span><br><span class="line">       [[  <span class="number">0</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [  <span class="number">0</span>, <span class="number">254</span>, <span class="number">255</span>],</span><br><span class="line">        [  <span class="number">0</span>, <span class="number">254</span>, <span class="number">255</span>]]], dtype=uint8)</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="hls色彩空间">HLS色彩空间</h3>
+<p>和HSV色彩空间类似，不过HLS色彩空间三要素为：色调H、亮度L、饱和度S</em>，文中是这么描述的，所以不同在哪？描述亮度的单词吗？无语。</p>
+<h3 id="类型转换函数">类型转换函数</h3>
+<p>上面的各种色彩空间与RGB色彩空间的转换，在opencv提供的类型转换函数中都可以实现。
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dst = cv2.cvtColor(src, code[, dstCn])</span><br></pre></td></tr></table></figure></p>
+<p>针对不同的类型转换，传入不同的code参数值，而dstCn是目标图像的通道数，默认为0，然后通道数会自动通过原始图像和code确定。</p>
+<table>
+<thead>
+<tr class="header">
+<th>code值</th>
+<th>解析</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cv2.COLOR_BGR2RGB</td>
+<td>opencv中BGR类型转为RGB类型</td>
+</tr>
+<tr class="even">
+<td>cv2.COLOR_RGB2BGR</td>
+<td>opencv中RGB类型转为BGR类型</td>
+</tr>
+<tr class="odd">
+<td>cv2.COLOR_BGR2GRAY</td>
+<td>BGR转为GRAY</td>
+</tr>
+<tr class="even">
+<td>cv2.COLOR_GRAY2BGR</td>
+<td>GRAY转为BGR</td>
+</tr>
+<tr class="odd">
+<td>cv2.COLOR_BGR2XYZ</td>
+<td>BGR转为XYZ</td>
+</tr>
+<tr class="even">
+<td>cv2.COLOR_XYZ2BGR</td>
+<td>XYZ转为BGR</td>
+</tr>
+<tr class="odd">
+<td>cv2.COLOR_BGR2YCrCb</td>
+<td>BGR转为YCrCb</td>
+</tr>
+<tr class="even">
+<td>cv2.COLOR_YCrCb2BGR</td>
+<td>YCrCb转为BGR</td>
+</tr>
+<tr class="odd">
+<td>cv2.COLOR_BGR2HSV</td>
+<td>BGR转为HSV</td>
+</tr>
+<tr class="even">
+<td>cv2.COLOR_HSV2BGR</td>
+<td>HSV转为BGR</td>
+</tr>
+<tr class="odd">
+<td>cv2.COLOR_BGR2HLS</td>
+<td>BGR转为HLS</td>
+</tr>
+<tr class="even">
+<td>cv2.COLOR_BayerBG2BGR</td>
+<td>逆马赛克，也是Bayer的BG模式</td>
+</tr>
+</tbody>
+</table>
+<p>在上面的参数中，出现了RGB和BGR的互转，在opencv中，通道的顺序一般是BGR，是逆序的，那这个RGB的转换会咋样？实践操作的结果来看，会使得B、R两通道的值互相替换，就是两条通道换了过来，但opencv渲染图片还是那个通道顺序，所以如果显示图片，颜色就会发生变化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> cv2</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>img = np.random.randint(<span class="number">0</span>, <span class="number">256</span>, size=(<span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>), dtype=np.uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>img</span><br><span class="line">array([[[ <span class="number">69</span>, <span class="number">184</span>,  <span class="number">11</span>],</span><br><span class="line">        [<span class="number">193</span>,   <span class="number">4</span>, <span class="number">194</span>],</span><br><span class="line">        [<span class="number">239</span>, <span class="number">139</span>, <span class="number">146</span>]],</span><br><span class="line"></span><br><span class="line">       [[<span class="number">188</span>,  <span class="number">30</span>,  <span class="number">44</span>],</span><br><span class="line">        [ <span class="number">60</span>, <span class="number">145</span>, <span class="number">133</span>],</span><br><span class="line">        [ <span class="number">46</span>, <span class="number">181</span>, <span class="number">139</span>]]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_img</span><br><span class="line">array([[[ <span class="number">11</span>, <span class="number">184</span>,  <span class="number">69</span>],</span><br><span class="line">        [<span class="number">194</span>,   <span class="number">4</span>, <span class="number">193</span>],</span><br><span class="line">        [<span class="number">146</span>, <span class="number">139</span>, <span class="number">239</span>]],</span><br><span class="line"></span><br><span class="line">       [[ <span class="number">44</span>,  <span class="number">30</span>, <span class="number">188</span>],</span><br><span class="line">        [<span class="number">133</span>, <span class="number">145</span>,  <span class="number">60</span>],</span><br><span class="line">        [<span class="number">139</span>, <span class="number">181</span>,  <span class="number">46</span>]]], dtype=uint8)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mong = cv2.imread(<span class="string">&quot;among.png&quot;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rgb_mong = cv2.cvtColor(mong, cv2.COLOR_BGR2RGB)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;source&quot;</span>, mong)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;rgb_res&quot;</span>, rgb_mong)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.waitKey()</span><br><span class="line">-<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>从上面的矩阵和下面图片的变化就能很清楚地看出内部变化和宏观变化，就算是替换了两通道，opencv的默认图片的通道顺序应该是没有变化，或者说imshow这一函数的内部规则依然是从bgr的通道顺序，从而使得图片颜色不一。
+<img src="/images/opencv_bg通道值互换效果.png" alt="效果" /></p>
+<h4 id="抽取特定颜色">抽取特定颜色</h4>
+<p>针对图片中的特定颜色块，在我们需要的时候，可以叠代图片并产出一个只包含该颜色块的图片，比如上面的哆啦A梦的颜色分区就很明显，很适合用来进行这个尝试。另外，这个想法的实现是依赖于opencv的inRange函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dst = cv2.inRange(src, lowerb, upperb)</span><br></pre></td></tr></table></figure>
+<p>上面的函数就是针对图片中[lowerb,
+upperb]这一区域的颜色进行抽取，不过要注意的是，如果是灰度图片，lowerb就只是一个整型值就行，但如果是一个RGB颜色空间的图片，lowerb就需要一个矩阵来描述颜色了，upperb同上。嗯，不过三通道共同表述颜色这种针对硬件的特性，实在是让我头疼，在HSV中，表述颜色的只有一种，这种就很对用户胃口，好，用这个试试。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> cv2</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mong = cv2.imread(<span class="string">&quot;among.png&quot;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mong_hsv = cv2.cvtColor(mong, cv2.COLOR_BGR2HSV)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>bmin, bmax = np.array((<span class="number">100</span>, <span class="number">43</span>, <span class="number">46</span>)), np.array((<span class="number">125</span>, <span class="number">255</span>, <span class="number">255</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mask = cv2.inRange(mong_hsv, bmin, bmax)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>blue = cv2.bitwise_and(mong, mong, mask=mask)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>ymin, ymax = np.array((<span class="number">26</span>, <span class="number">43</span>, <span class="number">46</span>)), np.array((<span class="number">34</span>, <span class="number">255</span>, <span class="number">255</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>ymask = cv2.inRange(mong_hsv, ymin, ymax)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rmin, rmax = np.array((<span class="number">0</span>, <span class="number">43</span>, <span class="number">46</span>)), np.array((<span class="number">10</span>, <span class="number">255</span>, <span class="number">255</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>rmask = cv2.inRange(mong_hsv, rmin, rmax)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>yellow = cv2.bitwise_and(mong, mong, mask=ymask)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>red = cv2.bitwise_and(mong, mong, mask=rmask)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;source&quot;</span>, mong)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;blue&quot;</span>, blue)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;yellow&quot;</span>, yellow)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;red&quot;</span>, red)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.waitKey()</span><br><span class="line">-<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/hsv色彩表.png" alt="色彩表" />
+上面是根据搜到的这个HSV的对照表进行的实验，应该图片中的颜色不是完全按照正规的颜色对照而来，所以得到的也是颜色块的碎碎块块，实在让人心累。
+<img src="/images/opencv色彩分层效果.png" alt="色彩分层效果" />
+不过针对水印的提取倒是让我在这部分有意外的收获。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> cv2</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>watermark = img[<span class="number">850</span>:, <span class="number">580</span>:]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>wm_abstract = cv2.inRange(watermark, (<span class="number">230</span>, <span class="number">230</span>, <span class="number">230</span>), (<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;source&quot;</span>, img)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;watermark_part&quot;</span>, watermark)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;watermark&quot;</span>, wm_abstract)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.waitKey()</span><br><span class="line">-<span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span></span><br></pre></td></tr></table></figure>
+<p>这样就算提取出来了水印的那部分，对于这种纯色的水印，RGB的inRange反而更好用的感觉。
+<img src="/images/opencv水印提取.png" alt="水印提取效果" /></p>
+<h3 id="肤色标记和检测">肤色标记和检测</h3>
+<p>和上面的确定颜色范围一致，对应人类照片进行肤色的颜色范围进行标记，然后就可以得到对应区域，然后抽取，书本中用的是HSV进行，不过有资料说YCrCb应用这种场景更好，我看看能不能两个都试试。</p>
+<p>书本中把肤色的色调和饱和度定在[5, 170]和[25,
+166]之间，我不确定是否是针对书中例子图片，但就先用着，虽然我用其他图片做实验.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> cv2</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>img = cv2.imread(<span class="string">&quot;eason.png&quot;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>h, s, v = cv2.split(hsv)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>hmask = cv2.inRange(h, <span class="number">5</span>, <span class="number">170</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>smask = cv2.inRange(s, <span class="number">25</span>, <span class="number">166</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>mask = hmask &amp; smask</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>roi = cv2.bitwise_and(img, img, mask=mask)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;source&quot;</span>, img)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;skin&quot;</span>, roi)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.waitKey()</span><br><span class="line">-<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/eason肤色检测hsv.png" alt="hsv肤色检测" />
+就结果来看，肤色的检测还是可以的，接下来试试YCrCb的检测。上面的效果来看的话，其实边缘部分没处理好，所以下面使用opencv的四种模糊技术之一的高通滤波。
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 引入部分和上面的一致</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>y, cr, cb = cv2.split(ycrcb)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cr = cv2.GaussianBlur(cr, (<span class="number">5</span>, <span class="number">5</span>), <span class="number">0</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>_, skin = cv2.threshold(cr, <span class="number">0</span>, <span class="number">255</span>, cv2.THRESH_BINARY+cv2.THRESH_OTSU)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;res&quot;</span>, skin)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.imshow(<span class="string">&quot;source&quot;</span>, img)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cv2.waitKey()</span><br><span class="line">-<span class="number">1</span></span><br></pre></td></tr></table></figure> <img src="/images/eason肤色检测ycrcv.png"
+alt="ycrcv肤色检测" />
+效果还是蛮不错的，但七窍通了六窍的我只能照抄例子来进行，没办法得到有颜色的图片。</p>
+<h3 id="alpha通道">alpha通道</h3>
+<p>在RGB色彩空间基础上，添加A通道，表示透明或者不透明，这就是RGBA色彩空间。A通道的取值范围可以是[0,
+1]也可以是[0,
+255]。在常见的图像处理中，一般都是RGB三通道，所以要使用RGBA色彩空间就需要cvtColor进行转换。这里只是进行一下记录，并不拓展。</p>
+<h2 id="四图像运算">四、图像运算</h2>
+<p>据说，啊据说啊，图像的加法运算、位运算是针对图像的位平面分解、图像异或加密、数字水印、脸部加码/解码等使用的。那如果想要逆向，那就暂时不清楚了。这一部分的处理暂时都以python的交互式编程作为演示。</p>
+<h3 id="加法运算">加法运算</h3>
+<p>主要有两种，一种是简单的+运算符引领的加法，另一种是opencv提供的add加法函数。描述一下规则：
+&gt;*
+加号运算符，在图像a和图像b使用简单的加号运算符进行加号运算时，它们的结果一旦超过灰度最大值255，就把这个值对256进行取模，加法的值就是这个余数，没有超出就正常运算。</p>
+<p><span class="math display">\[
+a+b
+\begin{cases}
+a+b,&amp;a+b\le255\\
+mod(a+b, 256),&amp;a+b&gt;255
+\end{cases}
+\]</span></p>
+<blockquote>
+<ul>
+<li>cv2.add(a,
+b)，图像a和图像b用这个函数进行加法运算，和上面的加号运算符主导的加法一样，同样有两种结果，第一种就是当两者之和大于255，那就让它作为最大值保留，255就是饱和值，封顶了；如果没有大于255，就正常相加。</li>
+</ul>
+</blockquote>
+<p><span class="math display">\[
+cv2.add(a, b)
+\begin{cases}
+a+b, &amp;a+b\le255\\
+255, &amp;a+b&gt;255
+\end{cases}
+\]</span></p>
+<p>来个简单例子 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment"># 灰度图模式读取</span></span><br><span class="line">img = cv2.imread(<span class="string">&#x27;among.png&#x27;</span>, <span class="number">1</span>)</span><br><span class="line"><span class="comment"># 加法处理</span></span><br><span class="line">a = img + img</span><br><span class="line">b = a + a</span><br><span class="line">c = cv2.add(img, img)</span><br><span class="line">c = cv2.add(c, c)</span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&quot;a&quot;</span>, a)</span><br><span class="line">cv2.imshow(<span class="string">&quot;b&quot;</span>, b)</span><br><span class="line">cv2.imshow(<span class="string">&quot;c&quot;</span>, c)</span><br><span class="line">cv2.imshow(<span class="string">&quot;d&quot;</span>, d)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure></p>
+<p>运算结果如下： <img src="/images/opencv加法运算.png"
+alt="加法运算" />
+a和b都是进行加法运算符的图像加法，c和d则是用cv2的add函数进行加法运算，可以明显看得出来，前者在越来越进一步的加法运算中，线条感更明显，有颜色的越来越黑，而后者则是反过来，越来越饱和，显得越来越白。这是一个对于图像的简单处理，但如果是两个图像之间乃至数值和图像之间的处理就不甚明了，因为没有参考。</p>
+<p><strong>加权和</strong></p>
+<p>加权和，是在计算两图像像素值之和时，把图像权重的要素也考虑进去。两个进行加权和的图像，需要大小、类型相同，但通道和具体是什么类型没有要求。不过找到的博客资料基本都是照本宣科，没有适合人类参考的说法，mdzz。暂时这里也照抄书本概念吧，上公式：</p>
+<p><span class="math inline">\(dst = saturate(src1\times\alpha +
+src2\times\beta+\gamma)\)</span></p>
+<p>这个加权和的实现是用的opencv中的函数addWeighted，对应上面公式，它也要传入五个参数：src1、alpha、src2、beta、gama，所谓权重在我看来就是两个图像所占比例，在最后的图像的结果来看谁更明显，所以上面可以理解成：结果图=图像1x系数1+图像2x系数2+亮度调节量。</p>
+<p>简单的图片混合例子： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">a = cv2.imread(<span class="string">&#x27;blena.png&#x27;</span>)</span><br><span class="line">b = cv2.imread(<span class="string">&#x27;bboat.png&#x27;</span>)</span><br><span class="line">c = cv2.addWeighted(a, <span class="number">0.2</span>, b, <span class="number">0</span>,<span class="number">8</span>, <span class="number">0</span>)</span><br><span class="line">d = cv2.addWeighted(a, <span class="number">0.5</span>, b, <span class="number">0</span>,<span class="number">5</span>, <span class="number">0</span>)</span><br><span class="line">e = cv2.addWeighted(a, <span class="number">0.8</span>, b, <span class="number">0</span>,<span class="number">2</span>, <span class="number">0</span>)</span><br><span class="line">cv2.imshow(<span class="string">&quot;c&quot;</span>, c)</span><br><span class="line">cv2.imshow(<span class="string">&quot;d&quot;</span>, d)</span><br><span class="line">cv2.imshow(<span class="string">&quot;e&quot;</span>, e)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure>
+因为实在没资源，我只好百度书本上的两张图来截图保存来做实验，然后按照人脸像所占比例越来越大来进行显示，结果如下：</p>
+<figure>
+<img src="/images/opencv加权和运算.png" alt="加权和运算" />
+<figcaption aria-hidden="true">加权和运算</figcaption>
+</figure>
+<p>结果很明显，随着人脸像的比例越来越大，图片人脸也越来越明显，这就是混合图像的例子，听说如果大小不一样的图像，可以使用resize来进行调整，再试一下。换了一下图片，然后代码调整为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">a = cv2.imread(<span class="string">&quot;ayanamirei.jpg&quot;</span>)</span><br><span class="line">b = cv2.imread(<span class="string">&quot;asikaj.jpg&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 比例调整大小，本来size并不一样，但调整后以外发现一致了，应该是算法问题</span></span><br><span class="line">a = cv2.resize(a, <span class="literal">None</span>, fx=<span class="number">0.1</span>, fy=<span class="number">0.1</span>, interpolation=cv2.INTER_LINEAR)</span><br><span class="line">b = cv2.resize(b, <span class="literal">None</span>, fx=<span class="number">0.1</span>, fy=<span class="number">0.1</span>, interpolation=cv2.INTER_LINEAR)</span><br><span class="line"></span><br><span class="line">c = cv2.addWeighted(a, <span class="number">0.2</span>, b, <span class="number">0.8</span>, <span class="number">0</span>)</span><br><span class="line">d = cv2.addWeighted(a, <span class="number">0.5</span>, b, <span class="number">0.5</span>, <span class="number">0</span>)</span><br><span class="line">e = cv2.addWeighted(a, <span class="number">0.8</span>, b, <span class="number">0.2</span>, <span class="number">0</span>)</span><br><span class="line">cv2.imshow(<span class="string">&quot;c&quot;</span>, c)</span><br><span class="line">cv2.imshow(<span class="string">&quot;d&quot;</span>, d)</span><br><span class="line">cv2.imshow(<span class="string">&quot;e&quot;</span>, e)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure>
+<p>调整效果以外得好，然后又能够进行混合图像处理了。得到的彩图如下： <img
+src="/images/加权和爱丽丝.png" alt="爱丽丝和绫波丽" />
+相对来说，应该0.4和0.3的比例是比较好的，在背景不是那么明显的情况下，清底应该比较好。resize最后的参数的选择对出图影响非常大：
+&gt;* INTER_NEAREST：最近邻插值 &gt;* INTER_LINEAR：线性插值（默认）
+&gt;* INTER_AREA：区域插值 &gt;* INTER_CUBIC：三次样条插值 &gt;*
+INTER_LANCZOS4：Lanczos 插值 缩小时推荐使用
+cv2.INTER_AREA；扩展放大时推荐使用 cv2.INTER_CUBIC 和
+cv2.INTER_LINEAR</p>
+<h3 id="按位逻辑运算">按位逻辑运算</h3>
+<p>关于逻辑运算，存在与或非、异或等运算，这里的按位逻辑运算，就是把一个数转换成二进制数，每一个对应位的数进行逻辑运算。具体逻辑运算没有展开的必要，不做记录。opencv提供的按位逻辑运算函数分别是：
+&gt;* 按位与，dst = cv2.bitwise_and(src1, src2[, mask]) &gt;*
+按位或，dst = cv2.bitwise_or(src1, src2[, mask]) &gt;* 按位非，dst =
+cv2.bitwise_not(src[, mask]) &gt;* 按位异或，dst = cv2.bitwise_xor(src1,
+src2[, mask]) mask，可选操作掩码，8位单通道array值</p>
+<p><strong>按位与运算的使用</strong></p>
+<p>针对按位与运算，当处理灰度图像时，像素点与数值0按位与，得到的只有0，与255按位与得到的是本来的值，当一个具有大量0值和255值的图像与其按位与，得到的就是一个部分被"黑化"的图像，就像被抠掉了一样。说白了就是用另一个图像来对目标图像进行部分乃至全部遮挡。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">img = cv2.imread(<span class="string">&quot;blena.png&quot;</span>)</span><br><span class="line"><span class="comment"># 制作一个和原图同尺寸的数组</span></span><br><span class="line">mask = np.zeros(img.shape, dtype=np.uint8)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 固定区域设置纯白</span></span><br><span class="line">mask[<span class="number">100</span>:<span class="number">280</span>, <span class="number">100</span>:<span class="number">250</span>] = <span class="number">255</span></span><br><span class="line">a = cv2.bitwise_and(img, mask)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 三图进行显示</span></span><br><span class="line">cv2.imshow(<span class="string">&quot;source&quot;</span>, img)</span><br><span class="line">cv2.imshow(<span class="string">&quot;mask&quot;</span>, mask)</span><br><span class="line">cv2.imshow(<span class="string">&quot;res&quot;</span>, a)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure>
+<figure>
+<img src="/images/opencv按位与lena.png" alt="按位与逻辑运算" />
+<figcaption aria-hidden="true">按位与逻辑运算</figcaption>
+</figure>
+<p>嗯，除了按位与运算的应用外，暂时另外两三个好像没啥子应用。不过要注意的是，两个进行按位逻辑运算的矩阵，应当是相同size的，不然会出错。所以有很多使用的时候会调整图片的大小。</p>
+<h3 id="位平面的分解">位平面的分解</h3>
+<p>彩图根据RGB三通道可以拆分成三个矩阵，这是通道的拆解；把图像位于同一比特位上的像素进行组合，得到的图像，又被称为位平面，这个过程就叫位平面的分解。在灰度图中，一个像素点的值的范围为0-255，是一个字节8bit的范围，每个位上的值抽取出来，得到一个位平面，加上原图，一共会有9张图。如果把彩图进行位平面的分割，未免就太多了。所以这里的例子只是灰度图，这样好搞一点。</p>
+<p>针对一个灰度图片，展开成二进制数并切割处位平面的情况下，位平面所在数位的权重越高，位平面和原图的相关性就越高，相对的，位平面所在数位的权重越低，对应的和原图的相关性就越低。说白了，就是2的0次方对应数位切出去的位平面就越看不出原图的痕迹，2的7次方对应数位切出去的位平面就越是和原图相似。</p>
+<p>针对RGB彩图，它拆成三通道，三通道对应的颜色也是一个8位二进制数，将他们拆成三通道然后同步对应数位切出一个基于通道的位平面，再组合起来，也就是原图的位平面。嗯，好像彩图的位平面分割也不是太难。</p>
+<p>位平面分割步骤： * 抽取原图宽和高，构造一个同样规模的矩阵； *
+把上面矩阵构造成一个像素点的值均为<span
+class="math inline">\(2^n\)</span>的矩阵做提取用； *
+将提取矩阵和原图做按位与运算得到位平面 *
+为了让对应数位较小的位平面不至于显示成纯黑，需要对其进行阈值化处理，使得最后得到的只有0后者255这样非黑即白的值，或者说是非真既假</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">img = cv2.imread(<span class="string">&quot;alian.jpg&quot;</span>, <span class="number">0</span>)</span><br><span class="line">img = cv2.resize(img, <span class="literal">None</span>, fx=<span class="number">0.4</span>, fy=<span class="number">0.4</span>, interpolation=cv2.INTER_LINEAR)</span><br><span class="line">cv2.imshow(<span class="string">&quot;source&quot;</span>, img)</span><br><span class="line">w, h = img.shape</span><br><span class="line"><span class="comment"># 创建8层同规模的矩阵，每个矩阵用来放置对应数位的提取矩阵，在后面的循环中给对应矩阵赋值</span></span><br><span class="line">arrays = np.zeros((w, h, <span class="number">8</span>), dtype=np.uint8)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">8</span>):</span><br><span class="line">    x[:, :, i] = <span class="number">2</span>**i</span><br><span class="line"></span><br><span class="line"><span class="comment"># 循环对原图进行按位与运算提取位平面，然后进行阈值处理，最后输出图像</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">8</span>):</span><br><span class="line">    temp = cv2.bitwise_and(img, x[:, :, i])</span><br><span class="line">    <span class="comment"># 将temp中大于0的值转为True，除此以外的值转换为False</span></span><br><span class="line">    mask = temp&gt;<span class="number">0</span></span><br><span class="line">    <span class="comment"># 将temp中True换成255</span></span><br><span class="line">    temp[mask] = <span class="number">255</span></span><br><span class="line">    cv2.imshow(<span class="string">&quot;res&quot;</span>+<span class="built_in">str</span>(i+<span class="number">1</span>), temp)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/alian1.png" /> <img src="/images/alian2.png" />
+<img src="/images/alian3.png" /></p>
+<p>从上面就可以看得很清楚，关于一个灰度图的位平面抽取和显示(用的是阿连的头像，可惜太白了，而且本体太大了，需要修改尺寸)，这样一来，想要处理彩图，在上面的过程中添加彩图拆分三通道和最后合成三通道即可。如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">img = cv2.imread(<span class="string">&quot;alian.jpg&quot;</span>)</span><br><span class="line">img = cv2.resize(img, <span class="literal">None</span>, fx=<span class="number">0.4</span>, fy=<span class="number">0.4</span>, interpolation=cv2.INTER_LINEAR)</span><br><span class="line">cv2.imshow(<span class="string">&quot;source&quot;</span>, img)</span><br><span class="line">w, h = img.shape[:<span class="number">2</span>]</span><br><span class="line">b, g, r = cv2.split(img)</span><br><span class="line">b_arr = np.zeros((w, h, <span class="number">8</span>), dtype=np.uint8)</span><br><span class="line">g_arr = np.zeros((w, h, <span class="number">8</span>), dtype=np.uint8)</span><br><span class="line">r_arr = np.zeros((w, h, <span class="number">8</span>), dtype=np.uint8)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">8</span>):</span><br><span class="line">    b_arr[:, :, i], g_arr[:, :, i], r_arr[:, :, i] = <span class="number">2</span>**i, <span class="number">2</span>**i, <span class="number">2</span>**i</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">8</span>):</span><br><span class="line">    t1 = cv2.bitwise_and(b, b_arr[:, :, i])</span><br><span class="line">    t2 = cv2.bitwise_and(g, g_arr[:, :, i])</span><br><span class="line">    t3 = cv2.bitwise_and(r, r_arr[:, :, i])</span><br><span class="line">    mask1 = t1 &gt;<span class="number">0</span></span><br><span class="line">    mask2 = t2 &gt;<span class="number">0</span></span><br><span class="line">    mask3 = t3 &gt;<span class="number">0</span></span><br><span class="line">    t1[mask1], t2[mask2], t3[mask3] = <span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span></span><br><span class="line">    temp = cv2.merge([t1, t2, t3])</span><br><span class="line">    cv2.imshow(<span class="string">&quot;res&quot;</span>+<span class="built_in">str</span>(i+<span class="number">1</span>), temp)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/彩图alian1.png" /> <img
+src="/images/彩图alian2.png" /> <img src="/images/彩图alian3.png" /></p>
+<h3 id="水印">水印</h3>
+<p>各大网站都很注视自己的版权问题，恨不得打上各种印记，图像上的水印就是一个体现，有时候是你上传上去的，到了网站上面，显示出来，就有了人家的印记，就很恶心。不过针对私人而言，这也是要保护的知识产权的一部分，是个公说公有理婆说婆有理的事。</p>
+<p>上面有介绍位平面是一幅图像的像素点基于同一二进制上数位的数值集合，数位越大，对应的位平面图像就越是贴合原图，数位越小就越是和原图相差大。因此在二进制数中最低位也就是2的0次方位，也叫<strong>最低有效位(LSB,
+Least Significant
+Bit)</strong>，而当把信息存在这个数位上，再合进原来的图像，这个信息就成了隐藏信息，水印就属于这种隐藏信息。那如何做到？</p>
+<p>首先就是读取需要加水印的图片和一个水印清晰的图片，把后者的最低有效位对应位平面提取，然后根据图片尺寸进行适当或放大或缩小的调整，再粘贴到需要添加水印的图片上，这一步的进行可以使用cv2的加权和函数也可以用PIL的粘贴函数。</p>
+<p><strong>自制水印图</strong></p>
+<p>首先，因为我没有水印的原图，所以就想生成两张带有自己标签的水印原图，分别是黑底白字和白底黑字两张。关于生成黑底图和白底图是很简单的，像素值为0就是纯黑，像素值为255就是纯白，至于添加文字，就可以用cv2自带的putText函数。来，开造。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment"># 制造黑色和白色背景</span></span><br><span class="line">black_w = np.zeros((<span class="number">300</span>, <span class="number">450</span>), dtype=np.uint8)</span><br><span class="line">white_b = np.ones((<span class="number">300</span>, <span class="number">450</span>), dtype=np.uint8)*<span class="number">255</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 调用putText函数添加手写体的标签，距离左上角150的位置，字体大小为3，粗细为3</span></span><br><span class="line">cv2.putText(black_w, <span class="string">&#x27;JackSAMA&#x27;</span>, (<span class="number">0</span>, <span class="number">150</span>), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, <span class="number">3</span>, <span class="number">255</span>, <span class="number">2</span>)</span><br><span class="line">cv2.putText(white_b, <span class="string">&#x27;JackSAMA&#x27;</span>, (<span class="number">0</span>, <span class="number">150</span>), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, <span class="number">3</span>, <span class="number">0</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">cv2.imshow(<span class="string">&quot;black&quot;</span>, black_w)</span><br><span class="line">cv2.imshow(<span class="string">&quot;white&quot;</span>, white_b)</span><br><span class="line">cv2.waitKey()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/黑白水印签名.png" /></p>
+<p>水印图片就制作好了，其实还可以根据实际情况来进行生成，只要定制好水印函数就好，还能根据图片大小来进行调节，当然，有实图也可以同步调整。关于putText的函数参数主要如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">img = cv2.putText(img, text, org, fontFace, fontScale, color[, thickness[, lineType[, bottomLeftOrigin]]])</span><br><span class="line">img, 操作图像对象</span><br><span class="line">text，添加的文本，一般都是英文，中文使用会乱码，暂时也还没解决</span><br><span class="line">fontFace，用过标签语言的应该都知道这是字体类型的意思</span><br><span class="line">fontScale，字体大小</span><br><span class="line">color，对于灰度图，简单的<span class="number">0</span>-<span class="number">255</span>表示即可，如果是rgb彩图就要适用(b, g, r)进行表示</span><br><span class="line">thickness，线条粗细，默认是<span class="number">1</span></span><br><span class="line">lineType，线条类型，默认是<span class="number">8</span>连接类型</span><br><span class="line">bottomLeftOrigin，默认为<span class="literal">False</span>，这样文本就是横着来；输入为<span class="literal">True</span>就是文本竖着来</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr class="header">
+<th>fontFace</th>
+<th>解析</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cv2.FONT_HERSHEY_SIMPLEX</td>
+<td>正常的sans-serif字体，就是常用的英文字体</td>
+</tr>
+<tr class="even">
+<td>cv2.FONT_HERSHEY_PLAIN</td>
+<td>小号sans-serif字体</td>
+</tr>
+<tr class="odd">
+<td>cv2.FONT_HERSHEY_DUPLEX</td>
+<td>正常大小的sans-serif</td>
+</tr>
+<tr class="even">
+<td>cv2.FONT_HERSHEY_COMPLEX</td>
+<td>正常的serif字体</td>
+</tr>
+<tr class="odd">
+<td>cv2.FONT_HERSHEY_TRIPLEX</td>
+<td>正常大小的serif字体</td>
+</tr>
+<tr class="even">
+<td>cv2.FONT_HERSHEY_COMPLEX_SMALL</td>
+<td>serif简化版</td>
+</tr>
+<tr class="odd">
+<td>cv2.FONT_HERSHEY_SCRIPT_SIMPLEX</td>
+<td>手写风格的字体</td>
+</tr>
+<tr class="even">
+<td>cv2.FONT_HERSHEY_SCRIPT_COMPLEX</td>
+<td>手写字体复杂版</td>
+</tr>
+<tr class="odd">
+<td>cv2.FONT_ITALIC</td>
+<td>斜体标记</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>lineType</th>
+<th>解析</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cv2.FILLED</td>
+<td>填充型</td>
+</tr>
+<tr class="even">
+<td>cv2.LINE_4</td>
+<td>4连接型</td>
+</tr>
+<tr class="odd">
+<td>cv2.LINE_8</td>
+<td>8连接型</td>
+</tr>
+<tr class="even">
+<td>cv2.LINE_AA</td>
+<td>抗锯齿，让线条更平滑</td>
+</tr>
+</tbody>
+</table>
+<p>上面就是opencv中字体参数和线条类型的一些解读，听说能换进去自我设计得库，不知道具体怎样。不过好像加了个抗锯齿的线条参数看起来舒服多了。</p>
+<p><strong>嵌入水印</strong> 把水印给添加到哆啦a梦的图片上去。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; import cv2</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; import numpy as np</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt;</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; mong = cv2.imread(<span class="string">&quot;among.png&quot;</span>)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; mong.shape</span></span><br><span class="line">(347, 272, 3)</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; watermark = cv2.imread(<span class="string">&quot;white_black_sign.png&quot;</span>)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; watermark.shape</span></span><br><span class="line">(300, 450, 3)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">调整水印原图大小和对应待处理图片补充空白</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; watermark = cv2.resize(watermark, None, fx=0.3, fy=0.3, interpolation=cv2.INTER_AREA)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; cv2.imshow(<span class="string">&quot;&quot;</span>, watermark)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; cv2.waitKey()</span></span><br><span class="line">-1</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; watermark.shape</span></span><br><span class="line">(90, 135, 3)</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; temp = np.ones(mong.shape, dtype=np.uint8)*255</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; temp[210:300, 137:272] = watermark</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; cv2.imshow(<span class="string">&quot;&quot;</span>, temp)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; cv2.waitKey()</span></span><br><span class="line">-1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进行加权和拼接，实现图片添加水印</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; res1 = cv2.addWeighted(mong, 0.9, temp, 0.1, 0)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; cv2.imshow(<span class="string">&quot;&quot;</span>, res1)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; cv2.waitKey()</span></span><br><span class="line">-1</span><br></pre></td></tr></table></figure>
+<figure>
+<img src="/images/水印添加.png" alt="添加水印效果" />
+<figcaption aria-hidden="true">添加水印效果</figcaption>
+</figure>
+<h2 id="五一些有意思的使用">五、一些有意思的使用</h2>
+<h3 id="去水印">去水印</h3>
+<p>很多去水印的办法，都是让美工给搞一张纯色的像我上面生成的那种水印图，然后再来识别颜色范围，再来给两图合并，也就是给paste上去，所以有不少使用是用到PIL库的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">img = cv2.imread(<span class="string">&quot;./iamfine.png&quot;</span>)</span><br><span class="line">h, w, _ = img.shape[<span class="number">0</span>:<span class="number">3</span>]</span><br><span class="line"><span class="comment">#切割，根据实际水印位置而定，[y0:y1, x0:x1]为下面裁剪用法，裁剪完后可以用上面的方法输出查看一下</span></span><br><span class="line">cropped = img[<span class="built_in">int</span>(h*<span class="number">0.9</span>):h, <span class="built_in">int</span>(w*<span class="number">0.75</span>):w]</span><br><span class="line"><span class="comment"># 对图片进行阈值化处理，把由后面两个参数划定的RGB色彩空间范围外的色彩输出为0或者255，由图片底色确定这个范围</span></span><br><span class="line">thresh = cv2.inRange(cropped, np.array([<span class="number">230</span>, <span class="number">230</span>, <span class="number">230</span>]), np.array([<span class="number">250</span>, <span class="number">250</span>, <span class="number">250</span>]))</span><br><span class="line"><span class="comment">#创建结构和尺寸的数据元素</span></span><br><span class="line">kernel = np.ones((<span class="number">3</span>, <span class="number">3</span>), np.uint8)</span><br><span class="line"><span class="comment"># 扩展待修复区域</span></span><br><span class="line">watermask = cv2.dilate(thresh, kernel, iterations=<span class="number">10</span>)</span><br><span class="line">specular = cv2.inpaint(cropped, watermask, <span class="number">5</span>, flags=cv2.INPAINT_TELEA)</span><br><span class="line"><span class="comment">#保存去除水印的残图</span></span><br><span class="line">cv2.imwrite(<span class="string">&quot;new.png&quot;</span>, specular)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用PIL的paste函数把残图粘贴在原图上得到新图</span></span><br><span class="line">i = Image.<span class="built_in">open</span>(<span class="string">&quot;./img/iamfine.png&quot;</span>)</span><br><span class="line">i2 = Image.<span class="built_in">open</span>(<span class="string">&quot;./img/new.png&quot;</span>)</span><br><span class="line">i2.paste(i, (<span class="built_in">int</span>(w*<span class="number">0.75</span>), <span class="built_in">int</span>(h*<span class="number">0.9</span>), w, h))</span><br><span class="line">i2.save(<span class="string">&quot;final.png&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>两图对比： <img src="/images/水印前.png" />|<img
+src="/images/去水印后.png" /> 其实用上面给添加水印的方法反推就行。</p>
+<h4 id="生成字符图片">生成字符图片</h4>
+<p>图片是由一个个像素点构成的，而计算机存储图片一样是用的二进制存储，而存储像素点用到的比特位就是图片的<strong>深度</strong>，用1bit来存储，图片要么是黑要么是白，因为它只有0和1的选择；用一字节(8bit)来存储那就是0-255的值。颜色有三原色：红绿蓝，这三色可以交叠在一起表示其他颜色，而这个图片的像素点的颜色的确定就是有RGB三色确定，一般称为三通道，因为它们分别用三个字节分别表示三原色的单独的值，叠在一起就是该像素点的颜色，是以像素点的表示通常是(0-255,0-255,0-255)。</p>
+<p><br>而我们要生成的字符图片，其实就是要建立一个像素点到字符的映射，因为字符集也是很大的，就连最基本的ASCII集也是128个字符，不过，我们也可以不需要用那么多，我们可以用一些简单字符凑成一个字符集，然后与像素点的颜色表配对即可(因为映射规则是自定义的嘛)。</p>
+<p><br>道理是这样，不过别人的例子我没有悟透，倒是另外一个方法让我有了收获，那就是先将图片转换成灰度图，那就是黑白色图片了，这时候像素点转换成字符会简单很多。</p>
+<p>简单操作如下： <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="built_in">str</span> = <span class="string">&quot;#+-.&quot;</span></span><br><span class="line">img = cv2.imread(<span class="string">&quot;among.png&quot;</span>, <span class="number">0</span>)</span><br><span class="line"><span class="comment"># 此时就只有height和width两个值，没有depth</span></span><br><span class="line">h, w = img.shape[<span class="number">0</span>:<span class="number">2</span>]</span><br><span class="line">for_change = np.ndarray([h, w])</span><br><span class="line">font = cv2.FONT_HERSHEY_SIMPLEX</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, h, <span class="number">5</span>):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, w, <span class="number">5</span>):</span><br><span class="line">        t = <span class="built_in">str</span>[<span class="built_in">round</span>(<span class="number">3</span>-img[i, j]/<span class="number">255</span>*<span class="number">3</span>)]</span><br><span class="line">        cv2.putText(for_change, t, (j, i), font, <span class="number">0.1</span>, color=(<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>))</span><br><span class="line">        </span><br><span class="line">cv2.imshow(<span class="string">&quot;&quot;</span>, for_change)</span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">cv2.imwrite(<span class="string">&quot;asciiPic.png&quot;</span>, for_change)</span><br></pre></td></tr></table></figure> <img src="/images/字符哆啦.png" />
+嗯，好歹是实现了，不过这种有点问题，那就是连带着底图也一起更换了，然后就有点伤眼。</p>
+<h4 id="生成字符视频">生成字符视频</h4>
+<p>因为视频就是一帧一帧的图片，所以生成字符图片就走完了生成字符视频一半的路，把上面的逻辑进行叠代就可以生成字符视频了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pixel2char</span>(<span class="params">pixel</span>):</span><br><span class="line">    char_list = <span class="string">&quot;@#$%&amp;erytuioplkszxcv=+---.     &quot;</span></span><br><span class="line">    index = <span class="built_in">int</span>(pixel / <span class="number">256</span> * <span class="built_in">len</span>(char_list))</span><br><span class="line">    <span class="keyword">return</span> char_list[index]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_char_img</span>(<span class="params">img, scale=<span class="number">4</span>, font_size=<span class="number">5</span></span>):</span><br><span class="line">    <span class="comment"># 调整图片大小</span></span><br><span class="line">    h, w = img.shape</span><br><span class="line">    re_im = cv2.resize(img, (w//scale, h//scale))</span><br><span class="line">    <span class="comment"># 创建一张图片用来填充字符</span></span><br><span class="line">    char_img = np.ones((h//scale*font_size, w//scale*font_size), dtype=np.uint8)*<span class="number">255</span></span><br><span class="line">    font = cv2.FONT_HERSHEY_SIMPLEX</span><br><span class="line">    <span class="comment"># 遍历图片像素</span></span><br><span class="line">    <span class="keyword">for</span> y <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, re_im.shape[<span class="number">0</span>]):</span><br><span class="line">        <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, re_im.shape[<span class="number">1</span>]):</span><br><span class="line">            char_pixel = pixel2char(re_im[y][x])</span><br><span class="line">            cv2.putText(char_img, char_pixel, (x*font_size, y*font_size), font, <span class="number">0.5</span>, (<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">    <span class="keyword">return</span> char_img</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">generate</span>(<span class="params">input_video, output_video</span>):</span><br><span class="line">    <span class="comment"># 1、读取视频</span></span><br><span class="line">    cap = cv2.VideoCapture(input_video)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2、获取视频帧率</span></span><br><span class="line">    fps = cap.get(cv2.CAP_PROP_FPS)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 读取第一帧，获取转换成字符后的图片的尺寸</span></span><br><span class="line">    ret, frame = cap.read()</span><br><span class="line">    char_img = get_char_img(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), <span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建一个VideoWriter，用于保存视频</span></span><br><span class="line">    fourcc = cv2.VideoWriter_fourcc(*<span class="string">&#x27;mp4v&#x27;</span>)</span><br><span class="line">    writer = cv2.VideoWriter(output_video, fourcc, fps, (char_img.shape[<span class="number">1</span>], char_img.shape[<span class="number">0</span>]))</span><br><span class="line">    <span class="keyword">while</span> ret:</span><br><span class="line">        <span class="comment"># 读取视频的当前帧，如果没有则跳出循环</span></span><br><span class="line">        ret, frame = cap.read()</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> ret:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="comment"># 将当前帧转换成字符图</span></span><br><span class="line">        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)</span><br><span class="line">        char_img = get_char_img(gray, <span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换成BGR模式，便于写入视频</span></span><br><span class="line">        char_img = cv2.cvtColor(char_img, cv2.COLOR_GRAY2BGR)</span><br><span class="line">        writer.write(char_img)</span><br><span class="line">    writer.release()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    generate(<span class="string">&#x27;in.mp4&#x27;</span>, <span class="string">&#x27;out.mp4&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>嗯，这个生成。。。。。。有点受不了，还没生成完，电脑就开始抽烟了！！！鲁大师抽烟了！！！断开后，视频还没到原视频的一半时长，但大小就是原视频的好几倍！！！后面再优化吧，不能奶不能奶。</p>
+<h2 id="末上面用上的图片">末，上面用上的图片</h2>
+<p><img src="/images/among.png" alt="哆啦" /> <img
+src="/images/阿连.jpg" alt="阿连" /> <img src="/images/asikaj.jpg"
+alt="明日香" /> <img src="/images/ayanamirei.jpg" alt="绫波丽" /> <img
+src="/images/lena.png" /> <img src="/images/eason.jpg" alt="eason" />
+<img src="/images/水印前.png" /></p>
+<p>先这样吧，以后再来更新，暂时没时间了。</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">https://jack-samu.github.io/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">December 2nd 2022, 8:41:30 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">March 2nd 2025, 11:33:59 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/" title="golang的CLI应用">
+                    <div class="nextTitle">golang的CLI应用</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/" title="c中多进程">
+                    <div class="prevTitle">c中多进程</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text">一、第三方库的安装和简单使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">1.0.1.</span> <span class="toc-text">安装</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80"><span class="toc-number">2.</span> <span class="toc-text">二、图像基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%97%B4%E5%92%8C%E8%BD%AC%E6%8D%A2"><span class="toc-number">3.</span> <span class="toc-text">三、色彩空间和转换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#gray%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%97%B4"><span class="toc-number">3.1.</span> <span class="toc-text">GRAY色彩空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ycrcb%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%97%B4"><span class="toc-number">3.2.</span> <span class="toc-text">YCrCb色彩空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hsv%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%97%B4"><span class="toc-number">3.3.</span> <span class="toc-text">HSV色彩空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hls%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%97%B4"><span class="toc-number">3.4.</span> <span class="toc-text">HLS色彩空间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E5%87%BD%E6%95%B0"><span class="toc-number">3.5.</span> <span class="toc-text">类型转换函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8A%BD%E5%8F%96%E7%89%B9%E5%AE%9A%E9%A2%9C%E8%89%B2"><span class="toc-number">3.5.1.</span> <span class="toc-text">抽取特定颜色</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%82%A4%E8%89%B2%E6%A0%87%E8%AE%B0%E5%92%8C%E6%A3%80%E6%B5%8B"><span class="toc-number">3.6.</span> <span class="toc-text">肤色标记和检测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#alpha%E9%80%9A%E9%81%93"><span class="toc-number">3.7.</span> <span class="toc-text">alpha通道</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E5%9B%BE%E5%83%8F%E8%BF%90%E7%AE%97"><span class="toc-number">4.</span> <span class="toc-text">四、图像运算</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E6%B3%95%E8%BF%90%E7%AE%97"><span class="toc-number">4.1.</span> <span class="toc-text">加法运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%89%E4%BD%8D%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97"><span class="toc-number">4.2.</span> <span class="toc-text">按位逻辑运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%8D%E5%B9%B3%E9%9D%A2%E7%9A%84%E5%88%86%E8%A7%A3"><span class="toc-number">4.3.</span> <span class="toc-text">位平面的分解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B0%B4%E5%8D%B0"><span class="toc-number">4.4.</span> <span class="toc-text">水印</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E4%B8%80%E4%BA%9B%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">五、一些有意思的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%BB%E6%B0%B4%E5%8D%B0"><span class="toc-number">5.1.</span> <span class="toc-text">去水印</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E5%AD%97%E7%AC%A6%E5%9B%BE%E7%89%87"><span class="toc-number">5.1.1.</span> <span class="toc-text">生成字符图片</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E5%AD%97%E7%AC%A6%E8%A7%86%E9%A2%91"><span class="toc-number">5.1.2.</span> <span class="toc-text">生成字符视频</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AB%E4%B8%8A%E9%9D%A2%E7%94%A8%E4%B8%8A%E7%9A%84%E5%9B%BE%E7%89%87"><span class="toc-number">6.</span> <span class="toc-text">末，上面用上的图片</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

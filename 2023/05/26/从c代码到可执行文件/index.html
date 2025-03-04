@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概述：针对c&#x2F;cpp从代码到可执行文件的一个简单剖析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从c代码到可执行文件">
+<meta property="og:url" content="https://jack-samu.github.io/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概述：针对c&#x2F;cpp从代码到可执行文件的一个简单剖析。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jack-samu.github.io/images/vs%E5%88%9B%E5%BB%BA%E7%A9%BA%E9%A1%B9%E7%9B%AE.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E6%B7%BB%E5%8A%A0sayhi%E5%A4%B4%E6%96%87%E4%BB%B6.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/vs%E7%94%9F%E6%88%90%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/sayhi%E4%B8%ADlib.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/sayhi%E8%BD%AC%E8%AF%91%E5%A4%B4%E6%96%87%E4%BB%B6.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/vs%E6%B7%BB%E5%8A%A0lib%E4%BE%9D%E8%B5%96%E7%9B%AE%E5%BD%95.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/vs%E6%B7%BB%E5%8A%A0lib.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/vs_sayhi%E7%BB%93%E6%9E%9C.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/vs%E6%B7%BB%E5%8A%A0def.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/sayhi%E5%8A%A8%E6%80%81%E5%BA%93.png">
+<meta property="article:published_time" content="2023-05-25T16:06:41.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:34:01.314Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="c, 编译原理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jack-samu.github.io/images/vs%E5%88%9B%E5%BB%BA%E7%A9%BA%E9%A1%B9%E7%9B%AE.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>从c代码到可执行文件 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">从c代码到可执行文件</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                从c代码到可执行文件
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="c, 编译原理">c, 编译原理</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">5.6k</span>阅读时长: <span class="post-count reading-time">22 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/05/26</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概述：针对c/cpp从代码到可执行文件的一个简单剖析。</p>
+<span id="more"></span>
+<h2 id="序">序</h2>
+<p>技术的发展，总是越来越好的，因为人是越来越卷的，没办法。简单日常，windows编程c或者cpp，在vs中一键运行，代码就跑起来了，就可以在debug或者release目录找到可执行文件了；在linux中，就要比windows稍微复杂点，但也是编辑-gcc编译，然后运行。windows有IDE，linux有好的命令体系，总之，实现起来都不复杂。那这些个简单动作的底层是怎样的呢？这就是下面的具体内容宗旨。</p>
+<h2 id="简单的拆解">简单的拆解</h2>
+<p>如下是一个Hello, world代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello, world.\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后执行命令，生成可执行文件，然后运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; gcc hello.c -o hello</span><br><span class="line">PS D:\Desktop&gt; ls</span><br><span class="line"></span><br><span class="line">    目录: D:\Desktop</span><br><span class="line"></span><br><span class="line">Mode                 LastWriteTime         Length Name</span><br><span class="line">----                 -------------         ------ ----</span><br><span class="line">-a----         2023/5/26      0:24             83 hello.c</span><br><span class="line">-a----         2023/5/26      0:25          54022 hello.exe</span><br><span class="line"></span><br><span class="line">PS D:\Desktop&gt; ./hello</span><br><span class="line">Hello, world.</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>命令行跑起来就这样，编译、运行，放在vs这IDE中就是简单的点一下运行了。</p>
+<h3 id="拆解">拆解</h3>
+<p>一个可执行文件，在windows中就是一个exe后缀文件，但在linux中没有那么多限制(也有说是ELF文件)，但一个共同的地方就是，为了能在CPU中跑起来，文件必须是机器指令集，所以编译就是一个得到机器指令集的过程。早期，为了克服编写机器指令的麻烦，就出现了汇编语言，它把机器指令和人们的常用语句做了个映射，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pushq	%rbp</span><br><span class="line">.seh_pushreg	%rbp</span><br><span class="line">movq	%rsp, %rbp</span><br></pre></td></tr></table></figure>
+<p>这样，编程语言就算开始了第一步迈进，直至现在的c/cpp高级语言。现在的c/cpp已经相当接近人类的自然语言(当然是英语角度)，完成自然语言向机器指令的转译工作的，就是编译器了，现在编译器要进行的阶段分别是预编译阶段、编译阶段，汇编阶段，但这样还不够，经历长期的工作检验，c/cpp就有了标准库，所以在汇编完成后得到目标文件以后，还需要进行链接，把库文件和目标文件进行链接，最后才得到可执行文件。</p>
+<p><strong>预编译阶段</strong>，预编译也常被称为预处理，主要进行的工作是把include包含的头文件中的声明和在代码中的位置进行更替也就是拓展include头文件位置为头文件声明，如果有函数定义当然就包含进去，如果没有，那就只是简单声明；除此以外就是宏替换，把代码文件中定义的宏和后面的使用进行替换扩展，还有注释的删除以及条件编译指令的处理。这一步可以使用命令：<code>gcc -E hello.c -o hello.i</code>，把上面的示例代码预处理一下，查看一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"># 1 &quot;hello.c&quot;</span><br><span class="line"># 1 &quot;&lt;built-in&gt;&quot;</span><br><span class="line"># 1 &quot;&lt;command-line&gt;&quot;</span><br><span class="line"># 1 &quot;hello.c&quot;</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/stdio.h&quot; 1 3</span><br><span class="line"># 9 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/stdio.h&quot; 3</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/crtdefs.h&quot; 1 3</span><br><span class="line"># 10 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/crtdefs.h&quot; 3</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 1 3</span><br><span class="line"># 12 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 3</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw_mac.h&quot; 1 3</span><br><span class="line"># 98 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw_mac.h&quot; 3</span><br><span class="line">             </span><br><span class="line"># 107 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw_mac.h&quot; 3</span><br><span class="line">             </span><br><span class="line"># 13 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 2 3</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw_secapi.h&quot; 1 3</span><br><span class="line"># 14 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 2 3</span><br><span class="line"># 282 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 3</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/vadefs.h&quot; 1 3</span><br><span class="line"># 9 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/vadefs.h&quot; 3</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 1 3</span><br><span class="line"># 578 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 3</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/sdks/_mingw_directx.h&quot; 1 3</span><br><span class="line"># 579 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 2 3</span><br><span class="line"># 1 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/sdks/_mingw_ddk.h&quot; 1 3</span><br><span class="line"># 580 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/_mingw.h&quot; 2 3</span><br><span class="line"># 10 &quot;D:/software/mingw-w64/x86_64-w64-mingw32/include/vadefs.h&quot; 2 3</span><br><span class="line"></span><br><span class="line">中间省略一大堆</span><br><span class="line"></span><br><span class="line"># 3 &quot;hello.c&quot;</span><br><span class="line">int main()&#123;</span><br><span class="line">    printf(&quot;Hello, world.\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>预处理展开后的代码过长，干脆把记录放在<a
+target="_blank" rel="noopener" href="https://gitee.com/jacksamu/compilation-process/tree/master/windows">代码仓</a>，虽然都是用的GNU规范的gcc进行编译，但系统的不同还是会使得生成有所差异，简单的差异。在vs中可以修改一下[项目属性]，[c/c++]选项，点击[预处理器]，把[预处理到文件]给确认一下为[是]，再点击运行，项目debug目录就有.i文件了(一般修改以后点击运行会报错，不过.i文件还是可以生成的，个人也不知道为何，要正常使用改回来就是了)。</p>
+<p><strong>编译阶段</strong>，这一步主要针对c/cpp限定语法语义，在指定的语法语义下把预处理后代码转译为汇编代码，很多的编译器优化针对的就是这里吧。很多语法上的问题，都是在这里检测出来的。命令执行为：<code>gcc -S hello.i -o hello.s</code>，然后代码又回归简单：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">	.file	&quot;hello.c&quot;</span><br><span class="line">	.text</span><br><span class="line">	.def	__main;	.scl	2;	.type	32;	.endef</span><br><span class="line">	.section .rdata,&quot;dr&quot;</span><br><span class="line">.LC0:</span><br><span class="line">	.ascii &quot;Hello, world.\0&quot;</span><br><span class="line">	.text</span><br><span class="line">	.globl	main</span><br><span class="line">	.def	main;	.scl	2;	.type	32;	.endef</span><br><span class="line">	.seh_proc	main</span><br><span class="line">main:</span><br><span class="line">	pushq	%rbp</span><br><span class="line">	.seh_pushreg	%rbp</span><br><span class="line">	movq	%rsp, %rbp</span><br><span class="line">	.seh_setframe	%rbp, 0</span><br><span class="line">	subq	$32, %rsp</span><br><span class="line">	.seh_stackalloc	32</span><br><span class="line">	.seh_endprologue</span><br><span class="line">	call	__main</span><br><span class="line">	leaq	.LC0(%rip), %rcx</span><br><span class="line">	call	puts</span><br><span class="line">	movl	$0, %eax</span><br><span class="line">	addq	$32, %rsp</span><br><span class="line">	popq	%rbp</span><br><span class="line">	ret</span><br><span class="line">	.seh_endproc</span><br><span class="line">	.ident	&quot;GCC: (x86_64-posix-seh-rev0, Built by MinGW-W64 project) 8.1.0&quot;</span><br><span class="line">	.def	puts;	.scl	2;	.type	32;	.endef</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在vs中，这部分可以在vs中进行反汇编查看，不过还不太熟练，简单做起来就是打断点，然后编译，然后[crtl+alt+D]，就可以查看汇编码了。</p>
+<p><strong>汇编阶段</strong>，这部分负责的是把前面的汇编码转译为目标文件，得到包含了机器指令集合全局数据的目标文件，当然还有个很重要的<em>隐藏信息</em>。命令执行：<code>gcc -c hello.s -o hello.o</code>，这一步估计也是修改编译选项才能得到目标文件。</p>
+<h3 id="重要的链接">重要的链接</h3>
+<p>针对各种大量的重复使用的功能代码，很多人都会选择把它复用起来，比如c/cpp标准库，这种别人写好的功能库，一般都是以静态库或者动态库的形式出现，而非直接的源代码。链接步骤失败，就会出现"undefined
+reference to
+xxxx"，这样的错误在windows中非常常见，准确来说就是vs中，这样的问题就是第三方库链接失败导致。那么链接器是如何进行工作的？</p>
+<p><strong>链接器工作原理</strong></p>
+<p>在上面的简单代码中，其实就只是调用了标准库中的输出语句printf，而在代码中，这样的外部引用，其实就相当于书本的标注，具体实现需要查看某某地址那样，而当链接器进行链接的时候，引用的标注必须有对应实现，否则就会报错。在前面，编译器处理printf这类外部引用的时候，为了方便后续的链接器工作，它会把源文件对外可用的或者外部引用的标识符进行记录，并存放在一张表保存在目标文件中，这个就是上面我说的隐藏信息。使用gcc进行链接的命令：<code>gcc hello.o -o hello</code>，也可以使用链接器ld。</p>
+<p>到这里，.o目标文件的结构体就比较明了了，主要包含机器指令的代码区，包含全局变量的数据区以及方便链接的符号表信息，来检查一下文件结构：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-ubuntu:~/Desktop/course$ size hello.o</span><br><span class="line">   text	   data	    bss	    dec	    hex	filename</span><br><span class="line">    132	      0	      0	    132	     84	hello.o</span><br><span class="line">jam@jam-ubuntu:~/Desktop/course$ size hello</span><br><span class="line">   text	   data	    bss	    dec	    hex	filename</span><br><span class="line">   1376	    600	      8	   1984	    7c0	hello</span><br></pre></td></tr></table></figure>
+<p>size命令可以查看目标文件、可执行文件和库文件的信息，不同格式会有不同样式的展示，就上面的直接使用会默认格式为伯克利样式，所以text就是只读数据，也就是机器指令集，如果用的是GNU，只读数据就会展示在data栏且数据略有差异。另外想要使用readelf来检查文件信息，但篇幅过长，干脆上传到<a
+target="_blank" rel="noopener" href="https://gitee.com/jacksamu/compilation-process/tree/master/ubuntu">代码仓</a>了，文件以record为后缀。通过对比可以发现，两者区别甚大。</p>
+<blockquote>
+<p>注：还有一件事，很多时候代码中会定义各种各样五花八门的函数或者变量，但不一定会拿来用，有时候甚至只有声明而无定义，这些个函数或者变量在golang中就是unused，是会报错的，但在c/cpp中是可以存在的，除非你拿来用的时候只有声明而无定义。如下：</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 编译通过且能运行</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">ff</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello, world.\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//编译不通过</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">ff</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    ff();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hello, world.\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ld直接报错：</span></span><br><span class="line"><span class="comment">/* PS D:\Desktop\GitHub\compilation-process&gt; gcc hello.c -o hello</span></span><br><span class="line"><span class="comment">C:\Users\penta\AppData\Local\Temp\ccogx5wD.o:hello.c:(.text+0xe): undefined reference to `ff&#x27;</span></span><br><span class="line"><span class="comment">collect2.exe: error: ld returned 1 exit status */</span></span><br></pre></td></tr></table></figure>
+<p>这大概就是代码中的“言之须有物”了。</p>
+<p><strong>链接静态库和动态库</strong></p>
+<p>静态库文件在linux中就是以.a为后缀的文件，在windows中是以.lib为后缀的文件，主打大而全，这些个提前编译好的静态库文件在使用的时候，只需要把已经编译好的个人代码的目标文件和静态库进行链接即可，链接中，主要就是复制需要的静态库到可执行文件中，这样也可加快编译，不然每次项目构建都需要重新把可复用的库文件编译一次就太费劲了。要知道的是，<em>静态库也是一个个目标文件，所以它们也是由代码区、数据区和符号表构成</em>。编译时，抛开标准库，某些特定的静态库需要指定链接，比如一个使用到线程api的程序在编译时就需要指定l参数：<code>gcc pthread_test.c -o pthread_test -lpthread</code>，在vs中就是使用pragma来指定，比如winsock的使用：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;Ws2_32.lib&quot;</span>)</span></span><br></pre></td></tr></table></figure>
+<p>针对静态库的链接，c标准库几乎是所有c代码都会用到的，如同上面的hello.c例子，目标文件只是132的简单机器指令，但链接了标准库以后，就直接编程了1984，而且这只是一个简单代码，如果逻辑变得复杂项目结构随之变得庞大，最后得到的就是一个异常庞大的可执行文件，这么一个文件仅是放在硬盘中就很要命，更何况运行起来需要加载到内存中。除此以外，如果后续静态库有修改，那就需要重新编译静态库然后再链接生成可执行文件，工作量就很大。</p>
+<p>针对这种情况的解决方案就是动态库，动态库在windows中被大规模使用，常常见到的就是某某软件运行因为缺失了某某.DLL文件而宕机，然后需要到微软官网去下载补丁。另外，在linux中，这些个动态库文件就是各种lib开头的.so文件。和静态库不同，静态库是在链接的时候把代码区和数据区给复制到可执行文件中，动态库则是在可执行文件中留下一部分库信息，比如库名、符号表以及定位信息，而不是全部代码和数据都丢到可执行文件中。</p>
+<blockquote>
+<p>动态库的链接过程，是在可执行文件中保留了一部分定位信息，那这些信息什么时候派上用场？第一种情况就是在程序加载的时候，众所周知的是程序时运行在CPU的，所以在运行前需要进行加载，而这一步会有特定的加载器完成，并且检测程序是否有动态依赖，如果有就会另有动态链接器来进行动态库的信息确认，就是查户口看看这个动态库是否存在，没有就会出现windows中的经典报错，确认有的话就正常运行。通常会在编译的时候会有信息指定<code>gcc test.c test.so -o test</code>，所以windows中各种软件的发布，安装路径下往往有着各种各样的DLL依赖，防止加载出错。这种依赖，也是插件的实现原理，在源码中声明那么几个函数，在插件中实现那么几个函数，那这个插件就可以编译成动态库从而供给软件主体调用。
+第二种情况就是在程序运行的时候，这种情况往往需要使用dlopen、dlsym、dlclose等等函数镞来在代码中指定，后续在运行到特定位置才会出现加载，算是比较特殊。</p>
+</blockquote>
+<p>就上面来看，无论动态库还是静态库，在运行的时候，往往都需要把使用的第三方库加载到CPU中，但相比静态库的所有文件都完整复制到可执行文件使得各种可执行文件都有着这么一份备份，动态库在系统中保留独一份，只在运行时才加载的情况，就显得很是节省硬盘空间了，因为各种需要使用到该动态库的可执行文件都共用一份动态库，只在运行时才加载，而且内存中只需要保留一份动态库代码，各种使用到该动态库的进程都可以共享这份代码资源，也节省了内存的空间。除此以外，当代码结构有所修改，就只需要修改库文件，然后重新编译生成一份.so文件即可，而不需要去动可执行文件。</p>
+<p>不过动态库也有着自己的缺点，那就是因为动态库文件加载后，在内存中就只存在一份，而不是多份拷贝，所以它在进程结构的调用的时候，就不算是直接的内部执行，而是需要"跑出门"拿一下实现，再来执行对应代码，所以就会出现满一步的情况。所以具体的静态库还是动态库的实现方式，都得看具体情况。</p>
+<h3 id="编译自己的静态库动态库">编译自己的静态库动态库</h3>
+<p>上面介绍的很明了了，静态库和动态库实质上都是目标文件，只是编译方式有点不同，然后得到的不同的目标文件，那接下来就做一个自己的静态库和动态库，先在linux中跑一圈。下面是简单代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sayhi.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">sayhi</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// sayhi.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sayhi.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">sayhi</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hi.\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//test.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sayhi.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">    sayhi();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译运行一下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-ubuntu:~/Desktop/test$ vim sayhi.h</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ vim sayhi.c</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ vim test.c</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ls</span><br><span class="line">sayhi.c  sayhi.h  test.c</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ gcc test.c sayhi.c -o test</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ./test</span><br><span class="line">Hi.</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>上面的逻辑很简单，自定义一个sayhi库，这个库包括sayhi.h库头，实现就在sayhi.c中，然后在test.c中引入，编译也通过了，接下来就把自定义库编译成静态库：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">把实际定义的库文件编译得到目标文件</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ gcc -c sayhi.c -o sayhi.o</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打包目标文件为静态库文件</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ar crs libsayhi.a sayhi.o</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查一下库文件是否有定义的符号接口</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ nm libsayhi.a </span><br><span class="line"></span><br><span class="line">sayhi.o:</span><br><span class="line">                 U puts</span><br><span class="line">0000000000000000 T sayhi</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">为了保证编译没有原来的.c库文件作怪，把它干掉</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ rm sayhi.c</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ls</span><br><span class="line">libsayhi.a  sayhi.h  sayhi.o  test  test.c</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译，-l指定库，-L指定库路径</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ gcc test.c -o test -lsayhi -L .</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">运行看看效果</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ./test</span><br><span class="line">Hi.</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>好的，这样就是一个自定义的静态库在命令行的整个流程了(因为也在windows命令行尝试过，当然配置好了mingw环境的)，然后再来进行一下动态库的尝试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取目标文件</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ gcc -c -fPIC sayhi.c -o sayhi.o</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译生成动态库文件</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ gcc -shared sayhi.o -o libsayhi.so</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译得到可执行文件</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ gcc test.c libsayhi.so -o test</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ./test</span><br><span class="line">./test: error while loading shared libraries: libsayhi.so: cannot open shared object file: No such file or directory</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>结果运行出错，显示无法找到动态库文件，检查一下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">nm命令检查生成的动态库是否有对应符号文件</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ nm libsayhi.so | grep sayhi</span><br><span class="line">0000000000001119 T sayhi</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查可执行文件的动态依赖，发现没有加载到内存中</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ldd test</span><br><span class="line">	linux-vdso.so.1 (0x00007ffe0acbb000)</span><br><span class="line">	libsayhi.so =&gt; not found</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007fa3b5a00000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007fa3b5dc7000)</span><br></pre></td></tr></table></figure>
+<p>程序运行，会根据可执行文件依赖，在LD_LIBRARY_PATH变量指定路径中去加载动态库，所以问题应该是在这个变量上，一般情况都不会把本地路径添加到改变量中。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查一下变量指定路径</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ echo $LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">临时添加一下路径，退出终端就没了的</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/jam/Desktop/test</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加成功</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ echo $LD_LIBRARY_PATH</span><br><span class="line">:/home/jam/Desktop/test</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">再检查一下<span class="built_in">test</span>的动态依赖，可以了</span></span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ldd test</span><br><span class="line">	linux-vdso.so.1 (0x00007fff4e3d9000)</span><br><span class="line">	libsayhi.so (0x00007f4361033000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4360e00000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007f436103f000)</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ ./test</span><br><span class="line">Hi.</span><br><span class="line">jam@jam-ubuntu:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>嗯，在windows中尝试，倒是不需要设置动态库变量，不过这个应该是因为windows针对动态库的应用非常好，而且会默认在可执行文件路径下去查找动态依赖。</p>
+<h4 id="在vs中的尝试">在vs中的尝试</h4>
+<p>vs中使用的编译器和linux中的不是同一种，linux中的应用，是GNU，vs中现在基本都是clang，另外这是一个IDE，所以主要是想玩一下设置。不过，现在的vs虽然可以编辑c项目，但它本身还是主打cpp，所以它提供的动态库方案或者静态库项目方案就没法使用了，只能创建空项目来调试设置再来生成静态库动态库了。首先，创建项目：</p>
+<figure>
+<img src="/images/vs创建空项目.png" alt="创建项目" />
+<figcaption aria-hidden="true">创建项目</figcaption>
+</figure>
+<p>然后添加sayhi.h头文件和sayhi.c源文件：</p>
+<figure>
+<img src="/images/添加sayhi头文件.png" alt="添加库文件" />
+<figcaption aria-hidden="true">添加库文件</figcaption>
+</figure>
+<p>修改项目属性，“解决方案资源管理器”栏目中，右键"sayhi"项目，打开[属性]：</p>
+<figure>
+<img src="/images/vs生成文件配置.png" alt="属性页面" />
+<figcaption aria-hidden="true">属性页面</figcaption>
+</figure>
+<p>如上所示，在[配置属性]-[常规]-[配置类型]中就可以修改项目生成文件，无论是静态库lib还是动态库dll，首要修改这个配置。现在需要的静态库，所以点击[静态库lib]，然后生成解决方案。因为只是生成文件，而不是运行，初次玩的话还是有点懵懂因为只有输出栏显示一些信息，而没有常见的黑窗口之类的东西。然后在项目的debug目录或者release目录中去找lib文件，如下就是debug目录下lib：</p>
+<figure>
+<img src="/images/sayhi中lib.png" alt="lib" />
+<figcaption aria-hidden="true">lib</figcaption>
+</figure>
+<p>新建一个test项目进行检验，复制前面sayhi.h头文件到test项目中，然后引入：</p>
+<p><img src="/images/sayhi转译头文件.png" alt="项目" /> <img
+src="/images/添加sayhi头文件.png" alt="引入sayhi.h" /></p>
+<p>添加test源文件：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sayhi.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	sayhi();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>后面的动态库也是用这份代码，都不用改了，然后重新进入项目[属性]界面，在[链接器]-[常规]-[附加库目录]一项进行编辑，添加前面sayhi静态库的生成路径：</p>
+<figure>
+<img src="/images/vs添加lib依赖目录.png" alt="添加依赖路径" />
+<figcaption aria-hidden="true">添加依赖路径</figcaption>
+</figure>
+<p>同样在[链接器]一栏，选中[输入]，编辑[附加依赖项]，输入前面生成的sayhi.lib：</p>
+<figure>
+<img src="/images/vs添加lib.png" alt="添加依赖" />
+<figcaption aria-hidden="true">添加依赖</figcaption>
+</figure>
+<p>然后就是一键运行的事儿了，结果如下：</p>
+<figure>
+<img src="/images/vs_sayhi结果.png" alt="结果" />
+<figcaption aria-hidden="true">结果</figcaption>
+</figure>
+<p><strong>动态库DLL的尝试</strong></p>
+<p>和上面一样，修改sayhi项目属性中[项目生成文件]属性，这次是动态库DLL嘛，但vs2022有点毛病(其他的我不知道)，它需要添加def文件：</p>
+<figure>
+<img src="/images/vs添加def.png" alt="添加def" />
+<figcaption aria-hidden="true">添加def</figcaption>
+</figure>
+<p>然后编辑添加如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LIBRARY</span><br><span class="line">EXPORTS</span><br><span class="line">  sayhi  @1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>如果有比较多的自定义的函数接口，这里就有点抓瞎了，不过这里只是一个实验，另外，vs的使用还是专注于它的本职cpp吧。上面添加完，设置完以后，重新生成一下解决方案，就有了需要用到的lib和dll了。</p>
+<figure>
+<img src="/images/sayhi动态库.png" alt="动态库生成效果" />
+<figcaption aria-hidden="true">动态库生成效果</figcaption>
+</figure>
+<p>啥？要用lib？对啊，在windows里面，vs生成动态库时需要有一个lib文件负责记录函数地址和连接，具体实现，还是在dll文件中。所以，这里的使用设置，也很像lib静态库的引入使用，走上面一样的步骤就好，唯一不同的地方，就是需要把dll文件丢到test项目生成可执行文件的debug目录下，不然运行起来会报错。</p>
+<p>嗯，因为两种方式都使用到lib，所以其实也可以简单设置了lib所在目录，然后用pragma设置所需依赖，结果都一样。好，实验结束。</p>
+<p>注：使用vs的动态库或者静态库模板，然后使用cpp语法，重新走一遍上面的路子，可行，一样的操作。</p>
+<p></font></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">https://jack-samu.github.io/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">May 26th 2023, 12:06:41 am</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">March 2nd 2025, 11:34:01 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/" title="从make到cmake">
+                    <div class="nextTitle">从make到cmake</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/" title="聊天室之C语言版">
+                    <div class="prevTitle">聊天室之C语言版</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%8F"><span class="toc-number">1.</span> <span class="toc-text">序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E6%8B%86%E8%A7%A3"><span class="toc-number">2.</span> <span class="toc-text">简单的拆解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%86%E8%A7%A3"><span class="toc-number">2.1.</span> <span class="toc-text">拆解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E8%A6%81%E7%9A%84%E9%93%BE%E6%8E%A5"><span class="toc-number">2.2.</span> <span class="toc-text">重要的链接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E8%87%AA%E5%B7%B1%E7%9A%84%E9%9D%99%E6%80%81%E5%BA%93%E5%8A%A8%E6%80%81%E5%BA%93"><span class="toc-number">2.3.</span> <span class="toc-text">编译自己的静态库动态库</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%A8vs%E4%B8%AD%E7%9A%84%E5%B0%9D%E8%AF%95"><span class="toc-number">2.3.1.</span> <span class="toc-text">在vs中的尝试</span></a></li></ol></li></ol></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

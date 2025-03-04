@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概览：c语言中数组和结构体的简单学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="c数组和结构体">
+<meta property="og:url" content="https://jack-samu.github.io/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概览：c语言中数组和结构体的简单学习">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-09T06:40:14.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:58.120Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="c">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>c数组和结构体 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">c数组和结构体</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                c数组和结构体
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="c">c</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">8.4k</span>阅读时长: <span class="post-count reading-time">33 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2022/11/09</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概览：c语言中数组和结构体的简单学习</p>
+<span id="more"></span>
+<p>数组，存储同类型的复合类型；结构体，存储不同类型的复合类型，用于自定义数据结构。
+&gt;计算机中，针对存储大量数据的集合，有着两种方式，一种是以块式集中存储数据，这就是数组的存储方式，大量同类型的数据集中放在一块；另外一种大量数据逐个分开，但其存储的数据项就包括下一个数据的存储地址，就像一个方向标，指向下一个数据，整体来看就像连接起来的表格，所以这种结构被称为链表。</p>
+<h2 id="一数组和指针">一、数组和指针</h2>
+<p>数组作为顺序存储的典型，存储相同类型的值，以该类型存储大小为单位划分，其长度就是其容量，可容纳多少个该类型的值在声明之初就定好了，数组内元素的访问可通过下标进行访问(下标就是整数索引，从0开始)。</p>
+<h3 id="初探数组">1.1 初探数组</h3>
+<p>数组的常见声明如下： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type <span class="built_in">array</span>[size];</span><br></pre></td></tr></table></figure>
+数组常见的声明就是数据类型加，数组名后面中括号括起来数组大小。在程序中，数组往往用来存储重要数据，它们的使用往往需要先进行初始化，比较直接的就是用大括号括起来的数值列表对数组进行初始化(数值个数不得大于数组大小)。如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//完整的初始化</span></span><br><span class="line"><span class="type">int</span> nums1[<span class="number">4</span>] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line"><span class="comment">//部分初始化</span></span><br><span class="line"><span class="type">int</span> nums2[<span class="number">4</span>] = &#123;<span class="number">1</span>, <span class="number">2</span>&#125;;</span><br><span class="line"><span class="comment">//C99后支持的新特性，只初始化最后一个元素</span></span><br><span class="line"><span class="type">int</span> nums3[<span class="number">4</span>] = &#123;[<span class="number">3</span>] = <span class="number">4</span>&#125;;</span><br><span class="line"><span class="comment">//不明确指定数组大小的声明初始化</span></span><br><span class="line"><span class="type">int</span> nums4[] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="comment">//错误示范</span></span><br><span class="line"><span class="type">int</span> nums5[<span class="number">4</span>] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="type">int</span> nums6[<span class="number">4</span>];</span><br><span class="line"><span class="comment">//下面这步是非法的</span></span><br><span class="line">nums6 = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br></pre></td></tr></table></figure>
+如上，数组的初始化是在声明之初就该进行了的，而且初始化接受部分的初始化，这种初始化是从数组第一个元素开始初始化直到用完常量值，剩下的由编译器自动赋以类型零值。上面这种用大括号括起来的列表来对数组进行初始化，在c++里面被称为<strong>列表初始化</strong>，所以这里也这么称呼吧，方便点。如上面的错误例子，当数组在初始化时初始化列表大于数组容量时，编译器直接报错，而且声明以后，在后面的语句进行列表初始化也是非法的，同样会报错，但可以声明固定大小的数组而不初始化。还有如上面nums4这样不指定size的，声明初始化以后，其大小就是初始化的列表长度，也就是说nums4的长度是5。</p>
+<h4 id="数组的使用">数组的使用</h4>
+<p>数组是一个集合，数组的使用往往就是数组内元素的读取和写入，而数组内元素的调用可以通过数组下标来索引该元素，而数组的下标索引从0开始。下面是几个应用方式：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1</span></span><br><span class="line"><span class="type">int</span> nums[<span class="number">4</span>] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;nums[<span class="number">0</span>]);      <span class="comment">//&quot;5&quot;</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, nums[<span class="number">0</span>]);    <span class="comment">//&quot;5&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//2</span></span><br><span class="line"><span class="type">int</span> nums1[<span class="number">4</span>] = &#123;[<span class="number">3</span>] = <span class="number">10</span>&#125;;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d, %d\n&quot;</span>, nums1[<span class="number">0</span>], nums1[<span class="number">3</span>]); <span class="comment">//&quot;0, 10&quot;</span></span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;nums[<span class="number">0</span>]);                  <span class="comment">//&quot;8&quot;</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d, %d\n&quot;</span>, nums1[<span class="number">0</span>], nums1[<span class="number">3</span>]); <span class="comment">//&quot;8, 10&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//3</span></span><br><span class="line"><span class="type">int</span> nums2[<span class="number">4</span>];</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d, %d, %d, %d\n&quot;</span>, nums2[<span class="number">0</span>], nums2[<span class="number">1</span>], nums2[<span class="number">2</span>], nums2[<span class="number">3</span>]); <span class="comment">//&quot;8, 0, 20, 0&quot;</span></span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%d%d%d%d&quot;</span>, &amp;nums2[<span class="number">0</span>], &amp;nums2[<span class="number">1</span>], &amp;nums2[<span class="number">2</span>], &amp;nums2[<span class="number">3</span>]);  <span class="comment">//&quot;0 1 2 3&quot;</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d, %d, %d, %d\n&quot;</span>, nums2[<span class="number">0</span>], nums2[<span class="number">1</span>], nums2[<span class="number">2</span>], nums2[<span class="number">3</span>]); <span class="comment">//&quot;0, 1, 2, 3&quot;</span></span><br></pre></td></tr></table></figure></p>
+<p>如上面的三个例子所示，三个整型数组，三种状态下(完全初始化、部分初始化，只声明)的读取和写入。其实，数组的使用，和for这种计数循环天然适配，如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> nums[<span class="number">4</span>], i;</span><br><span class="line"><span class="comment">//写入数据</span></span><br><span class="line"><span class="keyword">for</span>(i = <span class="number">0</span>;i &lt; <span class="number">4</span>;i++)</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;nums[i]);  <span class="comment">//逐行输入&quot;0&quot;、&quot;1&quot;、&quot;2&quot;、&quot;3&quot;</span></span><br><span class="line"><span class="comment">//读取</span></span><br><span class="line"><span class="keyword">for</span>(i=<span class="number">0</span> ;i &lt; <span class="number">4</span>; i++)</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d, &quot;</span>, nums[i]);</span><br><span class="line"><span class="comment">//&quot;0, 1, 2, 3,&quot;</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="调用数组元素的另一种方式">调用数组元素的另一种方式</h4>
+<p>上面使用数组元素的方式是基于下标来进行，但也有另一种方式进行调用。<strong>数组名的值，本身就是一个指针常量</strong>，它是数组第一个元素的地址，所以，数组元素的调用也可以用指针来进行。如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> nums[<span class="number">4</span>] = &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d, %d\n&quot;</span>, *nums, *(nums + <span class="number">2</span>)); <span class="comment">//&quot;0, 2&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> *p = nums, i;</span><br><span class="line"><span class="keyword">for</span>(i = <span class="number">0</span>;i &lt; <span class="number">4</span>; i++)</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d, &quot;</span>, *(p + i));           <span class="comment">//&quot;0, 1, 2, 3, &quot;</span></span><br></pre></td></tr></table></figure></p>
+<p>如上使用都是可以的，不过使用指针要注意的就是*取值符和&amp;取址符，指针本身是指向某地址的变量，而*取值符的作用就是用来取指针指向地址的值，而取址符对指针本身往往没有多大使用，因为使用场景往往更关注指针指向地址的值，这里是想提醒不能把指针当做寻常变量那样使用取址符&amp;。</p>
+<p><strong>要注意的，数组的使用和指针有共通之初，但并非等同于指针。</strong></p>
+<h3 id="多维数组">1.2 多维数组</h3>
+<p>在实际生活中，数据集有集合形式，也有矩阵形式，针对这种种数据的处理，C中往往都用数组进行，只是数组的形式有所不同。集合列表用一维数组，矩阵用二维数组，乃至有三维数组、四维数组应付更复杂的数据结构。这部分进行的就是对数组的学习解读。</p>
+<h4 id="二维数组">二维数组</h4>
+<p>数组的所谓二维三维方面，在这里的体现，用下标展示会更加直观，如下声明定义一个二维数组：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//完全初始化</span></span><br><span class="line"><span class="type">int</span> matrix[<span class="number">2</span>][<span class="number">3</span>] = &#123;</span><br><span class="line">    &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>&#125;,</span><br><span class="line">    &#123;<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//部分初始化</span></span><br><span class="line"><span class="type">int</span> matrix1[<span class="number">2</span>][<span class="number">3</span>] = &#123;</span><br><span class="line">    &#123;<span class="number">0</span>, <span class="number">1</span>&#125;,</span><br><span class="line">    &#123;<span class="number">3</span>, <span class="number">4</span>&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//不指定数组大小的声明初始化</span></span><br><span class="line"><span class="type">int</span> matrix2[][<span class="number">3</span>] = &#123;</span><br><span class="line">    &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>&#125;,</span><br><span class="line">    &#123;<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>回顾一下，数组是相同类型元素的列表，一维数组是一个简单列表，里面存放着同类型的一个个常量值，那二维数组呢？它则是存放着一个个一维数组的另类列表，所以，不去深究数组内的元素，其实二维数组和一维数组乃至多维数组都是一样的，它们都是一个有序列表。
+<br/>就着上面的结论来看上面的例子就简单多了，matrix是一个存放着两个数组的列表，内层数组则存放着三个整型数据。因此，可以在数组大小范围已定的情况下，用不足其大小的列表去对其进行初始化，比如matrix1，还有不明确外层数组数量的情况用符合内层大小的一定个数的数组去对数组初始化，比如matrix2(还是有点拗口)。上面的例子也可以改成下面的样子：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//完全初始化</span></span><br><span class="line"><span class="type">int</span> matrix[<span class="number">2</span>][<span class="number">3</span>] = &#123; &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>&#125;,&#123;<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125; &#125;;</span><br><span class="line"><span class="type">int</span> matrix[<span class="number">2</span>][<span class="number">3</span>] = &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//部分初始化</span></span><br><span class="line"><span class="type">int</span> matrix1[<span class="number">2</span>][<span class="number">3</span>] = &#123; &#123;<span class="number">0</span>, <span class="number">1</span>&#125;,&#123;<span class="number">3</span>, <span class="number">4</span>&#125; &#125;;</span><br><span class="line"><span class="type">int</span> matrix1[<span class="number">2</span>][<span class="number">3</span>] = &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//不指定数组大小的声明初始化</span></span><br><span class="line"><span class="type">int</span> matrix2[][<span class="number">3</span>] = &#123; &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>&#125;,&#123;<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125; &#125;;</span><br><span class="line"><span class="type">int</span> matrix2[][<span class="number">3</span>] = &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br></pre></td></tr></table></figure>
+这样来看，就比较直观，实际上二维数组的元素也是顺序存放的。针对二维数组元素的访问，还是使用下标的方式比较直观，但使用指针的方式进行访问也是可以的，不过相对来说，就形式来看，比较麻烦，一层叠一层的。
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> matrix[<span class="number">2</span>][<span class="number">3</span>] = &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="type">int</span> *p = matrix;        <span class="comment">//GNU中会有警告，没有在vs尝试</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, *(p+<span class="number">4</span>)); <span class="comment">//&quot;4&quot;</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, *((p+<span class="number">1</span>)+<span class="number">1</span>)); <span class="comment">//&quot;2&quot;，这里被计算器理解成p+2的取值</span></span><br><span class="line"><span class="type">int</span> (*p1)[<span class="number">3</span>] = matrix;       <span class="comment">//定义一个int [3]类型的指针，初始化其值使其指向matrix</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d, %d\n&quot;</span>, *(*p1 + <span class="number">1</span>), *(*(p1+<span class="number">1</span>)+<span class="number">1</span>));      <span class="comment">//读取二维数组第一行第二列和第二行第二列的值，输出&quot;1, 4&quot;</span></span><br></pre></td></tr></table></figure>
+总的来说，二维数组的指针调用方式有两种，一种是当做一维数组的正常偏移调用，第二种就是声明一个指向内层数组类型的指针，并初始化为指向matrix指向地址。因为*运算符的优先度要低于[]运算符，所以为了表明指针身份，需要把变量名和*运算符括起来；另外，需要重点说明的是上面的p1是一个int
+[4]类型的指针，(指针，是指向某地址的变量，具体来说是某种类型值的地址)，所以，实际上类型对于指针就是束缚，防止它访问的存储越界从而得到期望以外的值，而int
+[4]类型也是束缚，可以把这样的4个整型连起来的存储空间看做一个单位，现在的指针就指向这么一种单位的地址，当它初始化成matrix的地址后进行偏移，它实际上就是以matrix的内层数组为单位进行偏移。顺便说一句，有确定类型的指针也有空类型的指针。</p>
+<p><strong>和for循环配合使用的二维数组</strong></p>
+<p>因为二维数组可以展开成一维数组，所以用循环调用就有嵌套和不嵌套的使用，如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> matrix[<span class="number">2</span>][<span class="number">3</span>] = &#123;</span><br><span class="line">    &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>&#125;,</span><br><span class="line">    &#123;<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">int</span> i, j, *p = matrix;</span><br><span class="line"></span><br><span class="line"><span class="comment">//嵌套循环</span></span><br><span class="line"><span class="keyword">for</span>(i = <span class="number">0</span>;i&lt; <span class="number">2</span>;i++) &#123;</span><br><span class="line">    <span class="keyword">for</span>(j = <span class="number">0</span>;j &lt; <span class="number">3</span>;j++)</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d, &quot;</span>, matrix[i][j]);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//&quot;0, 1, 2, &quot;</span></span><br><span class="line"><span class="comment">//&quot;3, 4, 5, &quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//不嵌套循环，编译器报警系列</span></span><br><span class="line"><span class="keyword">for</span>(i = <span class="number">0</span>;i &lt; <span class="number">6</span>; i++)</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d, &quot;</span>, *(p + i));</span><br><span class="line"><span class="comment">//&quot;0, 1, 2, 3, 4, 5, &quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//嵌套循环</span></span><br><span class="line"><span class="type">int</span> (*p1)[<span class="number">3</span>] = matrix;</span><br><span class="line"><span class="keyword">for</span>(i = <span class="number">0</span>;i&lt;<span class="number">2</span>;i++) &#123;</span><br><span class="line">	<span class="keyword">for</span>(j=<span class="number">0</span>;j&lt;<span class="number">3</span>;j++)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%d, &quot;</span>, *(*(p + i) + j));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//&quot;0, 1, 2, &quot;</span></span><br><span class="line"><span class="comment">//&quot;3, 4, 5, &quot;</span></span><br></pre></td></tr></table></figure>
+多维数组和二维数组共通，只不过是集合往更深一层嵌套，这里就不展开了。</p>
+<h3 id="变长数组和动态数组">1.3 变长数组和动态数组</h3>
+<p>在日常应用中，数组的长度往往是固定的，固定的方式各不一，比较常见的，就是使用宏定义定下数组长度，而这种数组往往存储的就是一个个常量数据，是日常生活中基本不动的数据，比如year数组就该有12个数，每个数存放每个月的天数；week数组就该存着周日到周一这么几个数值，具体是字符串还是整型数就看需要了。如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MONTH 12</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WEEK 7</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//const限定符</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> leap_year[MONTH] = &#123;<span class="number">31</span>, <span class="number">28</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>, <span class="number">31</span>, <span class="number">30</span>, <span class="number">31</span>&#125;;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span> week[WEEK] = &#123;<span class="string">&quot;Sunday&quot;</span>, <span class="string">&quot;Monday&quot;</span>, <span class="string">&quot;Tuesday&quot;</span>, <span class="string">&quot;Wedsday&quot;</span>, <span class="string">&quot;Thursday&quot;</span>, <span class="string">&quot;Friday&quot;</span>, <span class="string">&quot;Saturday&quot;</span>&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>除此以外，还可以用整型变量或者整型表达式来确定数组长度，在C99之前，规定的标准是以整形常量表达式为数组确定大小，而不是整型表达式，这是C99后添加的新特性。其实就个人来看，无非就是一句语句和两句语句的区别。不过这里也说明相对一词的重要性，变量，不确定的，但在运行程序中它是确定的，也就是相对程序运行来说，它是固定的。这个就是<strong>变长数组--VLA</strong>。
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> sum, a, b;</span><br><span class="line"><span class="comment">//输入a、b值</span></span><br><span class="line"><span class="comment">//c99之前</span></span><br><span class="line">sum = a * b;</span><br><span class="line"><span class="type">int</span> num[sum];</span><br><span class="line"><span class="comment">//c99以后</span></span><br><span class="line"><span class="type">int</span> num[a*b];</span><br></pre></td></tr></table></figure>
+相较于一开始就用常量给定区域的数组而言，变长数组也算是动态数组了，这种数组长度在程序运行时确定的数组就是动态数组，反过来说，运行以前确定的，就是静态数组了(因为常量就是运行前就确定了的)。除此以外，还有一种动态数组，这种数组随程序需要而确定大小，内存空间也是自己申请，使用完毕自己释放。这种申请的内存，
+来自于堆，由于数组是可以逐层嵌套的，对于这种数组就需要自外向里，逐层创建，而释放则是反过来，由里向外逐层释放。而这种，才是常说的<strong>动态数组</strong>。</p>
+<blockquote>
+<p>堆区和栈区
+对于一个运行程序来说，内存常被分为栈区、堆区、常量区、静态区和代码区。初始，程序以可执行代码的形式存放在磁盘中，操作系统在运行程序的时候就会把代码和静态数据(如初始化变量)加载到内存中，加载完毕后，分配内存给运行时栈(存放局部变量、函数参数和返回地址，main也是函数)，除此以外，还有着堆内存由程序显式请求分配，对于数组、一些数据结构(链表、散列表、树等)都需要堆区存储，随程序运行的时候逐渐变化。</p>
+</blockquote>
+<p>在C语言中，内存的显式请求和显式释放都有两个专门的函数--malloc函数和free函数，而c++中则是new运算符和delete运算符申请和释放。上面两函数原型如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">malloc</span><span class="params">(<span class="type">int</span> num)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">free</span><span class="params">(<span class="type">void</span> *address)</span>;</span><br><span class="line"><span class="comment">//另外几个相关函数</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">calloc</span><span class="params">(<span class="type">int</span> num, <span class="type">int</span> size)</span>;</span><br><span class="line"><span class="comment">//在内存中动态地分配 num 个长度为 size 的连续空间，并将每一个字节都初始化为 0。所以它的结果是分配了 num*size 个字节长度的内存空间，并且每个字节的值都是0。</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">realloc</span><span class="params">(<span class="type">void</span> *address, <span class="type">int</span> newsize)</span>;</span><br><span class="line"><span class="comment">//该函数重新分配内存，把内存扩展到 newsize。</span></span><br></pre></td></tr></table></figure>
+malloc函数的用法，申请num指定字节的内存并返回指向该内存的空指针，一般在赋值给特定指针前需要强制类型转换；free则是把address指向的堆内存进行释放，没有返回值。常见的配合数组的使用如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> *p;</span><br><span class="line">p = (<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="number">4</span>* <span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line"><span class="keyword">for</span>(i = <span class="number">0</span>;i &lt; <span class="number">4</span>; i++)</span><br><span class="line">	p[i] = i;</span><br><span class="line"><span class="keyword">for</span>(i = <span class="number">0</span>;i &lt; <span class="number">4</span>;i++)</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;%d, &quot;</span>, p[i]);</span><br><span class="line"><span class="built_in">free</span>(p);</span><br></pre></td></tr></table></figure>
+如上，申请一个4整型大小的内存空间，在强制类型转换后赋值给整形指针p，这时候就可以针对p指针做数组操作了(指针操作也行)，重点，用完后记得free。</p>
+<p><strong>动态二维数组</strong></p>
+<p>上面已经有二维数组的学习，所以这里主要是一个嵌套malloc和free的调用例子
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> **p, i, j;</span><br><span class="line">    <span class="comment">//定义一个指向指针数组的指针，并指向能存下3个整型指针的连续内存</span></span><br><span class="line">    p = (<span class="type">int</span> **)<span class="built_in">malloc</span>(<span class="number">3</span>*<span class="keyword">sizeof</span>(<span class="type">int</span> *));</span><br><span class="line">    <span class="comment">//逐层分配空间并赋值</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>;i &lt; <span class="number">3</span>; i++)&#123;</span><br><span class="line">        p[i] = (<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="number">4</span>*<span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">        <span class="keyword">for</span>(j = <span class="number">0</span>;j &lt; <span class="number">4</span>;j++)</span><br><span class="line">            p[i][j] = i * <span class="number">3</span> + j + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//从数组末开始读取值，一行读取完毕就释放那一行的内存</span></span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">2</span>;i &gt;= <span class="number">0</span>;i--)&#123;</span><br><span class="line">        <span class="keyword">for</span>(j=<span class="number">3</span>;j&gt;= <span class="number">0</span>;j--)</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;%d, &quot;</span>, p[i][j]);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">        <span class="built_in">free</span>(p[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//释放最外层的指针存放内存</span></span><br><span class="line">    <span class="built_in">free</span>(p);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*输出</span></span><br><span class="line"><span class="comment">10, 9, 8, 7,</span></span><br><span class="line"><span class="comment">7, 6, 5, 4,</span></span><br><span class="line"><span class="comment">4, 3, 2, 1,</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+如上，针对动态二维数组的内存申请和释放就更能体现二维数组的性质，外层数组存放内层数组地址，通过地址访问到该数组内容，而内数组也用下标把信息拆分得更加细致。嗯，虽说上面的例子是从数组最深处开始访问并逐渐向外面开始释放，但我正常从第一行内层数组开始释放也没有出现问题，暂时没有出现什么问题，但还是能倒着释放就倒着来吧。</p>
+<h3 id="指针的更多形式">1.4 指针的更多形式</h3>
+<p>指针就一个功能，指向某个地址，然后根据其指向的地址，它就有了不同的称呼：
+* 简单指针，指向简单的同类型变量，如简单数组； *
+二重指针，指向简单指针的指针； *
+指针数组，存放指针的数组，其数组可以赋值给二重指针； *
+函数指针，指向函数的指针，就使用上来看有点像别名，其实是为了方便调用的；
+* 结构体指针，指向某个数据结构的指针</p>
+<h3 id="数组的边界">1.5 数组的边界</h3>
+<p>数组是持续内存，在访问内部元素的时候一旦越界，就会出现意料之外的行为。比如有一个元素长度为4的数组a，但在访问a[4]这种行为的时候，就属于明显的越界，但编译器并不会报错，这种问题的爆发会出现在程序运行的时候，有时候会输出期望值以外的值，有时候则会意外停止。所以这里是做一个警告，在进行下标访问的时候，要注意不能越界，另外像字符串这种字符数组，要习惯性地在数组末尾放置一个'\0'符。</p>
+<h3 id="数组和指针的异同">1.6 数组和指针的异同</h3>
+<blockquote>
+<ul>
+<li>从内存存储上看，数组是同类型元素的集合，是一大块固定数量类型的存储；指针是存储同类型地址的对象，根据系统的不同，其存储也不同，但其不大于8字节内存</li>
+<li>从声明定义上看，数组的整体定义要在声明之时，否则就只能逐一赋值，而指针可以拆开进行，而且也可以指向不同的地址</li>
+<li>从使用上看，数组使用下标进行元素访问，指针用*运算符取值，配合数组可以进行地址偏移</li>
+</ul>
+</blockquote>
+<p>###数组和指针相互区别相互联系，不可分割也不可等同，两者应用场景和使用角度不一样。</p>
+<h2 id="二结构体">二、结构体</h2>
+<p>作为复合类型的重要组成，结构体可以由其他各种数据类型组成，共同构成一个表达特殊意义的数据结构，也是面向对象编程的一个重要出发点。场景切入，当我们要描述一个对象的时候，比如一个学生，那我们可以用哪几个数据？成绩、身高、体重、年级、班级，等等皆可，针对我们需求的场景，抽取重要属性成结构体，程序需要处理的，就是结构体的属性数据。当我们需要做一个成绩系统，就需要学生的各科成绩，当我们需要做健康检测，就需要学生的身高、体重、视力等数据，需求不同，使用的属性不同。当我们确定好一个数据结构以后，就是确定了一个自定义类型，我们可以用这个类型来声明定义需要的变量。结构体的通用形式如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">tag</span> &#123;</span> </span><br><span class="line">    member-<span class="built_in">list</span></span><br><span class="line">    member-<span class="built_in">list</span> </span><br><span class="line">    member-<span class="built_in">list</span>  </span><br><span class="line">    ...</span><br><span class="line">&#125; variable-<span class="built_in">list</span> ;</span><br></pre></td></tr></table></figure>
+上面上面中，member-list就是成员列表，用字符型、整型、浮点型来填充，其变量名就是结构体tag的属性名，variable-list就是成员列表，一般来说如果不是声明为函数内局部变量，都不会在声明结构体时就声明这种类型的变量，所以一般全局的tag这里都是空留一个分号收尾。
+结构体的声明，其实是用户自定义了一个类型，它告诉了编译器这种类型由哪些数据构成。</p>
+<h3 id="初始化结构体">2.1 初始化结构体</h3>
+<p>结构体是不同类型的集合，数组是同类型的集合，但类型其实从内存角度上来说，就是划分字节和读取规则不一样，两者都是一大块内存，所以数组的初始化，很多可以参考数组。
+要初始化一个结构体，先要声明一个结构体，现在就抽取学生这一对象作为一个结构体，抽象其姓名、年龄和成绩作为基本属性，如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> name[<span class="number">10</span>];</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    <span class="type">float</span> total_score;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">a</span> =</span> &#123;<span class="string">&quot;Xiao Ming&quot;</span>, <span class="number">14</span>, <span class="number">89.7</span>&#125;;</span><br></pre></td></tr></table></figure>
+如上为student结构体的一个声明(这个声明一般放在所有函数外面作为全局变量使用)，声明student类型的a对象，用的也是括号初始化。需要注意，C和C++针对结构体对象的声明有点不同，C中进行声明需要添加struct突出结构体类型，c++中则是可选项，可加可不加。
+当然也可以进行声明，然后逐个元素进行初始化，不过student的name属性是数组，所以它只能在声明之时初始化，或者使用strcpy等方法进行赋值。
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//只声明不初始化</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">temp</span>;</span></span><br><span class="line">temp.name = <span class="string">&quot;Siri&quot;</span>;                 <span class="comment">//error: assignment to expression with array type</span></span><br><span class="line"><span class="built_in">strcpy</span>(temp.name, <span class="string">&quot;Siri&quot;</span>);          <span class="comment">//使用前要引入头文件string.h</span></span><br><span class="line">temp.age = <span class="number">10</span>;                      <span class="comment">//合法</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%f\n&quot;</span>, temp.total_score);   <span class="comment">//&quot;0.000000&quot;，编译器自动初始化为float类型零值</span></span><br></pre></td></tr></table></figure> 另外初始化的方法还有： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">b</span> =</span> &#123;.name = <span class="string">&quot;Xiao Fei&quot;</span>,</span><br><span class="line">            .age = <span class="number">15</span>,</span><br><span class="line">            .total_score = <span class="number">98.6</span>&#125;;</span><br></pre></td></tr></table></figure>
+如上面这种方式就是C99和C11后为结构体添加的指定初始化器(designated
+initializer)，在大括号内用点运算符和属性名标识特定元素，等号赋值初始化。当然也可以部分初始化，这样的话，没有初始化的部分就会被编译器自动初始化为类型零值。</p>
+<h3 id="访问结构体">2.3 访问结构体</h3>
+<p>目前，关于结构体属性的访问，可以使用点运算符来进行，如上面的指定初始化器中的用法，点运算符加属性名就可以访问对应属性，这就有点类似数组下标。实际上，一般的结构体对象只有这种访问方式，而结构体指针有着另外的方式来访问结构体属性。
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> *<span class="title">p</span> =</span> &amp;a;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%f\n&quot;</span>, p-&gt;total_score); <span class="comment">//&quot;98.6&quot;</span></span><br></pre></td></tr></table></figure>
+如上，作为指向结构体的指针，适用的访问结构体属性的方法就是箭头，突出指针的存在。</p>
+<h3 id="结构体类型衍生">2.4 结构体类型衍生</h3>
+<p>结构体是自定义类型，c中任何类型都可以产生指针和数组，所以就也有结构体数组和结构体指针，它们的声明定义和具体元素的访问没有特殊之处，只不过凑在一起会让人一下子有点不适。
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">stu</span>[3] =</span> &#123;</span><br><span class="line">    &#123;<span class="string">&quot;Xiao Ming&quot;</span>, <span class="number">14</span>, <span class="number">89.7</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;Siri&quot;</span>, <span class="number">11</span>, <span class="number">80</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;Xiao Fei&quot;</span>, <span class="number">88</span>&#125;</span><br><span class="line">&#125;；     </span><br><span class="line"><span class="comment">//错误，这种声明只能在结构体类型声明的时候进行，如下</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> name[<span class="number">10</span>];</span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    <span class="type">float</span> total_score;</span><br><span class="line">&#125; stu[<span class="number">3</span>] = &#123;</span><br><span class="line">    &#123;<span class="string">&quot;Xiao Ming&quot;</span>, <span class="number">14</span>, <span class="number">89.7</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;Siri&quot;</span>, <span class="number">11</span>, <span class="number">80</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;Xiao Fei&quot;</span>, <span class="number">8</span>&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>, stu[<span class="number">2</span>].age); <span class="comment">//&quot;8&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//只声明，后续可以像数组只声明那样进行类似的初始化</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">stu</span>[4];</span></span><br></pre></td></tr></table></figure>
+上面就是结构体数组的声明定义，关于结构体指针的声明比较简单，就简单的类型加*标识即可，然后用同类型普通变量的地址给予赋值就算初始化了。另外结构体数组的元素调用用的是下标访问，而结构体指针用的是箭头访问，但当指针指向数组时，它用的，还是下标访问方法。</p>
+<p><strong>复合嵌套</strong></p>
+<p>上面从一开始，结构体的属性就纳入了数组这一复合类型，所以结构体也是可以内嵌指针的，而且把数组改换成指针，也会方便很多。当然，在C语言中，方便与危险等同，越是简单的地方，越容易出事，不过这里不讨论。作为描述对象的结构体，对象内部也可以有对象属性，所以结构体同样可以嵌套结构体，比如给student拆解名字属性，名字属性就可以作为一个对象，内部填充姓和名，如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Name</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> *surname;</span><br><span class="line">    <span class="type">char</span> *name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Name</span> <span class="title">name</span>;</span></span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    <span class="type">float</span> total_score;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+本来是想直接把student放前面，Name搞个前置声明的，发现不行，而且结构体的声明也不能进行初始化，还有各种各样的特性。。。。。。还是c++用多了，总把c的struct当做类class。
+声明还是比较简单的，下面介绍一下其初始化和使用： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//main内</span></span><br><span class="line"><span class="type">int</span> i;</span><br><span class="line"><span class="comment">//普通student对象</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">a</span> =</span> &#123;&#123;<span class="string">&quot;Jam&quot;</span>, <span class="string">&quot;Chen&quot;</span>&#125;, <span class="number">25</span>, <span class="number">100.0</span>&#125;;</span><br><span class="line"><span class="comment">//student数组</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">stu</span>[2] =</span> &#123;</span><br><span class="line">    &#123;&#123;<span class="string">&quot;Hong&quot;</span>, <span class="string">&quot;Pan&quot;</span>&#125;, <span class="number">26</span>, <span class="number">88</span>&#125;,</span><br><span class="line">    &#123;&#123;<span class="string">&quot;Jin&quot;</span>, <span class="string">&quot;Jiang&quot;</span>&#125;, <span class="number">27</span>, <span class="number">98</span>&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//student指针</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> *<span class="title">p</span> =</span> &amp;a;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;name: %s %s\n&quot;</span>, a.name.surname, a.name.name);</span><br><span class="line"><span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;<span class="number">2</span>;i++)</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;name: %s %s, score: %.2f\n&quot;</span>, stu[i].name.surname, stu[i].name.name, stu[i].total_score);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;age: %d\n&quot;</span>, p-&gt;age);</span><br><span class="line"></span><br><span class="line"><span class="comment">//声明student对象但不初始化</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">temp</span>;</span></span><br><span class="line">temp.name.surname=<span class="string">&quot;Siri&quot;</span>;</span><br><span class="line">temp.name.name=<span class="string">&quot;MI&quot;</span>;</span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;temp.age);         <span class="comment">//80</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;age: %d\n&quot;</span>, temp.age);  <span class="comment">//&quot;80&quot;</span></span><br></pre></td></tr></table></figure>
+算是比较简单的了，具体的实验进行，就看个人经验了。当这些个简单的概念组合在一起变得庞大的时候，就大而化之，关注最底层的那一部分的特性，往往能更好理解和使用。</p>
+<h3 id="从堆内存分配的结构体">2.5 从堆内存分配的结构体</h3>
+<p>上面有介绍过动态数组，它是由malloc显式向堆内存申请特定大小的空间并由free显式释放的；同样的，结构体也可以，应该说，它往往是这么使用的，当它作为一个重要的数据结构的时候。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> *<span class="title">p</span>;</span></span><br><span class="line">p = (<span class="keyword">struct</span> student *)<span class="built_in">malloc</span>(<span class="number">2</span>*<span class="keyword">sizeof</span>(<span class="keyword">struct</span> student));</span><br><span class="line"><span class="comment">/*一堆应用操作*/</span></span><br><span class="line"><span class="built_in">free</span>(p);</span><br></pre></td></tr></table></figure>
+<p>其实这里并不复杂，但也只是一个概念的记录，复杂的是引入数据结构以后的事，这里篇幅也不够，只做记录。</p>
+<h5 id="重要的字节对齐">重要的字节对齐</h5>
+<p>先举一个例： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Name</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> *surname;</span><br><span class="line">    <span class="type">char</span> *name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">A</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Name</span> <span class="title">name</span>;</span></span><br><span class="line">    <span class="type">float</span> total_score;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">B</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> age;</span><br><span class="line">    <span class="type">float</span> total_score;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Name</span> <span class="title">name</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;A: %d, B: %d\n&quot;</span>, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> A), <span class="keyword">sizeof</span>(<span class="keyword">struct</span> B));</span><br><span class="line"><span class="comment">//输出：A: 32, B: 24</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;ptr: %d, int: %d, float: %d, Name: %d\n&quot;</span>, <span class="keyword">sizeof</span>(<span class="type">char</span> *), <span class="keyword">sizeof</span>(<span class="type">int</span>), <span class="keyword">sizeof</span>(<span class="type">float</span>), <span class="keyword">sizeof</span>(<span class="keyword">struct</span> Name));</span><br><span class="line"><span class="comment">//辅助数据：&quot;ptr: 8, int: 4, float: 4, Name: 16&quot;</span></span><br></pre></td></tr></table></figure>
+上面这个例子，指的是有着同样属性的A、B两个结构体，却因为属性的先后声明顺序不一样，使得sizeof得到的占用内存不一样。出现这种情况的原因，就是这里要介绍的内容--字节对齐。</p>
+<p>首先，说明一下字节对齐是如何对齐。在C中，一个变量，一块内存，一个复合变量，一大块内存，比如数组，但结构体就不一样，因为它存的是不同类型的变量，不像数组那样内部元素一致整齐。所以，字节对齐，就是针对结构体而言的一种调整了。所谓对齐，就是结构体中所有成员在分配内存时都要向成员中最大那个对齐，最大的那个作为一个标准，当第一个成员没有超出这个标准，后面紧跟着的也没超出这个标准，就会加在一起，看看是否到了这个标准，到了就可以新开一块最高标准的内存，没到就继续叠，最后凑起来的内存块就是最大那块的倍数(这里考虑的都是基本类型，不包括复合类型)。如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">A</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> a;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">B</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> a;</span><br><span class="line">    <span class="type">char</span> b;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">C</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> a;</span><br><span class="line">    <span class="type">char</span> b;</span><br><span class="line">    <span class="type">char</span> c;</span><br><span class="line">    <span class="type">char</span> d;</span><br><span class="line">    <span class="type">char</span> e;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">D</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> a;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="type">double</span> db;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">E</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> a;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="type">int</span> i2;</span><br><span class="line">    <span class="type">double</span> db;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;char: %d, int: %d, double: %d\n&quot;</span>, <span class="keyword">sizeof</span>(<span class="type">char</span>), <span class="keyword">sizeof</span>(<span class="type">int</span>), <span class="keyword">sizeof</span>(<span class="type">double</span>));</span><br><span class="line"><span class="comment">//&quot;char: 1, int: 4, double: 8&quot;</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;A: %d, B: %d, C: %d, D: %d\n&quot;</span>, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> A), <span class="keyword">sizeof</span>(<span class="keyword">struct</span> B), <span class="keyword">sizeof</span>(<span class="keyword">struct</span> C), <span class="keyword">sizeof</span>(<span class="keyword">struct</span> D));</span><br><span class="line"><span class="comment">//&quot;A: 8, B: 8, C: 12, D: 16, E: 24&quot;</span></span><br></pre></td></tr></table></figure> 上面的例子的空间结构大概可以参考如下： <strong>struct
+A</strong> |a|空|空|空| |---|---|---|---| |i|i|i|i| 占了8字节
+<br><strong>struct B</strong> |a|b|空|空| |---|---|---|---| |i|i|i|i|
+占了8字节 <br><strong>struct C</strong> |a|b|c|e| |---|---|---|---|
+|e|空|空|空| |i|||| 占了12字节 <br><strong>struct D</strong>
+|a|空|空|空|i|i|i|i| |----|----|---|---|---|-|-|-|-|-| |db||||||||||
+占了16个字节</p>
+<p><br><strong>struct E</strong> |a|空|空|空|i|i|i|i|
+|----|----|---|---|---|-|-|-|-|-| |i2|i2|i2|i2|空|空|空|空|
+|db|||||||||| 占了24个字节</p>
+<p><br>上面都是针对结构体由简单的基本类型进行的解读，如果是复合类型呢？加进去数组或者其他结构体呢？这种存在就比较特殊，属于好好的内存块里面凸出去的大头，就像脸上的粉刺，让脸看得没有那么整洁雅观。
+其实加进去数组也没什么，结构体也是基本类型的集合，虽说不至于拆开数组留空，但填补空缺还是够的，最要命的还是内嵌结构体。如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Name</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> *surname;</span><br><span class="line">    <span class="type">char</span> *name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">A</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Name</span> <span class="title">name</span>;</span></span><br><span class="line">    <span class="type">float</span> f;</span><br><span class="line">&#125;sa;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">B</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">float</span> f;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Name</span> <span class="title">name</span>;</span></span><br><span class="line">&#125;sb;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">C</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">Name</span> <span class="title">name</span>;</span></span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">float</span> f;</span><br><span class="line">&#125;sc;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;ptr: %d, int: %d, float: %d, Name: %d\n&quot;</span>, <span class="keyword">sizeof</span>(<span class="type">char</span> *), <span class="keyword">sizeof</span>(<span class="type">int</span>), <span class="keyword">sizeof</span>(<span class="type">float</span>), <span class="keyword">sizeof</span>(<span class="keyword">struct</span> Name));</span><br><span class="line"><span class="comment">//辅助信息：&quot;ptr: 8, int: 4, float: 4, Name: 16&quot;</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;A: %d, B: %d, C: %d\n&quot;</span>, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> A), <span class="keyword">sizeof</span>(<span class="keyword">struct</span> B), <span class="keyword">sizeof</span>(<span class="keyword">struct</span> C));</span><br><span class="line"><span class="comment">//&quot;A: 32, B: 24, C: 24&quot;</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;A: %p, %p\nB: %p, %p\nC: %p, %p\n&quot;</span>, &amp;sa.a, &amp;sa.name, &amp;sb.f, &amp;sb.name, &amp;sc.name, &amp;sc.a);</span><br><span class="line"><span class="comment">/*辅助性地址信息</span></span><br><span class="line"><span class="comment">A: 00000000004079C0, 00000000004079C8</span></span><br><span class="line"><span class="comment">B: 00000000004079A4, 00000000004079A8</span></span><br><span class="line"><span class="comment">C: 0000000000407980, 0000000000407990</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+上面的例子就是自定义了一个存放两个指针的算是规整的结构体，然后把它作为大头放进三个同样存放基本类型的结构体中，分不同顺序来进行实验，直观点的内存结构如下：
+<br><strong>struct A</strong> |a|a|a|a|空|空|空|空| |-|-|-|-|-|-|-|-|
+|name|||||||| |name|||||||| |f|f|f|f|空|空|空|空|
+占据32位字节，name独占16字节，分成8字节，a和f被name分开，所以各自占了8字节，但类型限制，实占4字节，其余字节位空置</p>
+<p><br><strong>struct B</strong> |a|a|a|a|f|f|f|f| |-|-|-|-|-|-|-|-|
+|name|||||||| |name||||||||
+占24字节，a和f合在一起凑足8字节，name独占两个8字节，同理，struct
+C也是一样构造</p>
+<p><br><strong>struct C</strong> |name|||||||| |-|-|-|-|-|-|-|-|
+|name|||||||| |a|a|a|a|f|f|f|f|
+和上面的大B同理。上面就很明白了，哪怕是复合类型如结构体，也不是简单看其整体内存，在这部分其实要有个上限，那就是系统限定的字节对齐最大单位，当所有成员中的最大成员超出这个单位，那就按系统的来。64位系统限定最大对齐为8字节，32则是限定为4字节。</p>
+<p><strong>字节对齐的意义</strong></p>
+<p><br>在没有字节对齐的时候，结构体的内存分配和数组一样，都贴在一起的，这样一来就会出现那么几个数据凑成奇数内存块，而CPU读取数据是根据数据总线来读取的，16位数据总线可以一次读取两字节的数据，32位数据总线一次能读取4字节数据，64位系统则是8字节数据。当char型成员和int型成员凑在一起时为5字节内存，32位系统就没办法一次读取正确，需要读取第二次，所以拓展开，char成员占4字节内存的一字节，其余置空，这样对于CPU就能每次读取正确。这算是空间内存换取时间的意思了。字节对齐的存在是针对CPU的读取效率问题。</p>
+<p><strong>手动字节对齐</strong></p>
+<p><br>当两台机器进行通信，它们需要使用一种数据结构传输信息，那它们采取的字节对齐规则一致就显得很有必要，这种时候就可以进行手动的字节对齐规则调整。方法有两种，一种是预编译中设定规则，另一种就是数组声明时设定对齐规则，如下：
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设定其后的代码中字节对齐以n为准</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack(n)</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">A</span> &#123;</span></span><br><span class="line">    ...<span class="comment">//balabala</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//设定其后的代码中字节对齐根据默认进行</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack()</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">B</span> &#123;</span></span><br><span class="line">    ...</span><br><span class="line">&#125;__attribute__((packed));</span><br><span class="line"><span class="comment">//上面的__attribut__是一个给编译器看的设置，重点关注里面的参数</span></span><br><span class="line"><span class="comment">//packed参数，表示按照实际来进行字节对齐，也就是不对齐</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="末言">末言</h2>
+<p>以上仅为个人参考书籍博客等资料而后实验所得，一家之言。</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">https://jack-samu.github.io/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">November 9th 2022, 2:40:14 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">March 2nd 2025, 11:33:58 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/" title="c数组和结构体">
+                    <div class="nextTitle">c数组和结构体</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/" title="c流程控制">
+                    <div class="prevTitle">c流程控制</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E6%95%B0%E7%BB%84%E5%92%8C%E6%8C%87%E9%92%88"><span class="toc-number">1.</span> <span class="toc-text">一、数组和指针</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E6%8E%A2%E6%95%B0%E7%BB%84"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 初探数组</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">数组的使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%83%E7%94%A8%E6%95%B0%E7%BB%84%E5%85%83%E7%B4%A0%E7%9A%84%E5%8F%A6%E4%B8%80%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="toc-number">1.1.2.</span> <span class="toc-text">调用数组元素的另一种方式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 多维数组</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.1.</span> <span class="toc-text">二维数组</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%98%E9%95%BF%E6%95%B0%E7%BB%84%E5%92%8C%E5%8A%A8%E6%80%81%E6%95%B0%E7%BB%84"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 变长数组和动态数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E9%92%88%E7%9A%84%E6%9B%B4%E5%A4%9A%E5%BD%A2%E5%BC%8F"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 指针的更多形式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E7%9A%84%E8%BE%B9%E7%95%8C"><span class="toc-number">1.5.</span> <span class="toc-text">1.5 数组的边界</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C%E6%8C%87%E9%92%88%E7%9A%84%E5%BC%82%E5%90%8C"><span class="toc-number">1.6.</span> <span class="toc-text">1.6 数组和指针的异同</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-number">2.</span> <span class="toc-text">二、结构体</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 初始化结构体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-number">2.2.</span> <span class="toc-text">2.3 访问结构体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93%E7%B1%BB%E5%9E%8B%E8%A1%8D%E7%94%9F"><span class="toc-number">2.3.</span> <span class="toc-text">2.4 结构体类型衍生</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E5%A0%86%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-number">2.4.</span> <span class="toc-text">2.5 从堆内存分配的结构体</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%87%8D%E8%A6%81%E7%9A%84%E5%AD%97%E8%8A%82%E5%AF%B9%E9%BD%90"><span class="toc-number">2.4.0.1.</span> <span class="toc-text">重要的字节对齐</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AB%E8%A8%80"><span class="toc-number">3.</span> <span class="toc-text">末言</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概述：针对sql数据库的连接练习，主要针对sqlite、mysql的简单练习。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python的sql连接">
+<meta property="og:url" content="https://jack-samu.github.io/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概述：针对sql数据库的连接练习，主要针对sqlite、mysql的简单练习。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-04-26T13:48:02.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:59.453Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="python, sql">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>python的sql连接 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">python的sql连接</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                python的sql连接
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="python, sql">python, sql</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">4.2k</span>阅读时长: <span class="post-count reading-time">20 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/04/26</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概述：针对sql数据库的连接练习，主要针对sqlite、mysql的简单练习。</p>
+<span id="more"></span>
+<h3 id="序言">序言</h3>
+<p>数据存储是一个很重要的话题，小到C里面的struct，到os的一个个数据表，大到一个个数据库软件乃至单纯提供数据存储和访问服务的集群，提供数据的快速访问、持久化维护、崩坏数据的恢复，数据的加密维护等可算一个系列工种了。想说它是个很大的话题，落在python中，其实也就很多都是用，这里关注那么几个数据库在python中的对口api，用几个例子来进行说明，嗯，这里的都是那么几个sql相关数据库。</p>
+<h3 id="一细小便捷的sqlite">一、细小便捷的sqlite</h3>
+<p>一种嵌入式的数据库，数据库就一个文件而已，相对来说是非常轻量的，对于业务量不大的功能性网站或者客户端的部分适合保存在本机的数据都是比较合适的一个选择。针对sql系列的数据库，大多有着多个单条关系数据聚集成表，多个表又集合成一个个数据库，而针对数据库的各种高级语言的api操作中也有着这样的概念：数据库的连接是connection，连接到数据库后，进行操作的是游标cursor，通过cursor执行操作，针对已有各种数据库操作接口的python，要进行连接就需要提供数据库的驱动，而sqlite驱动内置在python标准库中，所以不用另外安装sqlite3数据库。操作一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> sqlite3</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>conn = sqlite3.connect(<span class="string">&#x27;book.db&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cursor = conn.cursor()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">dir</span>(conn)</span><br><span class="line">[<span class="string">&#x27;DataError&#x27;</span>, <span class="string">&#x27;DatabaseError&#x27;</span>, <span class="string">&#x27;Error&#x27;</span>, <span class="string">&#x27;IntegrityError&#x27;</span>, <span class="string">&#x27;InterfaceError&#x27;</span>, <span class="string">&#x27;InternalError&#x27;</span>, <span class="string">&#x27;NotSupportedError&#x27;</span>, <span class="string">&#x27;OperationalError&#x27;</span>, <span class="string">&#x27;ProgrammingError&#x27;</span>, <span class="string">&#x27;Warning&#x27;</span>, <span class="string">&#x27;__call__&#x27;</span>, <span class="string">&#x27;__class__&#x27;</span>, <span class="string">&#x27;__delattr__&#x27;</span>, <span class="string">&#x27;__dir__&#x27;</span>, <span class="string">&#x27;__doc__&#x27;</span>, <span class="string">&#x27;__enter__&#x27;</span>, <span class="string">&#x27;__eq__&#x27;</span>, <span class="string">&#x27;__exit__&#x27;</span>, <span class="string">&#x27;__format__&#x27;</span>, <span class="string">&#x27;__ge__&#x27;</span>, <span class="string">&#x27;__getattribute__&#x27;</span>, <span class="string">&#x27;__gt__&#x27;</span>, <span class="string">&#x27;__hash__&#x27;</span>, <span class="string">&#x27;__init__&#x27;</span>, <span class="string">&#x27;__init_subclass__&#x27;</span>, <span class="string">&#x27;__le__&#x27;</span>, <span class="string">&#x27;__lt__&#x27;</span>, <span class="string">&#x27;__module__&#x27;</span>, <span class="string">&#x27;__ne__&#x27;</span>, <span class="string">&#x27;__new__&#x27;</span>, <span class="string">&#x27;__reduce__&#x27;</span>, <span class="string">&#x27;__reduce_ex__&#x27;</span>, <span class="string">&#x27;__repr__&#x27;</span>, <span class="string">&#x27;__setattr__&#x27;</span>, <span class="string">&#x27;__sizeof__&#x27;</span>, <span class="string">&#x27;__str__&#x27;</span>, <span class="string">&#x27;__subclasshook__&#x27;</span>, <span class="string">&#x27;backup&#x27;</span>, <span class="string">&#x27;close&#x27;</span>, <span class="string">&#x27;commit&#x27;</span>, <span class="string">&#x27;create_aggregate&#x27;</span>, <span class="string">&#x27;create_collation&#x27;</span>, <span class="string">&#x27;create_function&#x27;</span>, <span class="string">&#x27;cursor&#x27;</span>, <span class="string">&#x27;enable_load_extension&#x27;</span>, <span class="string">&#x27;execute&#x27;</span>, <span class="string">&#x27;executemany&#x27;</span>, <span class="string">&#x27;executescript&#x27;</span>, <span class="string">&#x27;in_transaction&#x27;</span>, <span class="string">&#x27;interrupt&#x27;</span>, <span class="string">&#x27;isolation_level&#x27;</span>, <span class="string">&#x27;iterdump&#x27;</span>, <span class="string">&#x27;load_extension&#x27;</span>, <span class="string">&#x27;rollback&#x27;</span>, <span class="string">&#x27;row_factory&#x27;</span>, <span class="string">&#x27;set_authorizer&#x27;</span>, <span class="string">&#x27;set_progress_handler&#x27;</span>, <span class="string">&#x27;set_trace_callback&#x27;</span>, <span class="string">&#x27;text_factory&#x27;</span>, <span class="string">&#x27;total_changes&#x27;</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">dir</span>(cursor)</span><br><span class="line">[<span class="string">&#x27;__class__&#x27;</span>, <span class="string">&#x27;__delattr__&#x27;</span>, <span class="string">&#x27;__dir__&#x27;</span>, <span class="string">&#x27;__doc__&#x27;</span>, <span class="string">&#x27;__eq__&#x27;</span>, <span class="string">&#x27;__format__&#x27;</span>, <span class="string">&#x27;__ge__&#x27;</span>, <span class="string">&#x27;__getattribute__&#x27;</span>, <span class="string">&#x27;__gt__&#x27;</span>, <span class="string">&#x27;__hash__&#x27;</span>, <span class="string">&#x27;__init__&#x27;</span>, <span class="string">&#x27;__init_subclass__&#x27;</span>, <span class="string">&#x27;__iter__&#x27;</span>, <span class="string">&#x27;__le__&#x27;</span>, <span class="string">&#x27;__lt__&#x27;</span>, <span class="string">&#x27;__module__&#x27;</span>, <span class="string">&#x27;__ne__&#x27;</span>, <span class="string">&#x27;__new__&#x27;</span>, <span class="string">&#x27;__next__&#x27;</span>, <span class="string">&#x27;__reduce__&#x27;</span>, <span class="string">&#x27;__reduce_ex__&#x27;</span>, <span class="string">&#x27;__repr__&#x27;</span>, <span class="string">&#x27;__setattr__&#x27;</span>, <span class="string">&#x27;__sizeof__&#x27;</span>, <span class="string">&#x27;__str__&#x27;</span>, <span class="string">&#x27;__subclasshook__&#x27;</span>, <span class="string">&#x27;arraysize&#x27;</span>, <span class="string">&#x27;close&#x27;</span>, <span class="string">&#x27;connection&#x27;</span>, <span class="string">&#x27;description&#x27;</span>, <span class="string">&#x27;execute&#x27;</span>, <span class="string">&#x27;executemany&#x27;</span>, <span class="string">&#x27;executescript&#x27;</span>, <span class="string">&#x27;fetchall&#x27;</span>, <span class="string">&#x27;fetchmany&#x27;</span>, <span class="string">&#x27;fetchone&#x27;</span>, <span class="string">&#x27;lastrowid&#x27;</span>, <span class="string">&#x27;row_factory&#x27;</span>, <span class="string">&#x27;rowcount&#x27;</span>, <span class="string">&#x27;setinputsizes&#x27;</span>, <span class="string">&#x27;setoutputsize&#x27;</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cursor.execute(<span class="string">&#x27;create table books (id varchar(20) primary key, name varchar(20), price double)&#x27;</span>)</span><br><span class="line">&lt;sqlite3.Cursor <span class="built_in">object</span> at <span class="number">0x00000168917DBEC0</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cursor.execute(<span class="string">&#x27;insert into books (id, name, price) values (\&#x27;1\&#x27;, \&#x27;GO语言编程之旅\&#x27;, 80.9)&#x27;</span>)</span><br><span class="line">&lt;sqlite3.Cursor <span class="built_in">object</span> at <span class="number">0x00000168917DBEC0</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cursor.rowcount</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>conn.commit()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cursor.execute(<span class="string">&#x27;select * from books&#x27;</span>)</span><br><span class="line">&lt;sqlite3.Cursor <span class="built_in">object</span> at <span class="number">0x00000168917DBEC0</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>books = cursor.fetchall()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>books</span><br><span class="line">[(<span class="string">&#x27;1&#x27;</span>, <span class="string">&#x27;GO语言编程之旅&#x27;</span>, <span class="number">80.9</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cursor.close()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>conn.close()</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure>
+<p>如上面所示，先连接本地sqlite数据库(嗯，那么轻量的我见过的都是本地的)，然后获取游标，然后使用游标的execute接口来执行sql语句，除此以外还可以用executescript脚本，看接口名是这么个意思，还么试过。</p>
+<blockquote>
+<p>像这种sql数据库，就和sql语句撇不开关系，对于旧版本的sql数据库，各种sql语句大多是大写，然后某个版本开始吧，就大小写均可，好像微软的SQL
+server还是用着大写？不太确定了。 &gt;
+sql语句也有着独特语法，了解数据库先了解其数据类型是很重要的，不过大多都跑不了字符、字符串、浮点、布尔和整型还有NULL空值这几种，多的就算数据库特性了，mysql的事务就算一个。
+&gt;&gt;
+sql语句常见的大概就是create创建、drop删除数据库、update修改、insert插入、select查看、delete删除，条件判断大概就是where定位，and/or等。。。。。。
+&gt;&gt;&gt;
+最烦的就是需要硬编码sql语句的第三方库，golang的database/sql和python的sqlite3或者pymysql等。</p>
+</blockquote>
+<p>拿sqlite来做个练习，就把上面的book数据库做大吧：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sqlite3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 本来想套两层的with上下文管理器的，没成功，不懂</span></span><br><span class="line"><span class="keyword">with</span> sqlite3.connect(<span class="string">&#x27;book.db&#x27;</span>) <span class="keyword">as</span> conn:</span><br><span class="line">    cursor = conn.cursor()</span><br><span class="line">    cursor.execute(<span class="string">&#x27;create table books(id int, name varchar(20), price double)&#x27;</span>)</span><br><span class="line">    cursor.execute(<span class="string">r&quot;insert into books values (1, &#x27;GO语言编程之旅&#x27;, 80.9)&quot;</span>)</span><br><span class="line">    cursor.execute(<span class="string">r&quot;insert into books values (2, &#x27;python爬虫实战&#x27;, 79.0)&quot;</span>)</span><br><span class="line">    cursor.execute(<span class="string">r&quot;insert into books values (3, &#x27;Java核心技术 卷I&#x27;, 48.0)&quot;</span>)</span><br><span class="line">    cursor.execute(<span class="string">r&quot;insert into books values (4, &#x27;Java核心技术 卷II&#x27;, 48.0)&quot;</span>)</span><br><span class="line">    conn.commit()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>做大以后再修改修改：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sqlite3</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">conn</span>(<span class="params">db_file</span>):</span><br><span class="line">    <span class="keyword">return</span> sqlite3.connect(db_file)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">execute</span>(<span class="params">db_file, sql</span>):</span><br><span class="line">    conn = conn(db_file)</span><br><span class="line">    <span class="keyword">with</span> conn.cursor() <span class="keyword">as</span> cursor:</span><br><span class="line">        cursor.execute(sql)</span><br><span class="line">        cursor.commit()</span><br><span class="line">    conn.close()</span><br></pre></td></tr></table></figure>
+<h3 id="二有事务的mysql">二、有事务的mysql</h3>
+<p>mysql的应用非常广泛，而且使用公司也多，对应的许多工作也对mysql有特定要求，尤其是中国，导致各种八股文大量生成。</p>
+<p>首先要备好mysql数据库和python操作第三方库pymysql，确定一下可行性：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; mysql -h 192.168.0.105 -ujam -p </span><br><span class="line">Enter password: *******</span><br><span class="line">Welcome to the MySQL monitor.  Commands end with ; or \g.</span><br><span class="line">Your MySQL connection id is 9</span><br><span class="line">Server version: 8.0.33 MySQL Community Server - GPL</span><br><span class="line"></span><br><span class="line">Copyright (c) 2000, 2021, Oracle and/or its affiliates.</span><br><span class="line"></span><br><span class="line">Oracle is a registered trademark of Oracle Corporation and/or its</span><br><span class="line">affiliates. Other names may be trademarks of their respective</span><br><span class="line">owners.</span><br><span class="line"></span><br><span class="line">Type &#x27;help;&#x27; or &#x27;\h&#x27; for help. Type &#x27;\c&#x27; to clear the current input statement.</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">show databases;</span></span><br><span class="line">+--------------------+</span><br><span class="line">| Database           |</span><br><span class="line">+--------------------+</span><br><span class="line">| information_schema |</span><br><span class="line">| performance_schema |</span><br><span class="line">| somedb             |</span><br><span class="line">+--------------------+</span><br><span class="line">3 rows in set (0.21 sec)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">mysql&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如上是准备好的我的外部mysql服务，也配置了一个用来练习的somedb和配套的jam用户。<code>pip install pymysql</code></p>
+<p>看看配套函数 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; import pymysql</span>     </span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt;</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; conn = pymysql.connect(host=<span class="string">&#x27;192.168.0.105&#x27;</span>, user=<span class="string">&#x27;jam&#x27;</span>, password=<span class="string">&#x27;abaaba&#x27;</span>, database=<span class="string">&#x27;somedb&#x27;</span>)</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; <span class="built_in">dir</span>(conn)</span> </span><br><span class="line">[&#x27;DataError&#x27;, &#x27;DatabaseError&#x27;, &#x27;Error&#x27;, &#x27;IntegrityError&#x27;, &#x27;InterfaceError&#x27;, &#x27;InternalError&#x27;, &#x27;NotSupportedError&#x27;, &#x27;OperationalError&#x27;, &#x27;ProgrammingError&#x27;, &#x27;Warning&#x27;, &#x27;__class__&#x27;, &#x27;__del__&#x27;, &#x27;__delattr__&#x27;, &#x27;__dict__&#x27;, &#x27;__dir__&#x27;, &#x27;__doc__&#x27;, &#x27;__enter__&#x27;, &#x27;__eq__&#x27;, &#x27;__exit__&#x27;, &#x27;__format__&#x27;, &#x27;__ge__&#x27;, &#x27;__getattribute__&#x27;, &#x27;__gt__&#x27;, &#x27;__hash__&#x27;, &#x27;__init__&#x27;, &#x27;__init_subclass__&#x27;, &#x27;__le__&#x27;, &#x27;__lt__&#x27;, &#x27;__module__&#x27;, &#x27;__ne__&#x27;, &#x27;__new__&#x27;, &#x27;__reduce__&#x27;, &#x27;__reduce_ex__&#x27;, &#x27;__repr__&#x27;, &#x27;__setattr__&#x27;, &#x27;__sizeof__&#x27;, &#x27;__str__&#x27;, &#x27;__subclasshook__&#x27;, &#x27;__weakref__&#x27;, &#x27;_affected_rows&#x27;, &#x27;_auth_plugin_map&#x27;, &#x27;_auth_plugin_name&#x27;, &#x27;_binary_prefix&#x27;, &#x27;_closed&#x27;, &#x27;_connect_attrs&#x27;, &#x27;_create_ssl_ctx&#x27;, &#x27;_execute_command&#x27;, &#x27;_force_close&#x27;, &#x27;_get_auth_plugin_handler&#x27;, &#x27;_get_server_information&#x27;, &#x27;_local_infile&#x27;, &#x27;_next_seq_id&#x27;, &#x27;_process_auth&#x27;, &#x27;_quote_bytes&#x27;, &#x27;_read_bytes&#x27;, &#x27;_read_ok_packet&#x27;, &#x27;_read_packet&#x27;, &#x27;_read_query_result&#x27;, &#x27;_read_timeout&#x27;, &#x27;_request_authentication&#x27;, &#x27;_result&#x27;, &#x27;_rfile&#x27;, &#x27;_secure&#x27;, &#x27;_send_autocommit_mode&#x27;, &#x27;_sock&#x27;, &#x27;_write_bytes&#x27;, &#x27;_write_timeout&#x27;, &#x27;affected_rows&#x27;, &#x27;autocommit&#x27;, &#x27;autocommit_mode&#x27;, &#x27;begin&#x27;, &#x27;bind_address&#x27;, &#x27;character_set_name&#x27;, &#x27;charset&#x27;, &#x27;client_flag&#x27;, &#x27;close&#x27;, &#x27;commit&#x27;, &#x27;connect&#x27;, &#x27;connect_timeout&#x27;, &#x27;cursor&#x27;, &#x27;cursorclass&#x27;, &#x27;db&#x27;, &#x27;decoders&#x27;, &#x27;encoders&#x27;, &#x27;encoding&#x27;, &#x27;escape&#x27;, &#x27;escape_string&#x27;, &#x27;get_autocommit&#x27;, &#x27;get_host_info&#x27;, &#x27;get_proto_info&#x27;, &#x27;get_server_info&#x27;, &#x27;host&#x27;, &#x27;host_info&#x27;, &#x27;init_command&#x27;, &#x27;insert_id&#x27;, &#x27;kill&#x27;, &#x27;literal&#x27;, &#x27;max_allowed_packet&#x27;, &#x27;next_result&#x27;, &#x27;open&#x27;, &#x27;password&#x27;, &#x27;ping&#x27;, &#x27;port&#x27;, &#x27;protocol_version&#x27;, &#x27;query&#x27;, &#x27;rollback&#x27;, &#x27;salt&#x27;, &#x27;select_db&#x27;, &#x27;server_capabilities&#x27;, &#x27;server_charset&#x27;, &#x27;server_language&#x27;, &#x27;server_public_key&#x27;, &#x27;server_status&#x27;, &#x27;server_thread_id&#x27;, &#x27;server_version&#x27;, &#x27;set_charset&#x27;, &#x27;show_warnings&#x27;, &#x27;sql_mode&#x27;, &#x27;ssl&#x27;, &#x27;thread_id&#x27;, &#x27;unix_socket&#x27;, &#x27;use_unicode&#x27;, &#x27;user&#x27;, &#x27;write_packet&#x27;]</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; cursor = conn.cursor()</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; <span class="built_in">dir</span>(cursor)</span> </span><br><span class="line">[&#x27;DataError&#x27;, &#x27;DatabaseError&#x27;, &#x27;Error&#x27;, &#x27;IntegrityError&#x27;, &#x27;InterfaceError&#x27;, &#x27;InternalError&#x27;, &#x27;NotSupportedError&#x27;, &#x27;OperationalError&#x27;, &#x27;ProgrammingError&#x27;, &#x27;Warning&#x27;, &#x27;__class__&#x27;, &#x27;__delattr__&#x27;, &#x27;__dict__&#x27;, &#x27;__dir__&#x27;, &#x27;__doc__&#x27;, &#x27;__enter__&#x27;, &#x27;__eq__&#x27;, &#x27;__exit__&#x27;, &#x27;__format__&#x27;, &#x27;__ge__&#x27;, &#x27;__getattribute__&#x27;, &#x27;__gt__&#x27;, &#x27;__hash__&#x27;, &#x27;__init__&#x27;, &#x27;__init_subclass__&#x27;, &#x27;__iter__&#x27;, &#x27;__le__&#x27;, &#x27;__lt__&#x27;, &#x27;__module__&#x27;, &#x27;__ne__&#x27;, &#x27;__new__&#x27;, &#x27;__reduce__&#x27;, &#x27;__reduce_ex__&#x27;, &#x27;__repr__&#x27;, &#x27;__setattr__&#x27;, &#x27;__sizeof__&#x27;, &#x27;__str__&#x27;, &#x27;__subclasshook__&#x27;, &#x27;__weakref__&#x27;, &#x27;_check_executed&#x27;, &#x27;_clear_result&#x27;, &#x27;_conv_row&#x27;, &#x27;_do_execute_many&#x27;, &#x27;_do_get_result&#x27;, &#x27;_ensure_bytes&#x27;, &#x27;_escape_args&#x27;, &#x27;_executed&#x27;, &#x27;_get_db&#x27;, &#x27;_nextset&#x27;, &#x27;_query&#x27;, &#x27;_result&#x27;, &#x27;_rows&#x27;, &#x27;arraysize&#x27;, &#x27;callproc&#x27;, &#x27;close&#x27;, &#x27;connection&#x27;, &#x27;description&#x27;, &#x27;execute&#x27;, &#x27;executemany&#x27;, &#x27;fetchall&#x27;, &#x27;fetchmany&#x27;, &#x27;fetchone&#x27;, &#x27;max_stmt_length&#x27;, &#x27;mogrify&#x27;, &#x27;nextset&#x27;, &#x27;rowcount&#x27;, &#x27;rownumber&#x27;, &#x27;scroll&#x27;, &#x27;setinputsizes&#x27;, &#x27;setoutputsizes&#x27;]</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>简单试一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pymysql</span><br><span class="line"></span><br><span class="line">sql = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">create table books(</span></span><br><span class="line"><span class="string">id int auto_increment primary key,</span></span><br><span class="line"><span class="string">name char(10) not null unique,</span></span><br><span class="line"><span class="string">price float not null</span></span><br><span class="line"><span class="string">)engine=InnoDB default charset=utf8;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> pymysql.connect(host=<span class="string">&#x27;192.168.0.105&#x27;</span>, user=<span class="string">&#x27;jam&#x27;</span>, password=<span class="string">&#x27;abaaba&#x27;</span>, database=<span class="string">&#x27;somedb&#x27;</span>) <span class="keyword">as</span> conn:</span><br><span class="line">    cursor = conn.cursor()</span><br><span class="line">    cursor.execute(sql)</span><br><span class="line">    cursor.close()</span><br></pre></td></tr></table></figure>
+<p>效果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">use somedb;</span></span><br><span class="line">Database changed</span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">show tables;</span></span><br><span class="line">+------------------+</span><br><span class="line">| Tables_in_somedb |</span><br><span class="line">+------------------+</span><br><span class="line">| books            |</span><br><span class="line">+------------------+</span><br><span class="line">2 rows in set (0.10 sec)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash"><span class="keyword">select</span> * from books;</span>    </span><br><span class="line">Empty set (0.13 sec)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">mysql&gt;</span></span><br></pre></td></tr></table></figure>
+<p>深入进行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pymysql</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">conn = pymysql.connect(host=<span class="string">&#x27;192.168.0.105&#x27;</span>, </span><br><span class="line">                           user=<span class="string">&#x27;jam&#x27;</span>, </span><br><span class="line">                           password=<span class="string">&#x27;abaaba&#x27;</span>, </span><br><span class="line">                           database=<span class="string">&#x27;somedb&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">insert</span>(<span class="params">cursor, val:<span class="built_in">list</span></span>):</span><br><span class="line">    cursor.execute(<span class="string">&#x27;insert into books values (%d, &quot;%s&quot;, %f)&#x27;</span>.<span class="built_in">format</span>(val[<span class="number">0</span>], val[<span class="number">1</span>], val[<span class="number">2</span>]))</span><br><span class="line">    <span class="comment"># 提交完毕后的保存操作</span></span><br><span class="line">    conn.commit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">display_all</span>(<span class="params">cursor</span>):</span><br><span class="line">    cursor.execute(<span class="string">&#x27;select * from books&#x27;</span>)</span><br><span class="line">    <span class="comment"># 查看</span></span><br><span class="line">    res = cursor.fetchall()</span><br><span class="line">    <span class="built_in">print</span>(res)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">update_name</span>(<span class="params">cursor, <span class="built_in">id</span>, name</span>):</span><br><span class="line">    cursor.execute(<span class="string">&#x27;update books set name=&quot;%s&quot; where id=%d&#x27;</span>%(name, <span class="built_in">id</span>))</span><br><span class="line">    conn.commit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    <span class="keyword">with</span> conn.cursor() <span class="keyword">as</span> cursor:</span><br><span class="line">        insert(cursor, [<span class="number">3</span>, <span class="string">&quot;Java核心技术 卷I&quot;</span>, <span class="number">48</span>])</span><br><span class="line">        insert(cursor, [<span class="number">4</span>, <span class="string">&quot;Java核心技术 卷II&quot;</span>, <span class="number">48</span>])</span><br><span class="line">        display_all(cursor)</span><br><span class="line">        update_name(cursor, <span class="number">3</span>, <span class="string">&quot;linux是怎样工作的&quot;</span>)</span><br><span class="line">        display_all()</span><br><span class="line">    conn.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>上面的这些个练习还是在交互界面进行比较好，编写进脚本里再跑，出错一次就会次次出错，键冲突啊，语法格式啊，总之不能出错一次，否则后续很烦人。在交互界面里面不是全套都跑，分开一个个的步骤就会轻松很多。比如下面的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pymysql <span class="keyword">import</span> connect</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">conn = connect(host=<span class="string">&#x27;192.168.0.105&#x27;</span>, </span><br><span class="line">                user=<span class="string">&#x27;jam&#x27;</span>, </span><br><span class="line">                password=<span class="string">&#x27;abaaba&#x27;</span>, </span><br><span class="line">                database=<span class="string">&#x27;somedb&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">table_init</span>(<span class="params">cursor</span>):</span><br><span class="line">    sql = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    create table books(</span></span><br><span class="line"><span class="string">    id int auto_increment primary key,</span></span><br><span class="line"><span class="string">    name char(10) not null unique,</span></span><br><span class="line"><span class="string">    price float not null</span></span><br><span class="line"><span class="string">    )engine=InnoDB default charset=utf8;</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    cursor.execute(sql)</span><br><span class="line">    conn.commit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">insert</span>(<span class="params">cursor, <span class="built_in">id</span>, name, price</span>):</span><br><span class="line">    cursor.execute(<span class="string">&#x27;insert into books values (&#123;&#125;, &quot;&#123;&#125;&quot;, &#123;&#125;)&#x27;</span>.<span class="built_in">format</span>(<span class="built_in">id</span>, name, price))</span><br><span class="line">    <span class="comment"># 提交完毕后的保存操作</span></span><br><span class="line">    conn.commit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">display_all</span>(<span class="params">cursor</span>):</span><br><span class="line">    cursor.execute(<span class="string">&#x27;select * from books&#x27;</span>)</span><br><span class="line">    <span class="comment"># 查看</span></span><br><span class="line">    res = cursor.fetchall()</span><br><span class="line">    <span class="built_in">print</span>(res)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">update_name</span>(<span class="params">cursor, <span class="built_in">id</span>, name</span>):</span><br><span class="line">    cursor.execute(<span class="string">&#x27;update books set name=&quot;%s&quot; where id=%d&#x27;</span>%(name, <span class="built_in">id</span>))</span><br><span class="line">    conn.commit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">drop</span>(<span class="params">cursor</span>):</span><br><span class="line">    cursor.execute(<span class="string">&#x27;drop table books&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        cursor = conn.cursor()</span><br><span class="line">        table_init(cursor)</span><br><span class="line">        insert(cursor, <span class="number">1</span>, <span class="string">&#x27;GO语言编程之旅&#x27;</span>, <span class="number">80.9</span>) </span><br><span class="line">        insert(cursor, <span class="number">2</span>, <span class="string">&#x27;python爬虫实战&#x27;</span>, <span class="number">88.1</span>)</span><br><span class="line">        insert(cursor, <span class="number">3</span>, <span class="string">&quot;Java核心技术I&quot;</span>, <span class="number">48.0</span>)</span><br><span class="line">        insert(cursor, <span class="number">4</span>, <span class="string">&quot;Java核心技术II&quot;</span>, <span class="number">48.0</span>)</span><br><span class="line">        display_all(cursor)</span><br><span class="line">        update_name(cursor, <span class="number">3</span>, <span class="string">&quot;计算机网络&quot;</span>)</span><br><span class="line">        <span class="comment">#drop(cursor)</span></span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        cursor.close()</span><br><span class="line">        conn.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>作为程序员，应该没有人一次编码一次过吧，我就踩了很多次坑，搞得常常要回头重置数据库，没办法，最后干脆点，作为练习嘛，添加一个错误处理，不管怎样都给我删掉这个数据库，等到终于过了，再把删掉数据库的操作函数注释掉。</p>
+<h3 id="三sqlalchemy操作mysql">三、sqlalchemy操作mysql</h3>
+<p>上面的sqlite3和pymysql这些个库操作起来，其实也就是多了个远程连接，实质上还是执行sql语句而已，没有过多的突出的功能了，在各种业务变得繁多而重的时候，解耦和耦合就显得很重要，而在高级语言中，针对数据库的一个特性--ORM技术，就是各论各的，高级语言可以操作自己的对象，操作完毕，就会映射到数据库中的关系数据中，也就是多个中间人转换，不用另外去学习sql的语法，前提是已经有对应的可操作数据表(一般如此)。</p>
+<p>python的ORM框架是SQLAlchemy，安装就是<code>pip install sqlalchemy</code>即可，</p>
+<p>前面一直针对书名和书的价格做数据库实验，放到python中就是下面这样的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>books = [</span><br><span class="line"><span class="meta">... </span>[<span class="number">1</span>, <span class="string">&quot;GO语言编程之旅&quot;</span>, <span class="number">89.0</span>],</span><br><span class="line"><span class="meta">... </span>[<span class="number">2</span>, <span class="string">&quot;python爬虫实战&quot;</span>, <span class="number">79.6</span>],</span><br><span class="line"><span class="meta">... </span>[<span class="number">3</span>, <span class="string">&quot;Java核心技术I&quot;</span>, <span class="number">44.4</span>],</span><br><span class="line"><span class="meta">... </span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(books)</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;list&#x27;</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(books[<span class="number">0</span>])</span><br><span class="line">&lt;<span class="keyword">class</span> <span class="string">&#x27;list&#x27;</span>&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure>
+<p>ORM技术就是在python中操作这类标准类型的数据，丢给ORM，然后由它转换成对应关系型数据，再进行对应的增删改查操作。接下来在前面已经建表的基础上，来进行连接，然后进行增删改查的操作。</p>
+<blockquote>
+<p>存储数据，很多语言第一时间想到的应该都是struct，但python没有struct，只有class，另一个就是golang，它只有struct而没有class，它们的实现类型都很纯粹。
+&gt;
+和它们的这种纯粹相比，cpp的struct就显得比较中立，既可纯数据也可面向对象。</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 46%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>mysql中数值类型</th>
+<th>python ORM数值类型</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>整数</td>
+<td>INTYINT、SMALLINT、INT、INTEGER、BIGINT</td>
+<td>SMALLINT、INT、INTEGER、BIGINT</td>
+</tr>
+<tr class="even">
+<td>浮点数</td>
+<td>FLOAT、DOUBLE、DECIMAL</td>
+<td>Float、DECIMAL</td>
+</tr>
+<tr class="odd">
+<td>日期和时间类型</td>
+<td>DATE、TIME、YEAR、DATETIME、TIMESTAMP</td>
+<td>Date、Time、DateTime、TIMESTAMP</td>
+</tr>
+<tr class="even">
+<td>字符串类型</td>
+<td>CHAR、VARCHAR、TINYTEXT、Text、MEDIUMTEXT、LONGTEXT</td>
+<td>CHAR、VARCHAR、String、TEXT、UnicodeText</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column, String, Float, Integer, create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> sessionmaker, declarative_base</span><br><span class="line"><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> quote_plus</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 这部分可以写进设置里，在见过的较大的项目里这类信息都是在Config文件夹里的</span></span><br><span class="line">Host = <span class="string">&#x27;192.168.0.105&#x27;</span></span><br><span class="line">User = <span class="string">&#x27;jam&#x27;</span></span><br><span class="line">Pwd = <span class="string">&#x27;abaaba&#x27;</span></span><br><span class="line">Database = <span class="string">&#x27;somedb&#x27;</span></span><br><span class="line"></span><br><span class="line">Base = declarative_base()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对应mysql books数据表</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Book</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    <span class="comment"># 表名</span></span><br><span class="line">    __tablename__ = <span class="string">&#x27;books&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 表成员，对应数据的实质操作对象</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(String(<span class="number">20</span>))</span><br><span class="line">    price = Column(Float(<span class="number">10</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化连接 以&#x27;数据库+数据库驱动://用户:密码@主机地址:端口/database&#x27;的形式</span></span><br><span class="line">uri = <span class="string">&#x27;mysql+pymysql://%s:%s@%s:3306/%s&#x27;</span>%(User, quote_plus(Pwd), Host, Database)</span><br><span class="line"><span class="built_in">print</span>(uri)</span><br><span class="line">engine = create_engine(uri)</span><br><span class="line">db_session = sessionmaker(bind=engine)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建表，自动查找BaseModel子类，并在数据库中建立对应的表</span></span><br><span class="line">Base.metadata.create_all(engine)</span><br><span class="line"><span class="comment"># 删表</span></span><br><span class="line">Base.metadata.drop_all(engine)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>踩了不少坑吧，首先是由于数据库uri的问题，在password@host这一部分出了问题，因为password中带有'@'字符，所以转义方面处理好，导致最后字符串解析得到的host是'<span
+class="citation"
+data-cites="192.168.0.105">@192.168.0.105</span>'，暂时不太清楚转义的处理，所以选择了降版本，把sqlalchemy降级到1.3.19，再来连接就没有出错(不过却和我的flask的依赖冲突了，有点烦，虚拟环境还是很有必要的)。
+&gt;
+后续的解决是用<code>urllib.parse.quote_plus(uri)</code>解决了，顺便把sqlalchemy的库更新了，不过这时候就有了个警告，是declarative_base迁移到了orm中而不是原来的ext.declarative中。</p>
+</blockquote>
+<p>后续的表操作：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进行操作</span></span><br><span class="line">session = db_session()</span><br><span class="line">book1 = Book(<span class="built_in">id</span>=<span class="number">1</span>, name=<span class="string">&#x27;GO语言编程之旅&#x27;</span>, price=<span class="number">89.6</span>)</span><br><span class="line">book2 = Book(<span class="built_in">id</span>=<span class="number">2</span>, name=<span class="string">&#x27;python爬虫实战&#x27;</span>, price=<span class="number">67.1</span>)</span><br><span class="line">book3 = Book(<span class="built_in">id</span>=<span class="number">3</span>, name=<span class="string">&#x27;linux是怎样运行的&#x27;</span>, price=<span class="number">89.6</span>)</span><br><span class="line">book4 = Book(<span class="built_in">id</span>=<span class="number">4</span>, name=<span class="string">&#x27;夜航船&#x27;</span>, price=<span class="number">55</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加多条</span></span><br><span class="line">session.add_all([book1, book2])</span><br><span class="line"><span class="comment"># 保存提交</span></span><br><span class="line">session.commit()</span><br><span class="line"><span class="comment"># 增加一条</span></span><br><span class="line">session.add(book3)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查一哈顺便插一哈</span></span><br><span class="line">sql_query = session.query(Book)</span><br><span class="line"><span class="built_in">print</span>(sql_query)</span><br><span class="line">books = sql_query.<span class="built_in">all</span>()</span><br><span class="line"><span class="keyword">for</span> book <span class="keyword">in</span> books:</span><br><span class="line">    <span class="built_in">print</span>(book.<span class="built_in">id</span>, book.name, book.price)</span><br><span class="line">session.add(book4)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 条件查询</span></span><br><span class="line">book = session.query(Book).<span class="built_in">filter</span>(Book.name==<span class="string">&#x27;python爬虫实战&#x27;</span>).one()</span><br><span class="line"><span class="built_in">print</span>()</span><br><span class="line"><span class="built_in">print</span>(book.<span class="built_in">id</span>, book.name, book.price)</span><br><span class="line">books = session.query(Book).<span class="built_in">filter</span>(Book.price==<span class="number">89.6</span>).<span class="built_in">all</span>()</span><br><span class="line"><span class="keyword">for</span> book <span class="keyword">in</span> books:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;价格都是89.6的书：\n&quot;</span>, book.name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模糊查询，加上通配符</span></span><br><span class="line">go_books = session.query(Book).<span class="built_in">filter</span>(Book.name.like(<span class="string">&#x27;GO%&#x27;</span>)).<span class="built_in">all</span>()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;名字带有GO的书数：&quot;</span>, <span class="built_in">len</span>(go_books), <span class="string">&quot;, 书名：&quot;</span>,go_books[<span class="number">0</span>].name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新</span></span><br><span class="line">session.query(Book).<span class="built_in">filter</span>(Book.<span class="built_in">id</span>==<span class="number">1</span>).update(&#123;<span class="string">&#x27;name&#x27;</span>:<span class="string">&#x27;我是李大爷&#x27;</span>&#125;)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 排个序</span></span><br><span class="line">allbooks = session.query(Book).order_by(Book.price).<span class="built_in">all</span>()</span><br><span class="line"><span class="keyword">for</span> book <span class="keyword">in</span> allbooks:</span><br><span class="line">    <span class="built_in">print</span>(book.<span class="built_in">id</span>, book.name, book.price)</span><br><span class="line"></span><br><span class="line">session.close()</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>另一个就是，本来想利用上下文管理器来管理sessionmaker类对象，但失败了，因为它没有实现__enter__方法，入口都没有的。</p>
+</blockquote>
+<p>总结一下，先整个declarative_base的基类，然后定义继承了该基类的后续操作的存储数据对象，再接下来就是连接的获取了，后续对表的操作都基于连接。</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">https://jack-samu.github.io/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">April 26th 2023, 9:48:02 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">March 2nd 2025, 11:33:59 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/" title="基础web之一">
+                    <div class="nextTitle">基础web之一</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/04/24/smtp%E5%92%8Cpop3/" title="smtp和pop3">
+                    <div class="prevTitle">smtp和pop3</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%8F%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">序言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E7%BB%86%E5%B0%8F%E4%BE%BF%E6%8D%B7%E7%9A%84sqlite"><span class="toc-number">2.</span> <span class="toc-text">一、细小便捷的sqlite</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E6%9C%89%E4%BA%8B%E5%8A%A1%E7%9A%84mysql"><span class="toc-number">3.</span> <span class="toc-text">二、有事务的mysql</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89sqlalchemy%E6%93%8D%E4%BD%9Cmysql"><span class="toc-number">4.</span> <span class="toc-text">三、sqlalchemy操作mysql</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

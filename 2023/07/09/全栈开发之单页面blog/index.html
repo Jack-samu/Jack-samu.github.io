@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="继前面全栈的环境跑通以后，现在开始blog单页面blog的设计。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="全栈开发之单页面blog">
+<meta property="og:url" content="https://jack-samu.github.io/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="继前面全栈的环境跑通以后，现在开始blog单页面blog的设计。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E5%85%A8%E6%A0%88blog%E5%8D%95%E9%A1%B5%E9%9D%A2%E5%89%8D%E5%8F%B0%E5%88%9D%E5%A7%8B%E6%95%88%E6%9E%9C.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/flask%E5%85%A8%E6%A0%88postman%E5%88%97%E8%A1%A8%E6%95%88%E6%9E%9C.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/flask%E5%85%A8%E6%A0%88blogs%E6%B8%B2%E6%9F%93.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E5%85%A8%E6%A0%88%E5%BC%82%E7%AB%AFPC%E8%AE%BF%E9%97%AE.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/flask%E5%85%A8%E6%A0%88blog%E6%B7%BB%E5%8A%A0.gif">
+<meta property="article:published_time" content="2023-07-09T05:50:37.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:55.233Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="flask django vue">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jack-samu.github.io/images/%E5%85%A8%E6%A0%88blog%E5%8D%95%E9%A1%B5%E9%9D%A2%E5%89%8D%E5%8F%B0%E5%88%9D%E5%A7%8B%E6%95%88%E6%9E%9C.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>全栈开发之单页面blog · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">全栈开发之单页面blog</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                全栈开发之单页面blog
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="flask django vue">flask django vue</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">3.3k</span>阅读时长: <span class="post-count reading-time">16 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/07/09</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>继前面全栈的环境跑通以后，现在开始blog单页面blog的设计。</p>
+<span id="more"></span>
+<p>前面已经设计好了整个流程，并且跑通，所以这里只需要针对具体代码的设计即可。因为进行改动的只有后台backend框架，所以先来同样的vue前台逻辑的设计。</p>
+<h2 id="vue部分">vue部分</h2>
+<p>首先设计一个Blog.vue组件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">    &lt;div class=&quot;container&quot;&gt;</span><br><span class="line">        &lt;p&gt;blog&lt;/p&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">export default&#123;</span><br><span class="line">    name: &#x27;Blog&#x27;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;style&gt;</span><br><span class="line">#app&#123;</span><br><span class="line">    margin-top: 60px;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/style&gt;</span><br></pre></td></tr></table></figure>
+<p>然后为了进行样式的设计，所以引入bootstrap这个css框架：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm i bootstrap -S</span><br></pre></td></tr></table></figure>
+<p>然后在vue中进行引入bootstrap框架的blog页面设计：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">    &lt;div class=&quot;container&quot;&gt;</span><br><span class="line">        &lt;div class=&quot;row&quot;&gt;</span><br><span class="line">            &lt;div class=&quot;col-sm-10&quot;&gt;</span><br><span class="line">                &lt;h1&gt;Blogs&lt;/h1&gt;</span><br><span class="line">                &lt;hr&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">                &lt;button type=&quot;button&quot; class=&quot;btn btn-success btn-sm&quot;&gt;添加&lt;/button&gt;</span><br><span class="line">                &lt;br&gt;&lt;br&gt;</span><br><span class="line">                &lt;table class=&quot;table table-hover&quot;&gt;</span><br><span class="line">                    &lt;thead&gt;</span><br><span class="line">                        &lt;tr&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;title&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;author&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;details&lt;/th&gt;</span><br><span class="line">                            &lt;th&gt;&lt;/th&gt;</span><br><span class="line">                        &lt;/tr&gt;</span><br><span class="line">                    &lt;/thead&gt;</span><br><span class="line">                    &lt;tbody&gt;</span><br><span class="line">                        &lt;tr&gt;</span><br><span class="line">                            &lt;td&gt;阿巴阿巴&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;我&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&lt;a href=&quot;https://zhuanlan.zhihu.com/p/642004545&quot;&gt;文章&lt;/a&gt;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;</span><br><span class="line">                                &lt;div class=&quot;btn-group&quot; role=&quot;group&quot;&gt;</span><br><span class="line">                                    &lt;button type=&quot;button&quot; class=&quot;btn btn-warning btn-sm&quot;&gt;更新&lt;/button&gt;</span><br><span class="line">                                    &lt;button type=&quot;button&quot; class=&quot;btn btn-danger btn-sm&quot;&gt;删除&lt;/button&gt;</span><br><span class="line">                                &lt;/div&gt;</span><br><span class="line">                            &lt;/td&gt;</span><br><span class="line">                        &lt;/tr&gt;</span><br><span class="line">                    &lt;/tbody&gt;</span><br><span class="line">                &lt;/table&gt;</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">export default&#123;</span><br><span class="line">    name: &#x27;Blog&#x27;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;style&gt;</span><br><span class="line">#app&#123;</span><br><span class="line">    margin-top: 60px;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/style&gt;</span><br></pre></td></tr></table></figure>
+<p>在vue路由部分进行Blog的使用注册：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="keyword">import</span> <span class="title class_">Blog</span> <span class="keyword">from</span> <span class="string">&#x27;@/components/Blog&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">Vue</span>.<span class="title function_">use</span>(<span class="title class_">Router</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">new</span> <span class="title class_">Router</span>(&#123;</span><br><span class="line">  <span class="attr">routes</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">path</span>: <span class="string">&#x27;/&#x27;</span>,</span><br><span class="line">      <span class="attr">component</span>: <span class="title class_">Blog</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>如上注册，把blog作为唯一路由进行使用，运行看一下效果：</p>
+<figure>
+<img src="/images/全栈blog单页面前台初始效果.png" alt="前台效果" />
+<figcaption aria-hidden="true">前台效果</figcaption>
+</figure>
+<h2 id="flask操作数据库">flask操作数据库</h2>
+<p>上面是基础页面，但重要的还是数据，所以需要设计一个存储文章的数据表：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create table</span> posts(</span><br><span class="line">    id <span class="type">int</span> auto_increment <span class="keyword">primary key</span>,</span><br><span class="line">    title <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">not null</span>,</span><br><span class="line">    content text <span class="keyword">not null</span>,</span><br><span class="line">    created_at datetime <span class="keyword">not null</span> <span class="keyword">default</span> <span class="built_in">current_timestamp</span>,</span><br><span class="line">    updated_at datetime <span class="keyword">not null</span> <span class="keyword">default</span> <span class="built_in">current_timestamp</span> <span class="keyword">on</span> <span class="keyword">update</span> <span class="built_in">current_timestamp</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>如上，针对上面这个类型的数据库进行ORM数据表类的设计，不过使用ORM框架需要引入flask-sqlalchemy：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install flask-sqlalchemy</span><br></pre></td></tr></table></figure>
+<p>开始数据表设计：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask_sqlalchemy <span class="keyword">import</span> SQLAlchemy</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column, String, Text, Integer, DateTime</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line">app.config[<span class="string">&#x27;SQLALCHEMY_DATABASE_URI&#x27;</span>] = <span class="string">&#x27;sqlite:///blogs.db&#x27;</span></span><br><span class="line">db = SQLAlchemy(app)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Blog</span>(db.Model):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;blog&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(<span class="string">&#x27;id&#x27;</span>, Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    title = Column(<span class="string">&#x27;title&#x27;</span>, String(<span class="number">100</span>), unique=<span class="literal">True</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    author = Column(<span class="string">&#x27;author&#x27;</span>, String(<span class="number">100</span>), nullable=<span class="literal">False</span>)</span><br><span class="line">    abstract = Column(<span class="string">&#x27;abstract&#x27;</span>, Text, nullable=<span class="literal">False</span>)</span><br><span class="line">    created_at = Column(<span class="string">&#x27;created_at&#x27;</span>, DateTime, default=datetime.utcnow)</span><br><span class="line">    updated_at = db.Column(<span class="string">&#x27;updated_at&#x27;</span>, DateTime, default=datetime.utcnow)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__str__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&#x27;&lt;id: <span class="subst">&#123;self.<span class="built_in">id</span>&#125;</span>, title: <span class="subst">&#123;self.title&#125;</span>, author: <span class="subst">&#123;self.author&#125;</span>, created_at: <span class="subst">&#123;self.created_at&#125;</span>&gt;&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>如上为数据库model的设计，使用的是本地轻量级sqlite数据库，针对这个数据库，需要进行的初始化动作，设计成如下命令来进行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> click</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"><span class="meta">@app.cli.command()</span></span><br><span class="line"><span class="meta">@click.option(<span class="params"><span class="string">&#x27;--drop&#x27;</span>, is_flag=<span class="literal">True</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">init</span>(<span class="params">drop</span>):</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;初始化数据库&#x27;&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">if</span> drop:</span><br><span class="line">        db.drop_all()</span><br><span class="line">        db.create_all()</span><br><span class="line">        blogs = [Blog(title=<span class="string">&#x27;哈哈哈哈&#x27;</span>, author=<span class="string">&#x27;a&#x27;</span>, abstract=<span class="string">&#x27;just a&#x27;</span>),</span><br><span class="line">                 Blog(title=<span class="string">&#x27;嘻嘻嘻嘻&#x27;</span>, author=<span class="string">&#x27;b&#x27;</span>, abstract=<span class="string">&#x27;just b&#x27;</span>),</span><br><span class="line">                 Blog(title=<span class="string">&#x27;阿巴阿巴&#x27;</span>, author=<span class="string">&#x27;啊巴&#x27;</span>, abstract=<span class="string">&#x27;just 啊巴&#x27;</span>)]</span><br><span class="line">        db.session.add_all(blogs)</span><br><span class="line">        db.session.commit()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        db.create_all()</span><br><span class="line">    click.echo(<span class="string">&#x27;数据表初始化&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>可以使用flask查看help命令看到上面命令信息，注释部分正是命令行的帮助信息，可以通过<code>flask init</code>来进行简单数据库表创建，添加drop参数可以进行所有数据表的删除后重新创表并插入信息。这里用的就是<code>flask init --drop</code>的命令(后来想了想，好像没有不添加drop参数的使用场合)，进行数据表生成后，设计一下数据表查询逻辑，和vue进行交互：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/blogs&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">lists</span>():</span><br><span class="line">    blogs = Blog.query.<span class="built_in">all</span>()</span><br><span class="line">    logger.info(blogs)</span><br><span class="line">    <span class="keyword">return</span> jsonify(blogs)</span><br></pre></td></tr></table></figure>
+<p>针对上面的数据表逻辑，vue还需要改改，而且js部分也需要请求后才能进行template的渲染：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">                  &lt;table class=&quot;table table-hover&quot;&gt;</span><br><span class="line">                    &lt;thead&gt;</span><br><span class="line">                        &lt;tr&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;id&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;title&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;author&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;abstract&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;created_at&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;updated_at&lt;/th&gt;</span><br><span class="line">                            &lt;th&gt;&lt;/th&gt;</span><br><span class="line">                        &lt;/tr&gt;</span><br><span class="line">                    &lt;/thead&gt;</span><br><span class="line">                    &lt;tbody&gt;</span><br><span class="line">                        &lt;tr v-for=&quot;(blog, index) in blogs&quot; :key=&quot;index&quot;&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.id &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.title &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.author &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.content &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.created_at&#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.updated_at &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;</span><br><span class="line">                                &lt;div class=&quot;btn-group&quot; role=&quot;group&quot;&gt;</span><br><span class="line">                                    &lt;button type=&quot;button&quot; class=&quot;btn btn-warning btn-sm&quot;&gt;更新&lt;/button&gt;</span><br><span class="line">                                    &lt;button type=&quot;button&quot; class=&quot;btn btn-danger btn-sm&quot;&gt;删除&lt;/button&gt;</span><br><span class="line">                                &lt;/div&gt;</span><br><span class="line">                            &lt;/td&gt;</span><br><span class="line">                        &lt;/tr&gt;</span><br><span class="line">                    &lt;/tbody&gt;</span><br><span class="line">                &lt;/table&gt;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">import axios from &#x27;axios&#x27;</span><br><span class="line"></span><br><span class="line">export default&#123;</span><br><span class="line">    name: &#x27;Blog&#x27;,</span><br><span class="line">    data() &#123;</span><br><span class="line">        return &#123;</span><br><span class="line">            blogs: []</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    methods: &#123;</span><br><span class="line">        getBlogs() &#123;</span><br><span class="line">            const path = &#x27;http://localhost:5000/blogs&#x27;</span><br><span class="line">            axios.get(path)</span><br><span class="line">                .then((res) =&gt; &#123;</span><br><span class="line">                    this.blogs = res.data.blogs;</span><br><span class="line">                &#125;)</span><br><span class="line">                .catch((error) =&gt; &#123;</span><br><span class="line">                    console.error(error)</span><br><span class="line">                &#125;)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    created() &#123;</span><br><span class="line">        this.getBlogs()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>如上修改了，样式，然后跑一下，需要说明的是，这里需要检测一下后台逻辑的blogs接口，用的postman，所以要开放外部局域网访问(因为postman在windows里面，实验环境在ubuntu)：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">source /home/blog/backend/bin/activate</span><br><span class="line">export FLASK_APP=/home/blog/backend/app.py</span><br><span class="line">flask run --host=0.0.0.0</span><br></pre></td></tr></table></figure>
+<p>结果不出意外的失败了，这是因为jsonify进行构造响应的数据是三个Blog对象，而这些个并不是可序列化对象，所以还需要转换：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">model_to_dict</span>(<span class="params"><span class="built_in">object</span></span>):</span><br><span class="line">    <span class="keyword">return</span> &#123;field.name:<span class="built_in">getattr</span>(<span class="built_in">object</span>, field.name) <span class="keyword">for</span> field <span class="keyword">in</span> <span class="built_in">object</span>.__table__.columns&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">scalars_to_list</span>(<span class="params"><span class="built_in">object</span></span>):</span><br><span class="line">    <span class="keyword">return</span> [model_to_dict(c) <span class="keyword">for</span> c <span class="keyword">in</span> <span class="built_in">object</span>]</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/blogs&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">lists</span>():</span><br><span class="line">    blogs = Blog.query.<span class="built_in">all</span>()</span><br><span class="line">    blogs = scalars_to_list(blogs)</span><br><span class="line">    logger.info(blogs)</span><br><span class="line">    <span class="keyword">return</span> jsonify(blogs)</span><br></pre></td></tr></table></figure>
+<p>计划通，结果如下：</p>
+<figure>
+<img src="/images/flask全栈postman列表效果.png" alt="postman效果" />
+<figcaption aria-hidden="true">postman效果</figcaption>
+</figure>
+<p>本来想直接就进行输出的，不过好像还是有点问题，因为Blog.vue中js部分，获取的是flask返回的json数据中的blogs数据，所以要改一改flask构造的数据样式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/blogs&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">lists</span>():</span><br><span class="line">    blogs = Blog.query.<span class="built_in">all</span>()</span><br><span class="line">    blogs = scalars_to_list(blogs)</span><br><span class="line">    logger.info(blogs)</span><br><span class="line">    <span class="keyword">return</span> jsonify(&#123;<span class="string">&#x27;blogs&#x27;</span>:blogs&#125;)</span><br></pre></td></tr></table></figure>
+<p>这样就可以了，效果如下：</p>
+<figure>
+<img src="/images/flask全栈blogs渲染.png" alt="blogs渲染效果" />
+<figcaption aria-hidden="true">blogs渲染效果</figcaption>
+</figure>
+<p>OK，继续进行设计，观察过页面的话，应该会留意到主页面的添加按钮，现在就进行添加blog逻辑的设计，首要的就是进行flask的逻辑设计，把前面的blogs路由的查询和列表数据返回结合在一起，根据请求方式进行逻辑切割：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/blogs&#x27;</span>, methods=[<span class="string">&#x27;GET&#x27;</span>, <span class="string">&#x27;POST&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">lists</span>():</span><br><span class="line">    resp_dict = &#123;<span class="string">&#x27;status&#x27;</span>:<span class="string">&#x27;success&#x27;</span>&#125;</span><br><span class="line">    <span class="keyword">if</span> request.method == <span class="string">&#x27;POST&#x27;</span>:</span><br><span class="line">        data = request.get_json()</span><br><span class="line">        blog = Blog(title=data[<span class="string">&#x27;title&#x27;</span>], author=data[<span class="string">&#x27;author&#x27;</span>], abstract=data[<span class="string">&#x27;abstract&#x27;</span>])</span><br><span class="line">        logger.info(blog)</span><br><span class="line">        db.session.add(blog)</span><br><span class="line">        db.session.commit()</span><br><span class="line">        resp_dict[<span class="string">&#x27;msg&#x27;</span>] = <span class="string">&#x27;successfully added&#x27;</span></span><br><span class="line">    blogs = Blog.query.<span class="built_in">all</span>()</span><br><span class="line">    <span class="comment"># model数据序列化</span></span><br><span class="line">    blogs = scalars_to_list(blogs)</span><br><span class="line">    logger.info(blogs)</span><br><span class="line">    <span class="comment"># 添加blogs信息</span></span><br><span class="line">    resp_dict[<span class="string">&#x27;blogs&#x27;</span>] = blogs</span><br><span class="line">    <span class="keyword">return</span> jsonify(resp_dict)</span><br></pre></td></tr></table></figure>
+<p>如上，简单的get就进行数据库查询，构造json数据库数据给vue进行渲染，另外的post就是把vue构造的新的blog信息进行Blog数据库model对象构造，然后更新数据库，再来在数据库查询部分给添加进去，下面设计一下vue的请求逻辑和处理逻辑：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&#x27;axios&#x27;</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span>&#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;Blog&#x27;</span>,</span><br><span class="line">    <span class="title function_">data</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            <span class="attr">activeAdditionModel</span>: <span class="literal">false</span>,</span><br><span class="line">            <span class="attr">additionForm</span>: &#123;</span><br><span class="line">                <span class="attr">title</span>: <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">                <span class="attr">author</span>: <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">                <span class="attr">abstract</span>: <span class="string">&#x27;&#x27;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">blogs</span>: []</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">methods</span>: &#123;</span><br><span class="line">        <span class="title function_">addBlog</span>(<span class="params">payload</span>) &#123;</span><br><span class="line">            <span class="keyword">const</span> path=<span class="string">&#x27;http://localhost:5000/blogs&#x27;</span></span><br><span class="line">            axios.<span class="title function_">post</span>(path, payload)</span><br><span class="line">                .<span class="title function_">then</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">                    <span class="comment">// 发起添加blog请求后进行渲染</span></span><br><span class="line">                    <span class="variable language_">this</span>.<span class="title function_">getBlogs</span>()</span><br><span class="line">                &#125;)</span><br><span class="line">                .<span class="title function_">catch</span>(<span class="function">(<span class="params">error</span>) =&gt;</span> &#123;</span><br><span class="line">                    <span class="variable language_">console</span>.<span class="title function_">error</span>(error)</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="title function_">getBlogs</span>()</span><br><span class="line">                &#125;)</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="title function_">getBlogs</span>(<span class="params"></span>) &#123;</span><br><span class="line">            <span class="keyword">const</span> path = <span class="string">&#x27;http://localhost:5000/blogs&#x27;</span></span><br><span class="line">            axios.<span class="title function_">get</span>(path)</span><br><span class="line">                .<span class="title function_">then</span>(<span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">blogs</span> = res.<span class="property">data</span>.<span class="property">blogs</span>;</span><br><span class="line">                &#125;)</span><br><span class="line">                .<span class="title function_">catch</span>(<span class="function">(<span class="params">error</span>) =&gt;</span> &#123;</span><br><span class="line">                    <span class="variable language_">console</span>.<span class="title function_">error</span>(error)</span><br><span class="line">                &#125;)</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="title function_">resetForm</span>(<span class="params"></span>)&#123;</span><br><span class="line">            <span class="variable language_">this</span>.<span class="title function_">initForm</span>()</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="title function_">initForm</span>(<span class="params"></span>)&#123;</span><br><span class="line">            <span class="variable language_">this</span>.<span class="property">additionForm</span>.<span class="property">title</span>=<span class="string">&#x27;&#x27;</span></span><br><span class="line">            <span class="variable language_">this</span>.<span class="property">additionForm</span>.<span class="property">author</span>=<span class="string">&#x27;&#x27;</span></span><br><span class="line">            <span class="variable language_">this</span>.<span class="property">additionForm</span>.<span class="property">abstract</span>=<span class="string">&#x27;&#x27;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="title function_">additionSubmit</span>(<span class="params"></span>)&#123;</span><br><span class="line">            <span class="variable language_">this</span>.<span class="title function_">toggleAddModal</span>()</span><br><span class="line">            <span class="keyword">const</span> payload=&#123;</span><br><span class="line">                <span class="attr">title</span>: <span class="variable language_">this</span>.<span class="property">additionForm</span>.<span class="property">title</span>,</span><br><span class="line">                <span class="attr">author</span>: <span class="variable language_">this</span>.<span class="property">additionForm</span>.<span class="property">author</span>,</span><br><span class="line">                <span class="attr">abstract</span>: <span class="variable language_">this</span>.<span class="property">additionForm</span>.<span class="property">abstract</span>,</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(payload)</span><br><span class="line">            <span class="variable language_">this</span>.<span class="title function_">addBlog</span>(payload)</span><br><span class="line">            <span class="comment">// 重置表单</span></span><br><span class="line">            <span class="variable language_">this</span>.<span class="title function_">initForm</span>()</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="title function_">toggleAddModal</span>(<span class="params"></span>)&#123;</span><br><span class="line">            <span class="keyword">const</span> body=<span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;body&#x27;</span>)</span><br><span class="line">            <span class="variable language_">this</span>.<span class="property">activeAdditionModel</span> = !<span class="variable language_">this</span>.<span class="property">activeAdditionModel</span></span><br><span class="line">            <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">activeAdditionModel</span>)&#123;</span><br><span class="line">                body.<span class="property">classList</span>.<span class="title function_">add</span>(<span class="string">&#x27;modal-open&#x27;</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                body.<span class="property">classList</span>.<span class="title function_">remove</span>(<span class="string">&#x27;modal-open&#x27;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">created</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">getBlogs</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>如上，关注axios请求，分出get和post请求，关注post请求应用，构造payload作为表单数据，然后指定axios请求url，最后进行post以后，再来一次get请求渲染列表页面，最后重置一下编辑页面。addBlog是post请求的主体逻辑，但这是按钮点击事件的处理逻辑(additionSubmit)的一部分。然后页面设计如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">    &lt;div class=&quot;container&quot;&gt;</span><br><span class="line">        &lt;div class=&quot;row&quot;&gt;</span><br><span class="line">            &lt;div class=&quot;col-sm-10&quot;&gt;</span><br><span class="line">                &lt;h1&gt;Blogs&lt;/h1&gt;</span><br><span class="line">                &lt;hr&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">                &lt;button </span><br><span class="line">                    type=&quot;button&quot; </span><br><span class="line">                    class=&quot;btn btn-success btn-sm&quot;</span><br><span class="line">                    @click=&quot;toggleAddModal&quot;</span><br><span class="line">                    &gt;添加&lt;/button&gt;</span><br><span class="line">                &lt;br&gt;&lt;br&gt;</span><br><span class="line">                &lt;table class=&quot;table table-hover&quot;&gt;</span><br><span class="line">                    &lt;thead&gt;</span><br><span class="line">                        &lt;tr&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;id&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;title&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;author&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;abstract&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;created_at&lt;/th&gt;</span><br><span class="line">                            &lt;th scope=&quot;col&quot;&gt;updated_at&lt;/th&gt;</span><br><span class="line">                            &lt;th&gt;&lt;/th&gt;</span><br><span class="line">                        &lt;/tr&gt;</span><br><span class="line">                    &lt;/thead&gt;</span><br><span class="line">                    &lt;tbody&gt;</span><br><span class="line">                        &lt;tr v-for=&quot;(blog, index) in blogs&quot; :key=&quot;index&quot;&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.id &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.title &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.author &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.abstract &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.created_at&#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;&#123;&#123; blog.updated_at &#125;&#125;&lt;/td&gt;</span><br><span class="line">                            &lt;td&gt;</span><br><span class="line">                                &lt;div class=&quot;btn-group&quot; role=&quot;group&quot;&gt;</span><br><span class="line">                                    &lt;button type=&quot;button&quot; class=&quot;btn btn-warning btn-sm&quot;&gt;更新&lt;/button&gt;</span><br><span class="line">                                    &lt;button type=&quot;button&quot; class=&quot;btn btn-danger btn-sm&quot;&gt;删除&lt;/button&gt;</span><br><span class="line">                                &lt;/div&gt;</span><br><span class="line">                            &lt;/td&gt;</span><br><span class="line">                        &lt;/tr&gt;</span><br><span class="line">                    &lt;/tbody&gt;</span><br><span class="line">                &lt;/table&gt;</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">        &lt;!-- 根据添加button进行页面逻辑添加 --&gt;</span><br><span class="line">        &lt;div</span><br><span class="line">            ref=&quot;additionModel&quot;</span><br><span class="line">            class=&quot;modal fade&quot;</span><br><span class="line">            :class=&quot;&#123;show: activeAdditionModel, &#x27;d-block&#x27;: activeAdditionModel&#125;&quot;</span><br><span class="line">            tabindex=&quot;-1&quot;</span><br><span class="line">            role=&quot;dialog&quot;&gt;</span><br><span class="line">            &lt;div class=&quot;modal-dialog&quot; role=&quot;document&quot;&gt;</span><br><span class="line">                &lt;div class=&quot;modal-content&quot;&gt;</span><br><span class="line">                    &lt;div class=&quot;modal-header&quot;&gt;</span><br><span class="line">                        &lt;h5 class=&quot;modal-title&quot;&gt;添加&lt;/h5&gt;</span><br><span class="line">                        &lt;button</span><br><span class="line">                            type=&quot;button&quot;</span><br><span class="line">                            class=&quot;close&quot;</span><br><span class="line">                            data-dismiss=&quot;modal&quot;</span><br><span class="line">                            aria-label=&quot;Close&quot;</span><br><span class="line">                            @click=&quot;toggleAddModal&quot;&gt;</span><br><span class="line">                            &lt;!-- 关闭按钮 --&gt;</span><br><span class="line">                            &lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;</span><br><span class="line">                        &lt;/button&gt;</span><br><span class="line">                    &lt;/div&gt;</span><br><span class="line">                    &lt;div class=&quot;modal-body&quot;&gt;</span><br><span class="line">                        &lt;form&gt;</span><br><span class="line">                            &lt;div class=&quot;mb-3&quot;&gt;</span><br><span class="line">                                &lt;label for=&quot;addTitle&quot; class=&quot;form-label&quot;&gt;Title:&lt;/label&gt;</span><br><span class="line">                                &lt;input </span><br><span class="line">                                    type=&quot;text&quot;</span><br><span class="line">                                    class=&quot;form-control&quot;</span><br><span class="line">                                    id=&quot;addTitle&quot;</span><br><span class="line">                                    v-model=&quot;additionForm.title&quot;</span><br><span class="line">                                    placeholder=&quot;输入标题&quot;&gt;</span><br><span class="line">                            &lt;/div&gt;</span><br><span class="line">                            &lt;div class=&quot;mb-3&quot;&gt;</span><br><span class="line">                                &lt;label for=&quot;addAuthor&quot; class=&quot;form-label&quot;&gt;Author:&lt;/label&gt;</span><br><span class="line">                                &lt;input </span><br><span class="line">                                    type=&quot;text&quot;</span><br><span class="line">                                    class=&quot;form-control&quot; </span><br><span class="line">                                    id=&quot;addAuthor&quot;</span><br><span class="line">                                    v-model=&quot;additionForm.author&quot;</span><br><span class="line">                                    placeholder=&quot;输入作者名&quot;&gt;</span><br><span class="line">                            &lt;/div&gt;</span><br><span class="line">                            &lt;div class=&quot;mb-3&quot;&gt;</span><br><span class="line">                                &lt;label for=&quot;addAbstract&quot; class=&quot;form-label&quot;&gt;Abstract:&lt;/label&gt;</span><br><span class="line">                                &lt;input </span><br><span class="line">                                    type=&quot;text&quot;</span><br><span class="line">                                    class=&quot;form-control&quot; </span><br><span class="line">                                    id=&quot;addAbstract&quot;</span><br><span class="line">                                    v-model=&quot;additionForm.abstract&quot;</span><br><span class="line">                                    placeholder=&quot;输入摘要&quot;&gt;</span><br><span class="line">                            &lt;/div&gt;</span><br><span class="line">                            &lt;div class=&quot;btn-group&quot; role=&quot;group&quot;&gt;</span><br><span class="line">                                &lt;button</span><br><span class="line">                                    type=&quot;button&quot;</span><br><span class="line">                                    class=&quot;btn btn-primary btn-sm&quot;</span><br><span class="line">                                    @click=&quot;additionSubmit&quot;&gt;提交&lt;/button&gt;</span><br><span class="line">                                &lt;button</span><br><span class="line">                                    type=&quot;button&quot;</span><br><span class="line">                                    class=&quot;btn btn-danger btn-sm&quot;</span><br><span class="line">                                    @click=&quot;resetForm&quot;&gt;重置&lt;/button&gt;</span><br><span class="line">                            &lt;/div&gt;</span><br><span class="line">                        &lt;/form&gt;</span><br><span class="line">                    &lt;/div&gt;</span><br><span class="line">                &lt;/div&gt;</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">        &lt;div v-if=&quot;activeAdditionModel&quot; class=&quot;modal-backdrop fade show&quot;&gt;&lt;/div&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br></pre></td></tr></table></figure>
+<p>来查看一下效果：</p>
+<figure>
+<img src="/images/全栈异端PC访问.png" alt="失败访问" />
+<figcaption aria-hidden="true">失败访问</figcaption>
+</figure>
+<p>如上访问是失败的，为什么？因为axios进行的请求是访问localhost的5000端口web，所以失败了，现在一个比较简单的办法就是进行axios的请求url的指定，并且开放flask的外界请求：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&#x27;axios&#x27;</span></span><br><span class="line">axios.<span class="property">defaults</span>.<span class="property">baseURL</span> = <span class="string">&#x27;http://192.168.1.7:5000&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>如上在main.js中添加指定url，然后修改addBlog方法和getBlogs方法中path，不用添加host了，直接就访问路由就好，还有flask运行：</p>
+<p><code>flask run --host=0.0.0.0</code></p>
+<p>OK，效果有了：</p>
+<figure>
+<img src="/images/flask全栈blog添加.gif" alt="简单效果" />
+<figcaption aria-hidden="true">简单效果</figcaption>
+</figure>
+<p>除了这个指定办法，还有着webpack的代理使用来解决这个问题，其他的一些路由就比较简单了，时间不够，留待后续。</p>
+<p></font></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">https://jack-samu.github.io/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">July 9th 2023, 1:50:37 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">March 2nd 2025, 11:33:55 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/" title="单页面blog全栈完善">
+                    <div class="nextTitle">单页面blog全栈完善</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/" title="全栈伊始">
+                    <div class="prevTitle">全栈伊始</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#vue%E9%83%A8%E5%88%86"><span class="toc-number">1.</span> <span class="toc-text">vue部分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#flask%E6%93%8D%E4%BD%9C%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">2.</span> <span class="toc-text">flask操作数据库</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

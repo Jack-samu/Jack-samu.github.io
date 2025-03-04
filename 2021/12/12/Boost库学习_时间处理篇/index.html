@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概览：记录一下Boost程序库的学习 系统：win11下WSL2，ubuntu子系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Boost库学习_时间处理篇">
+<meta property="og:url" content="https://jack-samu.github.io/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概览：记录一下Boost程序库的学习 系统：win11下WSL2，ubuntu子系统">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-12T03:12:53.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:56.067Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="c&#x2F;cpp">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>Boost库学习_时间处理篇 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">Boost库学习_时间处理篇</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                Boost库学习_时间处理篇
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="c/cpp">c/cpp</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">5.1k</span>阅读时长: <span class="post-count reading-time">24 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2021/12/12</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概览：记录一下Boost程序库的学习 系统：win11下WSL2，ubuntu子系统</p>
+<span id="more"></span>
+<h2 id="安装boost程序库">安装Boost程序库</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt-get install libboost-dev</span><br></pre></td></tr></table></figure>
+<p>安装好了以后就可以在/usr/include目录下看到boost目录了，切换进去可以看到，各种包含文件都是.hpp文件，意思是这些文件和我们常见到的头文件加静态库动态库文件不一样，我们经常可以看到声明放在头文件，实现放在库文件来对实现进行封装的形式，但Boost不一样，它把声明和实现放在同一个文件里，即.h+.cpp，只有少量库需要构建时指定链接。让我们测试一下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/version.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/config.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        std::cout &lt;&lt; BOOST_VERSION &lt;&lt; std::endl;</span><br><span class="line">        std::cout &lt;&lt; BOOST_LIB_VERSION &lt;&lt; std::endl;</span><br><span class="line">        std::cout &lt;&lt; BOOST_PLATFORM &lt;&lt; std::endl;</span><br><span class="line">        std::cout &lt;&lt; BOOST_COMPILER &lt;&lt; std::endl;</span><br><span class="line">        std::cout &lt;&lt; BOOST_STDLIB &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译运行一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ g++ -o version version.cpp -I .</span><br><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./version</span><br><span class="line">107100</span><br><span class="line">1_71</span><br><span class="line">linux</span><br><span class="line">GNU C++ version 9.3.0</span><br><span class="line">GNU libstdc++ version 20200808</span><br></pre></td></tr></table></figure>
+<p>可以看到，我们下载的是1_71版本的boost版本，测试完成。</p>
+<h2 id="c语言中的时间与日期库">c语言中的时间与日期库</h2>
+<p>学习之前我对书本中所说的c语言得到时间日期进行了一下了解，主要是以下两个函数：time和loacltime函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">time_t</span> <span class="title">time</span><span class="params">(<span class="type">time_t</span> *timer)</span></span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">tm</span> *<span class="built_in">localtime</span>(<span class="type">const</span> <span class="type">time_t</span> *timer);</span><br><span class="line"><span class="comment">//重要的变量</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">long</span>     <span class="type">time_t</span>;    <span class="comment">// 时间值time_t 为长整型的别名</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">tm</span> &#123;</span><br><span class="line">   <span class="type">int</span> tm_sec;         <span class="comment">/* 秒，范围从 0 到 59        */</span></span><br><span class="line">   <span class="type">int</span> tm_min;         <span class="comment">/* 分，范围从 0 到 59        */</span></span><br><span class="line">   <span class="type">int</span> tm_hour;        <span class="comment">/* 小时，范围从 0 到 23        */</span></span><br><span class="line">   <span class="type">int</span> tm_mday;        <span class="comment">/* 一月中的第几天，范围从 1 到 31    */</span></span><br><span class="line">   <span class="type">int</span> tm_mon;         <span class="comment">/* 月，范围从 0 到 11        */</span></span><br><span class="line">   <span class="type">int</span> tm_year;        <span class="comment">/* 自 1900 年起的年数        */</span></span><br><span class="line">   <span class="type">int</span> tm_wday;        <span class="comment">/* 一周中的第几天，范围从 0 到 6    */</span></span><br><span class="line">   <span class="type">int</span> tm_yday;        <span class="comment">/* 一年中的第几天，范围从 0 到 365    */</span></span><br><span class="line">   <span class="type">int</span> tm_isdst;       <span class="comment">/* 夏令时                */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>基本的使用就围绕time.h中的这几个函数和变量来进行。然后是一个测试程序。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">tm</span> *<span class="title">t</span>;</span></span><br><span class="line">        <span class="type">time_t</span> now;</span><br><span class="line">        time(&amp;now);</span><br><span class="line">        t = localtime(&amp;now);</span><br><span class="line"></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d.%d.%d\n&quot;</span>, t-&gt;tm_year + <span class="number">1900</span>, t-&gt;tm_mon + <span class="number">1</span>, t-&gt;tm_mday);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;一年中第%d天\n&quot;</span>, t-&gt;tm_yday);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d:%d:%d\n&quot;</span>, t-&gt;tm_hour, t-&gt;tm_min, t-&gt;tm_sec);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;date and time:%s&quot;</span>, asctime(t));</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意，上面是c代码，而且在linux环境下，windows环境下的vs编译会有所不同，像微软的vs常常有个安全警告，结果输出如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./outtime</span><br><span class="line">2021.12.11</span><br><span class="line">一年中第344天</span><br><span class="line">20:32:57</span><br><span class="line"><span class="built_in">date</span> and <span class="keyword">time</span>:Sat Dec 11 20:32:57 2021</span><br></pre></td></tr></table></figure>
+<p>以上就足以满足基本需求了，而反观c++，许多程序还是直接用着c的接口，然后作为准标准库之一的Boost中的timer、date_time和chrono就是用来处理处理时间和日期的。下面介绍的就是其中之一的timer。</p>
+<h2 id="boost库のtimer">Boost库のtimer</h2>
+<p>Boost1.48版以后，timer库就由两个组件组成，早期的timer和后面的cpu_timer，前者是基于标准c/c++库函数，后者则是基于chrono库的API，计时精度更高。而且更重要的是，Boost官方已经不再推荐使用前者，即前者的编译会出现警告，但由于我是初学者，所以就先学习早期的timer吧。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/timer.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> boost &#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">timer</span></span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">         <span class="built_in">timer</span>() &#123; _start_time = std::<span class="built_in">clock</span>(); &#125; <span class="comment">// postcondition: elapsed()==0</span></span><br><span class="line"><span class="comment">//         timer( const timer&amp; src );      // post: elapsed()==src.elapsed()</span></span><br><span class="line"><span class="comment">//        ~timer()&#123;&#125;</span></span><br><span class="line"><span class="comment">//  timer&amp; operator=( const timer&amp; src );  // post: elapsed()==src.elapsed()</span></span><br><span class="line">  <span class="function"><span class="type">void</span>   <span class="title">restart</span><span class="params">()</span> </span>&#123; _start_time = std::<span class="built_in">clock</span>(); &#125; <span class="comment">// post: elapsed()==0</span></span><br><span class="line">  <span class="function"><span class="type">double</span> <span class="title">elapsed</span><span class="params">()</span> <span class="type">const</span>                  <span class="comment">// return elapsed time in seconds</span></span></span><br><span class="line"><span class="function">    </span>&#123; <span class="keyword">return</span>  <span class="built_in">double</span>(std::<span class="built_in">clock</span>() - _start_time) / CLOCKS_PER_SEC; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">double</span> <span class="title">elapsed_max</span><span class="params">()</span> <span class="type">const</span>   <span class="comment">// return estimated maximum value for elapsed()</span></span></span><br><span class="line"><span class="function">  <span class="comment">// Portability warning: elapsed_max() may return too high a value on systems</span></span></span><br><span class="line"><span class="function">  <span class="comment">// where std::clock_t overflows or resets at surprising values.</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="built_in">double</span>((std::numeric_limits&lt;std::<span class="type">clock_t</span>&gt;::max)())</span><br><span class="line">       - <span class="built_in">double</span>(_start_time)) / <span class="built_in">double</span>(CLOCKS_PER_SEC); </span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">double</span> <span class="title">elapsed_min</span><span class="params">()</span> <span class="type">const</span>            <span class="comment">// return minimum value for elapsed()</span></span></span><br><span class="line"><span class="function">   </span>&#123; <span class="keyword">return</span> <span class="built_in">double</span>(<span class="number">1</span>)/<span class="built_in">double</span>(CLOCKS_PER_SEC); &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::<span class="type">clock_t</span> _start_time;</span><br><span class="line">&#125;; <span class="comment">// timer</span></span><br><span class="line"></span><br><span class="line">&#125; <span class="comment">// namespace boost</span></span><br></pre></td></tr></table></figure>
+<p>对于早期的timer，我们称为timer(v1)，接下来都这么称呼，官方好像也这么称呼，它包含了timer和progress_timer两个小组件（两个class），前者就在/usr/include/boost/timer.hpp中，后者在/usr/include/boost/progress.hpp中，上面就是关于timer的实现，比较简单，一眼分明。</p>
+<p>timer用来测量时间流逝，是个小型的计时器，提供毫秒级别的计时精度。让我们来看一下使用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/timer.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> boost;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        timer now;</span><br><span class="line"></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;最大时间间隔: &quot;</span></span><br><span class="line">                &lt;&lt; now.<span class="built_in">elapsed_max</span>() /<span class="number">3600</span> &lt;&lt; <span class="string">&quot;h&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;最小时间间隔：&quot;</span></span><br><span class="line">                &lt;&lt; now.<span class="built_in">elapsed_min</span>() &lt;&lt; <span class="string">&quot;s&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;时间过去了&quot;</span></span><br><span class="line">                &lt;&lt; now.<span class="built_in">elapsed</span>() &lt;&lt; <span class="string">&quot;s&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        now.<span class="built_in">restart</span>();</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;巴拉巴拉巴拉巴&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt;<span class="string">&quot;重启后现在时间过去了&quot;</span></span><br><span class="line">                &lt;&lt; now.<span class="built_in">elapsed</span>() &lt;&lt; <span class="string">&quot;s&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ g++ timerp.cpp -o timerp</span><br><span class="line">In file included from /usr/include/boost/config/header_deprecated.hpp:18,</span><br><span class="line">                 from /usr/include/boost/timer.hpp:20,</span><br><span class="line">                 from timerp.cpp:2:</span><br><span class="line">/usr/include/boost/timer.hpp:21:1: note: <span class="comment">#pragma message: This header is deprecated. Use the facilities in &lt;boost/timer/timer.hpp&gt; instead.</span></span><br><span class="line">   21 | BOOST_HEADER_DEPRECATED( <span class="string">&quot;the facilities in &lt;boost/timer/timer.hpp&gt;&quot;</span> )</span><br><span class="line">      | ^~~~~~~~~~~~~~~~~~~~~~~</span><br><span class="line">jam@DESKTOP-SJO8SMG:/mnt/c/Users/samu$ ./timerp</span><br><span class="line">最大时间间隔: 2.56205e+09h</span><br><span class="line">最小时间间隔：1e-06s</span><br><span class="line">时间过去了0.000287s</span><br><span class="line">巴拉巴拉巴拉巴</span><br><span class="line">重启后现在时间过去了4e-06s     </span><br></pre></td></tr></table></figure>
+<p>因为timer小组件就这么几种方法，使用起来很简单，如果使用<ctime>中的std::clock函数和std::clock_t变量也可以实现上面的功能(照搬即可，hhh)。如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ctime&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;limits&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">clock_t</span> t = <span class="built_in">clock</span>();</span><br><span class="line"></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;最大时间间隔: &quot;</span></span><br><span class="line">                &lt;&lt; (<span class="built_in">double</span>((numeric_limits&lt;<span class="type">clock_t</span>&gt;::max) () ) - <span class="built_in">double</span>(t)) / <span class="built_in">double</span>(CLOCKS_PER_SEC) /<span class="number">3600</span> &lt;&lt; <span class="string">&quot;h&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;最小时间间隔：&quot;</span></span><br><span class="line">                &lt;&lt; <span class="built_in">double</span>(<span class="number">1</span>) /<span class="built_in">double</span>(CLOCKS_PER_SEC) &lt;&lt; <span class="string">&quot;s&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;时间过去了&quot;</span></span><br><span class="line">                &lt;&lt; <span class="built_in">double</span>(<span class="built_in">clock</span>() - t) / CLOCKS_PER_SEC /<span class="number">3600</span> &lt;&lt; <span class="string">&quot;s&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        t = <span class="built_in">clock</span>();</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;巴拉巴拉巴拉巴&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt;<span class="string">&quot;重启后现在时间过去了&quot;</span></span><br><span class="line">                &lt;&lt; <span class="built_in">double</span>(<span class="built_in">clock</span>() - t) / CLOCKS_PER_SEC &lt;&lt; <span class="string">&quot;s&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，上面编译的时候的确出现了来自Boost官方库的信息提示，就当做是警告了。</p>
+<p>下面的是progress_timer的实现。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">progress_timer</span> : <span class="keyword">public</span> timer, <span class="keyword">private</span> noncopyable</span><br><span class="line">&#123;</span><br><span class="line">  </span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">progress_timer</span><span class="params">( std::ostream &amp; os = std::cout )</span></span></span><br><span class="line"><span class="function">     <span class="comment">// os is hint; implementation may ignore, particularly in embedded systems</span></span></span><br><span class="line"><span class="function">     : timer(), noncopyable(), m_os(os) &#123;</span>&#125;</span><br><span class="line">  ~<span class="built_in">progress_timer</span>()</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="comment">//  A) Throwing an exception from a destructor is a Bad Thing.</span></span><br><span class="line">  <span class="comment">//  B) The progress_timer destructor does output which may throw.</span></span><br><span class="line">  <span class="comment">//  C) A progress_timer is usually not critical to the application.</span></span><br><span class="line">  <span class="comment">//  Therefore, wrap the I/O in a try block, catch and ignore all exceptions.</span></span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">// use istream instead of ios_base to workaround GNU problem (Greg Chicares)</span></span><br><span class="line">      std::istream::fmtflags old_flags = m_os.<span class="built_in">setf</span>( std::istream::fixed,</span><br><span class="line">                                                   std::istream::floatfield );</span><br><span class="line">      std::streamsize old_prec = m_os.<span class="built_in">precision</span>( <span class="number">2</span> );</span><br><span class="line">      m_os &lt;&lt; <span class="built_in">elapsed</span>() &lt;&lt; <span class="string">&quot; s\n&quot;</span> <span class="comment">// &quot;s&quot; is System International d&#x27;Unites std</span></span><br><span class="line">                        &lt;&lt; std::endl;</span><br><span class="line">      m_os.<span class="built_in">flags</span>( old_flags );</span><br><span class="line">      m_os.<span class="built_in">precision</span>( old_prec );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">catch</span> (...) &#123;&#125; <span class="comment">// eat any exceptions</span></span><br><span class="line">  &#125; <span class="comment">// ~progress_timer</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  std::ostream &amp; m_os;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>由上可得，progress_timer继承自timer和noncopyable(这个暂时不表)，就是说，上面timer的使用progress_timer也能完全胜任，且progress_timer在析构的时候还能自动输出流逝时间，你需要的话，还能重定向输出到其他位置。以上就是timer(v1)的内容。</p>
+<h2 id="boost库のdate_time">Boost库のdate_time</h2>
+<p>前面学习了timer(v1)定时器的使用，接下来学习下Boost库中的日期和时间库，首先是了解一下时间日期的度量定性。通常，根据地球的自转，前辈们确定了基本时间度量的依据，但后来人们发现，地球自转并不均匀，所以需要用闰秒闰月闰年来对时间进行调整。世界很大，因此诞生的时间度量体系也很多，其中我们的公历叫格里高利历，date_time库就是基于此，提供精确定义时间点、时间段和时间长度，加减若干天/月/年，支持与c中的tm结构体相互转换。</p>
+<p>使用方式：在jamfile中指定lib生成date_time库，因为它是Boost中少数需要编译生成库文件才能使用的，但我上面使用的是ubuntu中直接下载的库，在我的/usr/lib中并没有出现libboost_date_time的库文件，所以我又另装了centos子系统在其下进行了boost库的编译安装。具体可参考我写的这个博客：<a
+target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44948269/article/details/121856832?spm=1001.2014.3001.5501">centos7安装boost</a></p>
+<p>确认了是可用的，所以可以供大家参考参考，上面搞定后，就能在你对应的lib目录下找到libboost_date_time.a的文件名，我这里是/usr/local/lib，仔细看看你编译过程的信息就能找到的。原本习惯了windows编程，准备通过#pragma
+comment来引入第三方库即可，没曾想这是windows特有的，所以只能通过输入编译命令时引入了。
+另外关于date_time，它有两个组件，分别由两个头文件来管理：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//处理时间的组件</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/date_time/posix_time/posix_time.hpp&gt;</span></span></span><br><span class="line"><span class="comment">//处理日期的组件</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/date_time/gregorian/gregorian.hpp&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> boost::posix_time;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> boost::gregorian;</span><br></pre></td></tr></table></figure>
+<p>之所以说是管理，是因为这两个头文件是对其他头文件的一个总包，是一个抽象概念，对于以后有新库组件的添加，直接在其内部引入头文件即可，其他程序引用的头文件依然还是这个。另外，编写程序时需要注意，这里处理时间可以看成数轴运算，存在时间点和时间段的概念，也就是它们之中存在运算。</p>
+<p>如下是主要类date的一个构造，我们只看函数名就可以了，因为现在是准备使用其功能而不是实现其功能。
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>, <span class="keyword">class</span> <span class="title class_">calendar</span>, <span class="keyword">class</span> <span class="title class_">duration_type_</span>&gt;</span><br><span class="line">  <span class="keyword">class</span> <span class="title class_">BOOST_SYMBOL_VISIBLE</span> date : <span class="keyword">private</span></span><br><span class="line">       boost::less_than_comparable&lt;T, boost::equality_comparable&lt;T&gt; &gt;</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">typedef</span> T date_type;</span><br><span class="line">    <span class="keyword">typedef</span> calendar calendar_type;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> calendar::date_traits_type traits_type;</span><br><span class="line">    <span class="keyword">typedef</span> duration_type_ duration_type;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> calendar::year_type year_type;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> calendar::month_type month_type;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> calendar::day_type day_type;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> calendar::ymd_type ymd_type;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> calendar::date_rep_type date_rep_type;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> calendar::date_int_type date_int_type;</span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">typename</span> calendar::day_of_week_type day_of_week_type;</span><br><span class="line">    <span class="built_in">date</span>(year_type y, month_type m, day_type d)</span><br><span class="line">      : <span class="built_in">days_</span>(calendar::<span class="built_in">day_number</span>(<span class="built_in">ymd_type</span>(y, m, d)))&#123;&#125;</span><br><span class="line">    <span class="built_in">date</span>(<span class="type">const</span> ymd_type&amp; ymd)</span><br><span class="line">      : <span class="built_in">days_</span>(calendar::<span class="built_in">day_number</span>(ymd))&#123;&#125;</span><br><span class="line">    <span class="comment">//let the compiler write copy, assignment, and destructor</span></span><br><span class="line">    <span class="function">year_type        <span class="title">year</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    month_type       <span class="title">month</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    day_type         <span class="title">day</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    day_of_week_type <span class="title">day_of_week</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    ymd_type         <span class="title">year_month_day</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    <span class="type">bool</span> <span class="keyword">operator</span>&lt;<span class="params">(<span class="type">const</span> date_type&amp; rhs)</span>  <span class="type">const</span></span></span><br><span class="line"><span class="function">    <span class="type">bool</span> <span class="keyword">operator</span></span>==(<span class="type">const</span> date_type&amp; rhs) <span class="type">const</span></span><br><span class="line">    <span class="comment">//! check to see if date is a special value</span></span><br><span class="line">    <span class="type">bool</span> <span class="built_in">is_special</span>()<span class="type">const</span></span><br><span class="line">    <span class="comment">//! check to see if date is not a value</span></span><br><span class="line">    <span class="type">bool</span> <span class="built_in">is_not_a_date</span>()  <span class="type">const</span></span><br><span class="line">    <span class="comment">//! check to see if date is one of the infinity values</span></span><br><span class="line">    <span class="type">bool</span> <span class="built_in">is_infinity</span>()  <span class="type">const</span></span><br><span class="line">    <span class="comment">//! check to see if date is greater than all possible dates</span></span><br><span class="line">    <span class="type">bool</span> <span class="built_in">is_pos_infinity</span>()  <span class="type">const</span></span><br><span class="line">    <span class="comment">//! check to see if date is greater than all possible dates</span></span><br><span class="line">    <span class="type">bool</span> <span class="built_in">is_neg_infinity</span>()  <span class="type">const</span></span><br><span class="line">    <span class="comment">//! return as a special value or a not_special if a normal date</span></span><br><span class="line">    special_values <span class="built_in">as_special</span>()  <span class="type">const</span></span><br><span class="line">    duration_type <span class="keyword">operator</span>-(<span class="type">const</span> date_type&amp; d) <span class="type">const</span></span><br><span class="line"></span><br><span class="line">    date_type <span class="keyword">operator</span>-(<span class="type">const</span> duration_type&amp; dd) <span class="type">const</span></span><br><span class="line">    date_type <span class="keyword">operator</span>-=(<span class="type">const</span> duration_type&amp; dd)</span><br><span class="line">    date_rep_type <span class="built_in">day_count</span>() <span class="type">const</span></span><br><span class="line">    <span class="comment">//allow internal access from operators</span></span><br><span class="line">    date_type <span class="keyword">operator</span>+(<span class="type">const</span> duration_type&amp; dd) <span class="type">const</span></span><br><span class="line">    date_type <span class="keyword">operator</span>+=(<span class="type">const</span> duration_type&amp; dd)</span><br><span class="line"></span><br><span class="line">    <span class="comment">//see reference</span></span><br><span class="line">  <span class="keyword">protected</span>:</span><br><span class="line">    <span class="comment">/*! This is a private constructor which allows for the creation of new</span></span><br><span class="line"><span class="comment">      dates.  It is not exposed to users since that would require class</span></span><br><span class="line"><span class="comment">      users to understand the inner workings of the date class.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">explicit</span> <span class="built_in">date</span>(date_int_type days) : <span class="built_in">days_</span>(days)</span><br><span class="line">    <span class="keyword">explicit</span> <span class="built_in">date</span>(date_rep_type days) : <span class="built_in">days_</span>(days.<span class="built_in">as_number</span>())</span><br><span class="line">    date_int_type days_;</span><br><span class="line">  &#125;;</span><br></pre></td></tr></table></figure></p>
+<p>作为轻量级对象，它可被拷贝传值，date全面支持比较和流输入输出的操作，可当成int或者string类型。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/date_time/gregorian/gregorian.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> boost::gregorian;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//定义时间点</span></span><br><span class="line">        <span class="function">date <span class="title">d1</span><span class="params">(<span class="number">2021</span>, <span class="number">12</span>, <span class="number">14</span>)</span></span>;</span><br><span class="line">        <span class="function">date <span class="title">d2</span><span class="params">(<span class="number">1997</span>, Apr, <span class="number">10</span>)</span></span>;</span><br><span class="line">        date d3 = <span class="built_in">from_string</span>(<span class="string">&quot;2000-0-0&quot;</span>);</span><br><span class="line">        <span class="function">date <span class="title">d4</span> <span class="params">( from_string(<span class="string">&quot;2004-8-11&quot;</span>) )</span></span>;</span><br><span class="line">        date d5 = <span class="built_in">from_undelimited_string</span>(<span class="string">&quot;20160913&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//输出当前日期</span></span><br><span class="line">        cout &lt;&lt; day_clock::<span class="built_in">local_day</span>() &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; day_clock::<span class="built_in">universal_day</span>() &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//输出时间点</span></span><br><span class="line">        cout &lt;&lt; d1 &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Today is the &quot;</span> &lt;&lt; d<span class="number">1.</span><span class="built_in">day_of_week</span>() &lt;&lt; <span class="string">&quot;th day in the week.&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;This week is the &quot;</span> &lt;&lt; d<span class="number">1.</span><span class="built_in">week_number</span>() &lt;&lt; <span class="string">&quot;th week in this year.&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//输出特殊时间点</span></span><br><span class="line">        cout &lt;&lt; <span class="built_in">date</span>(neg_infin) &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="built_in">date</span>(pos_infin) &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="built_in">date</span>(not_a_date_time) &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="built_in">date</span>(max_date_time) &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="built_in">date</span>(min_date_time) &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上进行date对象的构造和几个方法使用，然后编译运行一下，由于我的库文件放在/usr/local/lib中，且配置环境变量一直没成功，我干脆在编译时使用绝对路径。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@DESKTOP-SJO8SMG samu]# g++ timerp.cpp -o timerp /usr/local/lib/libboost_date_time.a</span><br><span class="line">[root@DESKTOP-SJO8SMG samu]# ./timerp</span><br><span class="line">terminate called after throwing an instance of <span class="string">&#x27;boost::wrapexcept&lt;boost::gregorian::bad_day_of_month&gt;&#x27;</span></span><br><span class="line">  what():  Day of month value is out of range 1..31</span><br><span class="line">Aborted (core dumped)</span><br></pre></td></tr></table></figure>
+<p>不过可以看到，编译通过了，但运行却出错了，为何？因为上面使用not_a_date_time的枚举构造了一个无效日期，在输出时就会出现异常，因为这个日期的处理，date_time库是直接抛出异常，把这里的输出删掉即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@DESKTOP-SJO8SMG samu]# g++ timerp.cpp -o timerp /usr/local/lib/libboost_date_time.a#有资料说不需要-l参数，直接链接即可，加上反而出错</span><br><span class="line">[root@DESKTOP-SJO8SMG samu]# ./timerp</span><br><span class="line">2021-Dec-14</span><br><span class="line">2021-Dec-14</span><br><span class="line">2021-Dec-14</span><br><span class="line">Today is the Tue day <span class="keyword">in</span> the week.</span><br><span class="line">This week is the 50th week <span class="keyword">in</span> this year.</span><br><span class="line">-infinity</span><br><span class="line">+infinity</span><br><span class="line">9999-Dec-31</span><br><span class="line">1400-Jan-01</span><br></pre></td></tr></table></figure>
+<p>但在后续又发现几个错误，就是上面构建的d3对象，事实上是没有0月0日的，哈哈哈，over掉了。改正后的输出如上。另外要说明的是工厂类day_clock的静态方法local_day()和universal_day()的使用，它们会返回当天的日期，不过一个是本地日期一个是UTC日期，前者的使用依赖于操作系统的时区设置。上面说了not_a_date_time是表示无效日期的枚举，后面两个呢？max_date_time是指这个库允许输出的最大可能日期，min_date_time则是反过来，所以当你构造的日期对象超出界限也会报错。neg_infin和pos_infin枚举则是负无限日期和正无限日期的意思。</p>
+<p>对于from_string()和from_undelimited_string()则是工厂函数，前者用斜杠或者连字符分隔年月日，后者不用分隔符。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">      <span class="comment">//输出date对象的年月日</span></span><br><span class="line">      date::ymd_type ymd = d<span class="number">3.</span><span class="built_in">year_month_day</span>();</span><br><span class="line">      cout &lt;&lt; d<span class="number">2.</span><span class="built_in">year</span>() &lt;&lt; <span class="string">&quot;.&quot;</span> &lt;&lt; d<span class="number">2.</span><span class="built_in">month</span>() &lt;&lt; <span class="string">&quot;.&quot;</span> &lt;&lt; d<span class="number">2.</span><span class="built_in">day</span>() &lt;&lt; endl;</span><br><span class="line">      cout &lt;&lt; ymd.year &lt;&lt; <span class="string">&quot;.&quot;</span> &lt;&lt; ymd.month &lt;&lt; <span class="string">&quot;.&quot;</span> &lt;&lt; ymd.day &lt;&lt; endl;</span><br><span class="line">      cout &lt;&lt; <span class="built_in">to_iso_string</span>(d2) &lt;&lt; endl;</span><br><span class="line">      cout &lt;&lt; <span class="built_in">to_iso_extended_string</span>(d3) &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line"><span class="comment">//date对象的输入输出操作</span></span><br><span class="line">      date d;</span><br><span class="line">      cin &gt;&gt; d;</span><br><span class="line">      cout &lt;&lt; <span class="built_in">to_iso_extended_string</span>(d) &lt;&lt; endl;</span><br></pre></td></tr></table></figure>
+<p>输出年月日还可以使用year()、month()、day()函数，或者使用year_month_day()得到ymd_type结构，输出其year、month、day元素。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1997.Apr.10</span><br><span class="line">2000.Feb.2</span><br><span class="line">19970410</span><br><span class="line">2000-02-02</span><br><span class="line">2008-Jan-02#个人输入</span><br><span class="line">2008-01-02</span><br></pre></td></tr></table></figure>
+<p>另外一个重要操作是支持与c结构体tm的相互转换，主要使用to_tm()函数和date_from_tm()函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//tm和date的相互转换</span></span><br><span class="line">      tm t = <span class="built_in">to_tm</span>(d4);</span><br><span class="line">      cout &lt;&lt; t.tm_year &lt;&lt; <span class="string">&quot;.&quot;</span> &lt;&lt; t.tm_mon &lt;&lt; <span class="string">&quot;.&quot;</span> &lt;&lt; t.tm_mday &lt;&lt; endl;</span><br><span class="line">      d4 = <span class="built_in">date_from_tm</span>(t);</span><br><span class="line">      cout &lt;&lt; <span class="built_in">to_iso_extended_string</span>(d4) &lt;&lt; endl;</span><br></pre></td></tr></table></figure>
+<p>由于date是对于许多c库的一层封装甚至更底层的封装，所以这里不需要再另行引入time.h头文件，因为内部已经进行过这一步了，我们直接用即可。结果输出如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">104.7.11</span><br><span class="line">2004-08-11</span><br></pre></td></tr></table></figure>
+<p>可以看到，我没有给tm结构体的年份加上1900，所以它输出的是从1900开始到现在的年份，另外它的月份是从0开始的，所以这里是7月份。</p>
+<h2
+id="boost时间长度计算のdaysmonthsyears">Boost时间长度计算のdays、months、years</h2>
+<p>Boost库中有着以天数为单位的时长对象date_duration，它支持比较操作和加减法还有递增递减操作，可以像操作整数那样操作它，但不支持乘法、除法、取余等运算，为了方便，date_time库把date_duration定义了一个typedef，就是day，我们可以定义如下对象：
+days d1(3), d2(-3), d3(333);
+类似days的还有months、years和weeks，需要知道的是，months和years全面支持加减乘除，成员函数number_of_months()和number_of_years()可返回月数和年数，而weeks是days的子类，单位是7，行为和days相同。</p>
+<p>注：虽然是可以正常计算，但日期的计算还是要考虑我们的生活规律，比如d1为2004年2月29号，d1减一年得到的日期却是2003年2月28号，需要注意这种月末的计算。后面其实还有日期区间的概念，但目前还用不上，因为涉及区间就可以添加迭代器概念，date_time库存在日期迭代器的概念，而这个当我需要的时候再学习更新。</p>
+<h2 id="boost库の时间处理">Boost库の时间处理</h2>
+<p>上面的是关于date_time库处理日期的介绍，接下来是关于其后的时分秒的时间处理的介绍。这个部件被boost::posix_time命名空间管理，上面有介绍了，主要使用的还是time_duration的度量类，这个类可以精确到微秒级（书上是这么说的），如果头文件前定义BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG，还可以进一步精确到纳秒级。以下是time_duration.hpp中关于time_duration的类构造：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>, <span class="keyword">typename</span> rep_type&gt;</span><br><span class="line"> <span class="keyword">class</span> <span class="title class_">BOOST_SYMBOL_VISIBLE</span> time_duration : <span class="keyword">private</span></span><br><span class="line">     boost::less_than_comparable&lt;T, boost::equality_comparable&lt;T&gt; &gt;</span><br><span class="line"> <span class="comment">/* dividable, addable, and subtractable operator templates</span></span><br><span class="line"><span class="comment">  * won&#x27;t work with this class (MSVC++ 6.0). return type</span></span><br><span class="line"><span class="comment">  * from &#x27;+=&#x27; is different than expected return type</span></span><br><span class="line"><span class="comment">  * from &#x27;+&#x27;. multipliable probably wont work</span></span><br><span class="line"><span class="comment">  * either (haven&#x27;t tried) */</span></span><br><span class="line"> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">   <span class="comment">// A tag for type categorization. Can be used to detect Boost.DateTime duration types in generic code.</span></span><br><span class="line">   <span class="keyword">typedef</span> <span class="type">void</span> _is_boost_date_time_duration;</span><br><span class="line">   <span class="keyword">typedef</span> T duration_type;  <span class="comment">//the subclass</span></span><br><span class="line">   <span class="keyword">typedef</span> rep_type traits_type;</span><br><span class="line">   <span class="keyword">typedef</span> <span class="keyword">typename</span> rep_type::day_type  day_type;</span><br><span class="line">   <span class="keyword">typedef</span> <span class="keyword">typename</span> rep_type::hour_type hour_type;</span><br><span class="line">   <span class="keyword">typedef</span> <span class="keyword">typename</span> rep_type::min_type  min_type;</span><br><span class="line">   <span class="keyword">typedef</span> <span class="keyword">typename</span> rep_type::sec_type  sec_type;</span><br><span class="line">   <span class="keyword">typedef</span> <span class="keyword">typename</span> rep_type::fractional_seconds_type fractional_seconds_type;</span><br><span class="line">   <span class="keyword">typedef</span> <span class="keyword">typename</span> rep_type::tick_type tick_type;</span><br><span class="line">   <span class="keyword">typedef</span> <span class="keyword">typename</span> rep_type::impl_type impl_type;</span><br><span class="line"></span><br><span class="line">   <span class="built_in">time_duration</span>() : <span class="built_in">ticks_</span>(<span class="number">0</span>) &#123;&#125;</span><br><span class="line">   <span class="built_in">time_duration</span>(hour_type hours_in,</span><br><span class="line">                 min_type minutes_in,</span><br><span class="line">                 sec_type seconds_in=<span class="number">0</span>,</span><br><span class="line">                 fractional_seconds_type frac_sec_in = <span class="number">0</span>) :</span><br><span class="line">     <span class="built_in">ticks_</span>(rep_type::<span class="built_in">to_tick_count</span>(hours_in,minutes_in,seconds_in,frac_sec_in))</span><br><span class="line">   &#123;&#125;</span><br><span class="line">   <span class="comment">// copy constructor required for dividable&lt;&gt;</span></span><br><span class="line">   <span class="comment">//! Construct from another time_duration (Copy constructor)</span></span><br><span class="line">   <span class="built_in">time_duration</span>(<span class="type">const</span> time_duration&lt;T, rep_type&gt;&amp; other)</span><br><span class="line">     : <span class="built_in">ticks_</span>(other.ticks_)</span><br><span class="line">   &#123;&#125;</span><br><span class="line">   <span class="comment">//! Construct from special_values</span></span><br><span class="line">   <span class="built_in">time_duration</span>(special_values sv) : <span class="built_in">ticks_</span>(impl_type::<span class="built_in">from_special</span>(sv))</span><br><span class="line">   &#123;&#125;</span><br><span class="line">   <span class="comment">//! Returns smallest representable duration</span></span><br><span class="line">   <span class="function"><span class="type">static</span> duration_type <span class="title">unit</span><span class="params">()</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Return the number of ticks in a second</span></span></span><br><span class="line"><span class="function">   <span class="type">static</span> tick_type <span class="title">ticks_per_second</span><span class="params">()</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Provide the resolution of this duration type</span></span></span><br><span class="line"><span class="function">   <span class="type">static</span> time_resolutions <span class="title">resolution</span><span class="params">()</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns number of hours in the duration</span></span></span><br><span class="line"><span class="function">   hour_type <span class="title">hours</span><span class="params">()</span>   <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns normalized number of minutes</span></span></span><br><span class="line"><span class="function">   min_type <span class="title">minutes</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns normalized number of seconds (0..60)</span></span></span><br><span class="line"><span class="function">   sec_type <span class="title">seconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns total number of seconds truncating any fractional seconds</span></span></span><br><span class="line"><span class="function">   sec_type <span class="title">total_seconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns total number of milliseconds truncating any fractional seconds</span></span></span><br><span class="line"><span class="function">   tick_type <span class="title">total_milliseconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns total number of nanoseconds truncating any sub millisecond values</span></span></span><br><span class="line"><span class="function">   tick_type <span class="title">total_nanoseconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns total number of microseconds truncating any sub microsecond values</span></span></span><br><span class="line"><span class="function">   tick_type <span class="title">total_microseconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns count of fractional seconds at given resolution</span></span></span><br><span class="line"><span class="function">   fractional_seconds_type <span class="title">fractional_seconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="comment">//! Returns number of possible digits in fractional seconds</span></span></span><br><span class="line"><span class="function">   <span class="type">static</span> <span class="type">unsigned</span> <span class="type">short</span> <span class="title">num_fractional_digits</span><span class="params">()</span></span></span><br><span class="line"><span class="function">   duration_type <span class="title">invert_sign</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="type">bool</span> <span class="title">is_negative</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="type">bool</span> <span class="keyword">operator</span>&lt;<span class="params">(<span class="type">const</span> time_duration&amp; rhs)</span>  <span class="type">const</span></span></span><br><span class="line"><span class="function">   <span class="type">bool</span> <span class="keyword">operator</span></span>==(<span class="type">const</span> time_duration&amp; rhs)  <span class="type">const</span></span><br><span class="line">   <span class="comment">//! unary- Allows for time_duration td = -td1</span></span><br><span class="line">   duration_type <span class="keyword">operator</span>-()<span class="type">const</span></span><br><span class="line">   duration_type <span class="keyword">operator</span>-(<span class="type">const</span> duration_type&amp; d) <span class="type">const</span></span><br><span class="line">   duration_type <span class="keyword">operator</span>+(<span class="type">const</span> duration_type&amp; d) <span class="type">const</span></span><br><span class="line">   duration_type <span class="keyword">operator</span>/(<span class="type">int</span> divisor) <span class="type">const</span></span><br><span class="line">   duration_type <span class="keyword">operator</span>-=(<span class="type">const</span> duration_type&amp; d)</span><br><span class="line">   duration_type <span class="keyword">operator</span>+=(<span class="type">const</span> duration_type&amp; d)</span><br><span class="line">   <span class="comment">//! Division operations on a duration with an integer.</span></span><br><span class="line">   duration_type <span class="keyword">operator</span>/=(<span class="type">int</span> divisor)</span><br><span class="line">   <span class="comment">//! Multiplication operations an a duration with an integer</span></span><br><span class="line">   duration_type <span class="keyword">operator</span>*(<span class="type">int</span> rhs) <span class="type">const</span></span><br><span class="line">   duration_type <span class="keyword">operator</span>*=(<span class="type">int</span> divisor)</span><br><span class="line">   tick_type <span class="built_in">ticks</span>() <span class="type">const</span></span><br><span class="line">   <span class="comment">//! Is ticks_ a special value?</span></span><br><span class="line">   <span class="type">bool</span> <span class="built_in">is_special</span>()<span class="type">const</span></span><br><span class="line">   <span class="comment">//! Is duration pos-infinity</span></span><br><span class="line">   <span class="type">bool</span> <span class="built_in">is_pos_infinity</span>()<span class="type">const</span></span><br><span class="line">   <span class="comment">//! Is duration neg-infinity</span></span><br><span class="line">   <span class="type">bool</span> <span class="built_in">is_neg_infinity</span>()<span class="type">const</span></span><br><span class="line">   <span class="comment">//! Is duration not-a-date-time</span></span><br><span class="line">   <span class="type">bool</span> <span class="built_in">is_not_a_date_time</span>()<span class="type">const</span></span><br><span class="line">   <span class="comment">//! Used for special_values output</span></span><br><span class="line">   impl_type <span class="built_in">get_rep</span>()<span class="type">const</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">protected</span>:</span><br><span class="line">   <span class="keyword">explicit</span> <span class="built_in">time_duration</span>(impl_type in) : <span class="built_in">ticks_</span>(in) &#123;&#125;</span><br><span class="line">   impl_type ticks_;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+<p>因为boost中组件所在的文件会直接由该组件名字命名，查找还是很方便的，但如果是边缘类就很难查找了。需要使用linux的查找命令，这个我还不太熟悉。time_duration有hours、minutes、seconds、millisec、microsec和nanosec，除了加减乘除四则运算，time_duration还支持比较和输入输出。
+示例代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/date_time/posix_time/posix_time.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> boost::posix_time;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//time_duration对象</span></span><br><span class="line">        <span class="function">time_duration <span class="title">t1</span><span class="params">(<span class="number">12</span>,<span class="number">12</span>,<span class="number">12</span>,<span class="number">12</span>)</span></span>;</span><br><span class="line">        <span class="function">time_duration <span class="title">t2</span><span class="params">(<span class="number">6</span>, <span class="number">66</span>, <span class="number">666</span>, <span class="number">6666</span>)</span></span>;</span><br><span class="line">        time_duration t_temp;</span><br><span class="line">        cout &lt;&lt; t1 &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; t2 &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//时分秒微妙</span></span><br><span class="line">        <span class="function">hours <span class="title">h</span><span class="params">(<span class="number">8</span>)</span></span>;</span><br><span class="line">        <span class="function">minutes <span class="title">m</span><span class="params">(<span class="number">88</span>)</span></span>;</span><br><span class="line">        <span class="function">seconds <span class="title">s</span><span class="params">(<span class="number">888</span>)</span></span>;</span><br><span class="line">        <span class="function">millisec <span class="title">ms</span><span class="params">(<span class="number">8888</span>)</span></span>;</span><br><span class="line">        t2 = h + m + s + ms;</span><br><span class="line">        cout &lt;&lt; t2 &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;has &quot;</span> &lt;&lt; t<span class="number">2.</span><span class="built_in">total_seconds</span>() &lt;&lt; <span class="string">&quot;secs.&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//time_duration的输入输出</span></span><br><span class="line">        time_duration <span class="type">temp_t</span>;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;请输入时间：&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cin &gt;&gt; <span class="type">temp_t</span>;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;输入的时间：&quot;</span> &lt;&lt; endl &lt;&lt; <span class="built_in">to_simple_string</span>(<span class="type">temp_t</span>) &lt;&lt; endl &lt;&lt; <span class="built_in">to_iso_string</span>(<span class="type">temp_t</span>) &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//转换成tm结构</span></span><br><span class="line">        tm t = <span class="built_in">to_tm</span>(<span class="type">temp_t</span>);</span><br><span class="line">        cout &lt;&lt; t.tm_hour &lt;&lt; <span class="string">&quot;:&quot;</span> &lt;&lt; t.tm_min &lt;&lt; <span class="string">&quot;:&quot;</span> &lt;&lt; t.tm_sec &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@DESKTOP-SJO8SMG samu]# ./timerp</span><br><span class="line">12:12:12.000012</span><br><span class="line">07:17:06.006666</span><br><span class="line">09:42:56.888000</span><br><span class="line">has 34976secs.</span><br><span class="line">请输入时间：</span><br><span class="line">23:33:33.10</span><br><span class="line">输入的时间：</span><br><span class="line">23:33:33.100000</span><br><span class="line">233333.100000</span><br><span class="line">23:33:33</span><br><span class="line">[root@DESKTOP-SJO8SMG samu]# ./timerp</span><br><span class="line">12:12:12.000012</span><br><span class="line">07:17:06.006666</span><br><span class="line">09:42:56.888000</span><br><span class="line">has 34976secs.</span><br><span class="line">请输入时间：</span><br><span class="line">23:46:46</span><br><span class="line">输入的时间：</span><br><span class="line">23:46:46</span><br><span class="line">234646</span><br><span class="line">23:46:46</span><br></pre></td></tr></table></figure>
+<p>使用还是很简单的，这里不做赘述了，因为只是简单了解使用，并不打算详细学习，所以就先到这吧。</p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">https://jack-samu.github.io/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">December 12th 2021, 11:12:53 am</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">March 2nd 2025, 11:33:56 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/" title="c++类复习">
+                    <div class="nextTitle">c++类复习</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/" title="tcp/udp底层实操第四篇">
+                    <div class="prevTitle">tcp/udp底层实操第四篇</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85boost%E7%A8%8B%E5%BA%8F%E5%BA%93"><span class="toc-number">1.</span> <span class="toc-text">安装Boost程序库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84%E6%97%B6%E9%97%B4%E4%B8%8E%E6%97%A5%E6%9C%9F%E5%BA%93"><span class="toc-number">2.</span> <span class="toc-text">c语言中的时间与日期库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#boost%E5%BA%93%E3%81%AEtimer"><span class="toc-number">3.</span> <span class="toc-text">Boost库のtimer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#boost%E5%BA%93%E3%81%AEdate_time"><span class="toc-number">4.</span> <span class="toc-text">Boost库のdate_time</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#boost%E6%97%B6%E9%97%B4%E9%95%BF%E5%BA%A6%E8%AE%A1%E7%AE%97%E3%81%AEdaysmonthsyears"><span class="toc-number">5.</span> <span class="toc-text">Boost时间长度计算のdays、months、years</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#boost%E5%BA%93%E3%81%AE%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86"><span class="toc-number">6.</span> <span class="toc-text">Boost库の时间处理</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

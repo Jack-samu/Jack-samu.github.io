@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概述：make工具是非常有用的工程管理工具，常见于linux系统使用，在windows中更多是cmake或者各种IDE来负责工程管理，个人比较喜欢啥都玩一下，所以就有了这篇简单使用总结。这里的只是总结，如果已经有c&#x2F;cpp程序编译过程的简单了解的，应该阅读不算吃力，可以先看看这篇文章，觉得很好理解当然下面就能够更快接受。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从make到cmake">
+<meta property="og:url" content="https://jack-samu.github.io/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概述：make工具是非常有用的工程管理工具，常见于linux系统使用，在windows中更多是cmake或者各种IDE来负责工程管理，个人比较喜欢啥都玩一下，所以就有了这篇简单使用总结。这里的只是总结，如果已经有c&#x2F;cpp程序编译过程的简单了解的，应该阅读不算吃力，可以先看看这篇文章，觉得很好理解当然下面就能够更快接受。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85%E7%9B%AE%E5%BD%95%E6%A0%B7%E5%BC%8F.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E7%AE%80%E5%8D%95%E4%BE%9D%E8%B5%96.png">
+<meta property="article:published_time" content="2023-05-30T01:19:29.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:34:01.472Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="c&#x2F;cpp, makefile">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jack-samu.github.io/images/%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85%E7%9B%AE%E5%BD%95%E6%A0%B7%E5%BC%8F.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>从make到cmake · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">从make到cmake</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                从make到cmake
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="c/cpp, makefile">c/cpp, makefile</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">5.7k</span>阅读时长: <span class="post-count reading-time">21 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/05/30</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概述：make工具是非常有用的工程管理工具，常见于linux系统使用，在windows中更多是cmake或者各种IDE来负责工程管理，个人比较喜欢啥都玩一下，所以就有了这篇简单使用总结。这里的只是总结，如果已经有c/cpp程序编译过程的简单了解的，应该阅读不算吃力，可以先看看<a
+target="_blank" rel="noopener" href="https://jacksamu.gitee.io/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">这篇文章</a>，觉得很好理解当然下面就能够更快接受。</p>
+<span id="more"></span>
+<h2 id="序">序</h2>
+<p>一个简单的c/cpp程序，从代码到可执行文件，主要经历预编译、编译、汇编和链接四个阶段，中间会生成预处理.i文件，编译后.s汇编文件，汇编处理后包含机器指令集的.o文件，最后进行标准库或者第三方库的链接得到可执行文件。这个过程，针对一个简单c/cpp文件来说，就一个<code>gcc/g++ test.c/test.cpp -o test</code>命令而已，但如果对于一个庞大的工程项目，来来回回的代码修改更迭，耦合解耦再耦合，简单的过程就会变得复杂，简单的一句命令就会变成一套命令才能搞定。</p>
+<p>针对这样的一套命令，makefile就算是这个命令的集合，但它的执行主体是make，它自有一套语法来解析makefile的内容，从而执行正确的编译命令。当一套工程的编译流程，归结成命令，汇总到makefile中，在后续修改不改变架构的情况下，编译一个工程就成了一句make命令和等待的事儿了。</p>
+<p>最简单的makefile语法：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">target: dependency_file</span></span><br><span class="line">&lt;TAB&gt;command</span><br></pre></td></tr></table></figure>
+<p>如上，target是目标文件，dependency_file是依赖，也是来源，要得到target文件，就需要执行command命令把dependency_file文件，试验是在windows的mingw环境，所以各种类linux的执行命令都有附带，不过make命令的使用需要修改一个可执行命令的文件名，"mingw32-make.exe"修改为"make.exe"，因为路径本来就添加到环境变量中去了的，所以不用重复改动环境然后重启。</p>
+<p><strong>一个简单的cpp程序</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> std::cout;</span><br><span class="line"><span class="keyword">using</span> std::endl;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Hello, makefile.&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这么一个cpp程序，编译成可执行文件就是<code>g++ test.cpp -o test</code>，落在makefile中就是：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">test.exe: test.cpp</span></span><br><span class="line">	g++ test.cpp -o test</span><br></pre></td></tr></table></figure>
+<p>简单跑一下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; make</span><br><span class="line">g++ test.cpp -o test</span><br><span class="line">PS D:\Desktop&gt; ./test</span><br><span class="line">Hello, makefile.</span><br></pre></td></tr></table></figure>
+<p>把前面的生成文件删掉，把g++编译命令拆解一下，就是：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">g++ -c test.cpp -o test.o</span><br><span class="line">g++ test.o -o test</span><br></pre></td></tr></table></figure>
+<p>拆解以后，再落实到makefile中：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">test: test.o</span></span><br><span class="line">	g++ test.o -o test</span><br><span class="line"><span class="section">test.o: test.cpp</span></span><br><span class="line">	g++ -c test.cpp -o test.o</span><br></pre></td></tr></table></figure>
+<p>再重新跑一下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; make</span><br><span class="line">g++ -c test.cpp -o test.o</span><br><span class="line">g++ test.o -o test</span><br><span class="line">PS D:\Desktop&gt; ./test</span><br><span class="line">Hello, makefile.</span><br><span class="line">PS D:\Desktop&gt; ls</span><br><span class="line">    目录: D:\Desktop</span><br><span class="line"></span><br><span class="line">Mode                 LastWriteTime         Length Name</span><br><span class="line">----                 -------------         ------ ----</span><br><span class="line">-a----         2023/5/30     22:06             79 makefile</span><br><span class="line">-a----         2023/5/30     21:54            133 test.cpp</span><br><span class="line">-a----         2023/5/30     22:06          56882 test.exe</span><br><span class="line">-a----         2023/5/30     22:06           2399 test.o</span><br><span class="line"></span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>好的，大致结果就这样，完成命令的拆解，落实到makefile中做成命令集，然后执行make命令，托管这些东西给make。另外就是在这个过程中，会生成很多中间文件，这些个文件对于最后发布来说，基本可以说是没啥用的了，对于这一类软件，可以给一个清理操作：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm *.o</span><br></pre></td></tr></table></figure>
+<p>因为上面的test.o是不需要的，最多就研究的时候会用到，所以就rm了，rm是linux下命令删除命令，在makefile声明了clean操作以后，clean就像make的子命令，执行<code>make clean</code>就可以进行里面的<code>rm *.o</code>一系列命令。不过毕竟是linux命令，在windows的使用还是有所差异，所以这里没有执行成功。</p>
+<blockquote>
+<p>简单讲解，一个makefile是编译命令的集群，最上层是最终结果和其依赖，而要得到这些个依赖，就要一层一层找下去，直到最早那个源文件，然后从最初的命令开始执行，逐层套娃，一直到最上面，才是需要的结果文件。但如果还定义了诸如clean的操作，在编译完成后，也是会进行对应处理的。</p>
+</blockquote>
+<h3 id="深入一点的make">1.1 深入一点的make</h3>
+<p>从一个代码文件到一个可执行文件，可以拆解成四个步骤，从这个拆解的过程来看软件发展，一个发行的可执行文件，在代码不断耦合解耦的过程中，就有了各种各样的依赖；其中编译四步中的链接的静态库和动态库的拆分，也就使得这些个发行软件有了各种各样的依赖，所以有时候一个软件安装了以后就是这样的：</p>
+<figure>
+<img src="/images/软件安装目录样式.png" alt="软件目录样式" />
+<figcaption aria-hidden="true">软件目录样式</figcaption>
+</figure>
+<p>一个发行软件，往往像上面那样，需要各种依赖，在windows中动态库静态库算是应用最泛的了吧，常常能在某某软件安装完以后，点击运行，当当！缺失某某DLL依赖，需要去微软官网去下载补丁跑一圈才能用。而且很多程序员都知道大融合时代，用不了你的代码那我就直接用你的可执行软件，再加上一个公司发行一个软件，公司内不同部门做不同部分最后拿出那么几个动态库静态库或者可执行文件，然后层层依赖，就成了一个庞大的体系。难以理解？就像现在的各种中间件一样，一个mysql数据库，主打的就是关系型数据的存储，它本身就是一个软件，但它对外提供服务，各种软件都可以使用它来作为信息存储，这样就是软件间的依赖。</p>
+<p>回归到编译过程中，为了最后形成这样的动态库或静态库又或者可执行文件的依赖，就需要有序地执行编译，这样的层层依赖，在代码中也有，.h头文件进行声明，但实现却是在两个不同的.cpp文件，如下：</p>
+<figure>
+<img src="/images/简单依赖.png" alt="交叉依赖" />
+<figcaption aria-hidden="true">交叉依赖</figcaption>
+</figure>
+<p>如上，声明在a.h头文件的一些变量、函数或者类可以分别定义实现在a.cpp和b.cpp中，而b.h头文件的一些声明可以定义实现在b.cpp当中，这就是一个交叉依赖，a.cpp中的函数实现依赖于a.h中的声明，而b.cpp同时依赖于a.h和b.h，对于这样的几个文件，因为要实现商业保密，所以把a.cpp编译成动态库，把b.cpp编译成静态库，再给个执行主体的main，实现起来就成了下面这样：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">test:main.o, libba.a, a.so</span></span><br><span class="line">	g++ main.o liba.so libb.a -o test -lb -L .</span><br><span class="line"><span class="section">libb.a: b.o</span></span><br><span class="line">	ar crs libb.a b.o</span><br><span class="line"><span class="section">liba.so: a.o</span></span><br><span class="line">	g++ -shared a.o -o liba.so</span><br><span class="line"><span class="section">main.o: main.cpp, a.h, b.h</span></span><br><span class="line">	g++ -c main.cpp -o main.o</span><br><span class="line"><span class="section">b.o: a.h, b.h, b.cpp</span></span><br><span class="line">	g++ -c b.cpp -o b.o</span><br><span class="line"><span class="section">a.o: a.h, a.cpp</span></span><br><span class="line">	g++ -c -fPIC a.cpp -o a.o</span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm *.o</span><br></pre></td></tr></table></figure>
+<p>上面只是简单的构思，具体见仁见智吧。要注意的是，对于一个工程项目，很多东西如果推倒重来，是很麻烦的事，如果你上面的项目只因为修改了一下a.cpp中fun1的内部实现，然后执行make命令的时候就全部生成一次，那这样是很耗费时间的，所以make聪明的一个地方在于，它会根据文件时间戳来决定某文件是否有变更，从而把依赖此文件的一系列文件进行重新编译，相对于整体来说，这样会很节省时间。</p>
+<p>有时候头文件进行修改，然后进行make，但发现并没有生效，可能是因为在makefile中并没有把这个头文件添加到依赖文件列表中，所以它就不把这个文件视为需要检查的文件队列里。</p>
+<h3 id="添加点东西">1.2 添加点东西</h3>
+<p>前面的就一个简单的流程，但简单的流程走下来，总有时候会有稀奇古怪的问题，所以需要检查一下情况的进展，这也是代码中添加日志输出的原因，而makefile是命令集，在某个执行的时候也可以使用echo命令来输出重要信息，用过shell脚本的应该有所了解。除此以外，还可以添加变量：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">aa = hello</span><br><span class="line"><span class="section">something:</span></span><br><span class="line">	echo <span class="variable">$(aa)</span></span><br></pre></td></tr></table></figure>
+<p>比如这样，定义了一个值为hello字符串的aa变量，然后在something(名字无所谓，反正不同)，在命令处执行echo把aa变量进行输出，结果就成了这样：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; make</span><br><span class="line">echo hello</span><br><span class="line">hello</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>这种操作可以用在设置参数部分，比如提前设定某某长长的命令执行参数为某个变量，就像一个别名，这样执行的时候就直接调用这个命令加这个变量即可。作用上类似cpp中的常量。</p>
+<h3 id="不同的赋值">1.3 不同的赋值</h3>
+<p>上面的赋值只有一个的情况下，看不出来什么特别的，但如果出来多个赋值变量，就会出错了：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tst=aa</span><br><span class="line">tst1=<span class="variable">$(tst)</span></span><br><span class="line">tst=bb</span><br><span class="line"><span class="section">all:</span></span><br><span class="line">	echo <span class="variable">$(tst1)</span></span><br></pre></td></tr></table></figure>
+<p>上面按照日常我们的各种语言的顺序来看，应该都是tst1被赋值为aa字符串才对，但实际上并不是这样：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; make</span><br><span class="line">echo bb</span><br><span class="line">bb</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>因为这个是一个延迟赋值，它是在makefile运行时才会赋值，但这个解释让人更懵，运行时再赋值？这么说就是先运行了<code>tst=bb</code>才运行的all中命令？所以可以确定它连赋值都是逆序，从下而上的不？不过记住这个赋值有延迟就够了，要正常赋值，可以使用:=，修改一下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tst=aa</span><br><span class="line">tst1 := <span class="variable">$(tst)</span></span><br><span class="line">tst=bb</span><br><span class="line"><span class="section">all:</span></span><br><span class="line">	echo <span class="variable">$(tst1)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; make</span><br><span class="line">echo aa</span><br><span class="line">aa</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>这样就有比较正常的结果了。除了延迟赋值=，立即赋值:=，还有着空赋值?=，这种是变量没有给设置值只是一个空变量的时候就赋值，不然就保持原值：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tst=aa</span><br><span class="line">tst1 ?= <span class="variable">$(tst)</span></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">	echo <span class="variable">$(tst1)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; make</span><br><span class="line">echo aa</span><br><span class="line">aa</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>这里因为一开始tst1就是空的，所以空赋值就存了tst的aa的值，如果它一开始就已经赋值，那结果就不一样了：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tst=aa</span><br><span class="line">tst1 ?= <span class="variable">$(tst)</span></span><br><span class="line">tst=bb</span><br><span class="line"><span class="section">all:</span></span><br><span class="line">	echo <span class="variable">$(tst1)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; make</span><br><span class="line">echo bb</span><br><span class="line">bb</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>这一种可以用来在工程文件中，设置一个不确定是否存在的变量，如果有了那就按照原来的值来，没有就用上新设置的值，空赋值就是这么个使用。</p>
+<h3 id="特殊的自动变量">1.4 特殊的自动变量</h3>
+<p>有那么几个自动变量，比如$&lt;表示第一个依赖文件：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">file: file.a, file.b</span></span><br><span class="line">	echo <span class="variable">$&lt;</span></span><br><span class="line"><span class="section">file.a:</span></span><br><span class="line"><span class="section">file.b:</span></span><br></pre></td></tr></table></figure>
+<p>照理来说，这样的语法是没问题的，但它一直报错说没有生成file.a或者file.b的rule，删去这部分以后也有问题，同样的情况在linux中也出错，看来就算是实验还需要有确切文件存在？那接下来就简单记录那么些个特殊变量和使用样式就好：</p>
+<p>$^ 表示所有依赖，使用样式如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">test: test.cpp</span></span><br><span class="line">	echo <span class="variable">$^</span></span><br><span class="line">	g++ <span class="variable">$^</span> -o test</span><br></pre></td></tr></table></figure>
+<p>$@ 表示目标：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">test: test.cpp</span></span><br><span class="line">	echo <span class="variable">$@</span></span><br><span class="line">	g++ <span class="variable">$^</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+<p>总的来说，makefile的使用，就会类似一个shell脚本，里面都是命令集，跟随特定语法的指示下有序执行。常见的是一个递归关系去确认整个依赖树，然后递归执行。</p>
+<h3 id="自动推导">1.5 自动推导</h3>
+<p>在makefile中有很多自动隐含的规则，就是自动推导：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">test: test.o</span></span><br><span class="line">	g++ test.o -o test</span><br></pre></td></tr></table></figure>
+<p>如上，并没有显式表示test.o的依赖，在测试中我也只保留一份test.cpp文件，上面的依赖规则却指明需要test.o的参与，所以make自动推导test同名的cpp文件，生成test.o文件，再来生成最后的test文件，这种自动隐藏的规则很危险，因为人的想法没有那么直接，在一个执行过程中往往会因各种原因而出现千奇百怪的结果，所以还是需要进行显式确定。这也是在c/cpp编程中，各种限制自动推导的原因吧。但高手会用还是会用，个人能明了写清就已经是最大追求，看懂当然是必须。</p>
+<h3 id="有用的vpath">有用的VPATH</h3>
+<p>前面的实验都是在一个目录下进行实验，而makefile默认会在当前目录下去找寻依赖，但一个c/cpp项目，往往其下有着各种各样的包，当中要生成奇奇怪怪的各种目标文件，这也是很多github发行包，使用make安装的其下各种目录都有着它独特的makefile的原因。但这是泾渭分明的情况，有时候编译的时候需要夸目录去寻找依赖，这就需要使用VPATH了：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VPATH=src:../test</span><br></pre></td></tr></table></figure>
+<p>以上表示VPATH所在makefile，标明依赖路径除了当前所在目录，还可以去当前目录的src目录和父级目录的test目录下去寻找依赖，因为linux下的分割符是冒号:，所以这里使用冒号分割两个路径。还可以进行匹配，不过上面的是VPATH大写的变量，下面的是vpath关键字：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">vpath</span> %.cpp src</span><br></pre></td></tr></table></figure>
+<p>如上表示在当前src目录下所有.cpp都是依赖文件，%是通配符用法，命令中使用广泛，表示0或多个字符。当前的使用都是设置，vpath单个出现就是表示前面的vpath的设置都清除掉的意思。</p>
+<h3 id="条件分支">条件分支</h3>
+<p>很多定义了语法的，都会定义条件分支，makefile语法也不例外，它的条件分支的语法样式如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ifeq</span> stat</span><br><span class="line">	exp</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	exp1</span><br><span class="line"><span class="keyword">endif</span></span><br></pre></td></tr></table></figure>
+<p>如上，ifeq开启语句块，endif记性语句块闭合，就这样。</p>
+<h3 id="一些内置函数">一些内置函数</h3>
+<p>首先，在makefile中函数的使用需要以$起头，然后隔一个空格再用括号或者大括号把函数名和参数给包圆，内部参数列表不会再用括号括起来进行表示(考验眼力？)，常用的内置函数有subst字符替换函数，patsubst通过通配符确定规则的字符替换函数，去除空格的strip函数，查找字符串的findstring函数，还有filter、filter-out、sort、word、wordlist等等。举例实在太多，实际用的就那么几个，直接查<a
+target="_blank" rel="noopener" href="https://seisman.github.io/how-to-write-makefile/functions.html">资料</a>吧。</p>
+<h2 id="来一个相对正式点的例子">来一个相对正式点的例子</h2>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CC=g++</span><br><span class="line">CFLAGS=-c -Wall</span><br><span class="line">LDFLAGS=</span><br><span class="line">SOURCES=main.cpp hello.cpp</span><br><span class="line">OBJECTS=$(SOURCES:.cpp=.o)</span><br><span class="line">EXECUTABLE=hello</span><br><span class="line"></span><br><span class="line"><span class="section">all: <span class="variable">$(SOURCES)</span> <span class="variable">$(EXECUTABLE)</span></span></span><br><span class="line"></span><br><span class="line"><span class="variable">$(EXECUTABLE)</span>: <span class="variable">$(OBJECTS)</span></span><br><span class="line">	<span class="variable">$(CC)</span> <span class="variable">$(LDFLAGS)</span> <span class="variable">$(OBJECTS)</span> -o <span class="variable">$@</span></span><br><span class="line"></span><br><span class="line"><span class="section">.cpp.o:</span></span><br><span class="line">	<span class="variable">$(CC)</span> <span class="variable">$(CFLAGS)</span> <span class="variable">$&lt;</span> -o <span class="variable">$@</span></span><br><span class="line"></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm -rf <span class="variable">$(OBJECTS)</span></span><br></pre></td></tr></table></figure>
+<p>上面首先是定义了CC、CFLAGS、SOURCES、OBJECTS、EXECUTABLE变量，也置空了LDFLAGS以待后续需要，all标明了项目中所有涉及文件。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(EXECUTABLE)</span>: <span class="variable">$(OBJECTS)</span></span><br><span class="line">	<span class="variable">$(CC)</span> <span class="variable">$(LDFLAGS)</span> <span class="variable">$(OBJECTS)</span> -o <span class="variable">$@</span></span><br><span class="line"></span><br><span class="line"><span class="section">.cpp.o:</span></span><br><span class="line">	<span class="variable">$(CC)</span> <span class="variable">$(CFLAGS)</span> <span class="variable">$&lt;</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+<p>这里则是命令的执行过程，最下面的是生成目标文件，上面的是生成可执行文件，后续还定义了clean清理。</p>
+<h2 id="二cmake来了">二、cmake来了</h2>
+<p>作为跨平台的开源的一个构建系统，cmake的使用在linux还是很普遍的，虽然在windows上用的更多，因为GUI嘛。使用前，首先是安装，在windows里面的话，去官网下载就完了，一键安装就完了：</p>
+<p><a target="_blank" rel="noopener" href="https://cmake.org/download/">官网地址</a></p>
+<p>在linux里面也是apt或者yum一键搞定：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ubuntu</span></span><br><span class="line">sudo apt update</span><br><span class="line">sudo apt install cmake</span><br></pre></td></tr></table></figure>
+<p>嗯。。。。。。好像centos下要用下载源包来编译安装，好吧，那就不记录这步了。安装好以后，还是习惯命令行来查看版本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; cmake --version</span><br><span class="line">cmake version 3.25.0-rc4</span><br><span class="line"></span><br><span class="line">CMake suite maintained and supported by Kitware (kitware.com/cmake).</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="简单cmakelist">2.1 简单CMakeList</h3>
+<p>和make一样，cmake也有着自己的独特文件CMakeList.txt(似乎大小写要明确)，所以关注一下cmakelist.txt文件语法，拿起前面的简单例子，来个开门红吧。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;Hello, cmakefile.&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>简单例子重申，然后是CMakeList文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">project(test)</span><br><span class="line">add_executable(test.exe test.cpp)</span><br></pre></td></tr></table></figure>
+<p>然后在当前只有test.cpp和CMakeList.txt文件的项目目录下，创建build目录(因为cmake采用out-of-source方式来进行构建，把中间产物和源文件进行分离)，然后执行<code>cd build;cmake ..</code>生成一大堆的中间文件在build中，然后在build目录下进行make。结果失败了，因为这次实验是在windows系统，所以它没有生成make需要的makefile，而是自动生成了MSVC项目。所以这里要明确指定版本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd build;cmake .. -G &quot;Unix Makefiles&quot;</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<p>这样就生成默认可执行文件了，不过因为CMakeList指定了可执行文件名为test.exe，所以它又自动加了后缀成了test.exe.exe，嗯。。。。。。问题不大。</p>
+<h3 id="cmake的拓展">2.2 cmake的拓展</h3>
+<p>整理一下，cmake的使用，是控制项目有序生成对应系统平台的build，windows下是生成比较标准的vs解决方案，嗯所以很多时候用cmake以后还是用vs打开来编译一下；linux下则是专门生成makefile(当然windows下指定参数来生成也是可以)，后面再make就行。</p>
+<p>把上面的简单例子进行一下切割，拆出输出函数为一个库，然后在main中调用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">hello</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">sayHi</span><span class="params">(<span class="type">const</span> std::string&amp; name)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>函数实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;../include/hi.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">hello</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Hello!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">sayHi</span><span class="params">(<span class="type">const</span> std::string&amp; name)</span></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Hi, &quot;</span>&lt;&lt; name &lt;&lt; <span class="string">&quot;!&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重要的调用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;include/hi.h&quot;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    std::string a = <span class="string">&quot;Jack&quot;</span>;</span><br><span class="line">    <span class="built_in">hello</span>();</span><br><span class="line">    <span class="built_in">sayHi</span>(a);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>把头文件和实现文件进行切割，分别放在include目录和src目录，然后把main放在根目录下，项目结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">D:\DESKTOP\TEST</span><br><span class="line">│   CMakeLists.txt</span><br><span class="line">│   main.cpp</span><br><span class="line">├───include</span><br><span class="line">│       hi.h</span><br><span class="line">└───src</span><br><span class="line">        hi.cpp</span><br></pre></td></tr></table></figure>
+<p>然后简单编写一下CMakeList：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># cmake版本要求</span><br><span class="line">cmake_minimum_required(VERSION 3.0)</span><br><span class="line">project(test)</span><br><span class="line"># PROJECT_SOURCE_DIR变量是cmake命令执行时的执行目录</span><br><span class="line">message(STATUS &quot;项目路径：$&#123;PROJECT_SOURCE_DIR&#125;&quot;)</span><br><span class="line"># 添加include目录路径</span><br><span class="line">include_directories($&#123;PROJECT_SOURCE_DIR&#125;/include)</span><br><span class="line"># 查找src目录下所有cpp文件为一个列表，记录在全局变量SRC_LIST中</span><br><span class="line">file(GLOB SRC_LIST $&#123;PROJECT_SOURCE_DIR&#125;/src/*.cpp)</span><br><span class="line">add_executable(test main.cpp;$&#123;SRC_LIST&#125;)</span><br></pre></td></tr></table></figure>
+<p>如上，在cmakelist中，#表示单行注释，多行注释可以使用#[[]]来进行括起来，其他的都如注释所言，比较明了吧，然后，还是这个执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建目录并切换进去</span></span><br><span class="line">mkdir build;cd build</span><br><span class="line">cmake .. -G &quot;Unix Makefiles&quot;</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<p>然后就可以在当前路径查看到可执行文件了，执行一下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop\test\build&gt; ./test</span><br><span class="line">Hello!</span><br><span class="line">Hi, Jack!</span><br></pre></td></tr></table></figure>
+<p>比较明了，除此以外，还可以通过set命令设置宏EXECUTABLE_OUTPUT_PATH的值，可以设定为项目路径的bin目录，这样可执行文件就会生成在其中了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">set(EXECUTABLE_OUTPUT_PATH $&#123;PROJECT_SOURCE_DIR&#125;/bin)</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>然后执行以后就可以在bin目录查看可执行文件了，嗯，如果没有bin目录，它会自行创建。不过，上面的方式是直接暴露所有src的做法，很多时候，各种实现都是以静态库或者动态库的形式出现，所以下面再添加一下静态库和动态库的一个库的实验。</p>
+<h3 id="静态库和动态库">2.3 静态库和动态库</h3>
+<p>在这一部分，这两种库的创建可以用简单的语句来进行，只需要进行库名和依赖文件的确定就可以了，比如要生成静态库：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">add_library(hi STATIC $&#123;SRC_LIST&#125;)</span><br><span class="line"># add_executable(test main.cpp)</span><br></pre></td></tr></table></figure>
+<p>如上，注释掉可执行文件的生成，使用add_library确定生成库名为hi，STATIC确定生成方式是静态库文件，后面SRC_LIST全局变量是依赖，然后去cmake然后make，就在build目录下得到名为libhi.a的静态库文件了，当然，这是linux形式的，如果要进行windows形式的静态库文件生成，可以引入vs帮忙，不过这里不介绍。然后引入动态库：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add_library(hi SHARED $&#123;SRC_LIST&#125;)</span><br><span class="line"># add_executable(test main.cpp)</span><br></pre></td></tr></table></figure>
+<p>同样的步骤，把参数STATIC换成SHARED即可，然后继续cmake并且make，libhi.dll和libhi.dll.a就来了，毕竟是windows系统，还是有一些系统特色限制的，并没有像真正的linux那样生成.so的动态库文件。</p>
+<p>不过上面的方式，都是在build中进行生成，所以要设定LIBRARY_OUTPUT_PATH宏来设置静态库和动态库的生成路径，重新走一遍上面的步骤，就可以在项目目录的lib目录下找到需要的静态库或动态库文件。</p>
+<h3 id="链接库文件">2.4 链接库文件</h3>
+<p>静态库和动态库，都是拿来用的嘛，接着前面的内容，把静态库或动态库分别进行一次链接，生成可执行文件。首先的是链接静态库，需要用到的是link_libraries进行链接，link_directories指定第三方库：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 指定外界第三方库文件生成路径</span><br><span class="line">set(LIBRARY_OUTPUT_PATH $&#123;PROJECT_SOURCE_DIR&#125;/lib)</span><br><span class="line">...</span><br><span class="line">add_library(hi STATIC $&#123;SRC_LIST&#125;)</span><br><span class="line"># 指定链接路径</span><br><span class="line">link_directories($&#123;PROJECT_SOURCE_DIR&#125;/lib)</span><br><span class="line"># 链接hi第三方静态库</span><br><span class="line">link_libraries(hi)</span><br><span class="line">add_executable(test main.cpp)</span><br></pre></td></tr></table></figure>
+<p>然后到bin目录下去执行test，无错，实验通过。然后是动态库，使用target_link_libraries来进行链接，同样使用link_directories来引入库路径：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">set(LIBRARY_OUTPUT_PATH $&#123;PROJECT_SOURCE_DIR&#125;/lib)</span><br><span class="line">...</span><br><span class="line">add_library(hi SHARED $&#123;SRC_LIST&#125;)</span><br><span class="line"># 指定链接路径</span><br><span class="line">link_directories($&#123;PROJECT_SOURCE_DIR&#125;/lib)</span><br><span class="line">add_executable(test main.cpp)</span><br><span class="line"># 指定动态链接的库</span><br><span class="line">target_link_libraries(test hi)</span><br></pre></td></tr></table></figure>
+<p>如上，就完成了动态库的链接了，不过正如同上面的动态库生成不够完美那样，这里的可执行文件的执行也是有问题，毕竟是linux的样式，所以执行以后就闪退了，为了解决这个办法，把可执行文件和动态库放一起，就可以了。</p>
+<h2 id="三听说的现代版cmake">三、听说的现代版cmake</h2>
+<p>在某乎上看到一篇文章，发现好像cmake分出了古代流和现代流，古代流就是上面的用法，现代流是基于cmake3版本。在前面，不是要手动创建build，然后切换目录再<code>cmake ..</code>吗？现代流cmake可以直接指定B参数或者build参数，然后它就会完成前面目标。如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cmake -B build -G &quot;Unix Makefiles&quot;</span><br><span class="line">cd build; make</span><br><span class="line">./test</span><br></pre></td></tr></table></figure>
+<p>如上，拿着最早的简单版本，完全可以达到预期目标。</p>
+<p></font></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">https://jack-samu.github.io/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">May 30th 2023, 9:19:29 am</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">March 2nd 2025, 11:34:01 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/" title="cpp预编译指令">
+                    <div class="nextTitle">cpp预编译指令</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/" title="从c代码到可执行文件">
+                    <div class="prevTitle">从c代码到可执行文件</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%8F"><span class="toc-number">1.</span> <span class="toc-text">序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B1%E5%85%A5%E4%B8%80%E7%82%B9%E7%9A%84make"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 深入一点的make</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E7%82%B9%E4%B8%9C%E8%A5%BF"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 添加点东西</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84%E8%B5%8B%E5%80%BC"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 不同的赋值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%AE%8A%E7%9A%84%E8%87%AA%E5%8A%A8%E5%8F%98%E9%87%8F"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 特殊的自动变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E6%8E%A8%E5%AF%BC"><span class="toc-number">1.5.</span> <span class="toc-text">1.5 自动推导</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E7%94%A8%E7%9A%84vpath"><span class="toc-number">1.6.</span> <span class="toc-text">有用的VPATH</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E5%88%86%E6%94%AF"><span class="toc-number">1.7.</span> <span class="toc-text">条件分支</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0"><span class="toc-number">1.8.</span> <span class="toc-text">一些内置函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A5%E4%B8%80%E4%B8%AA%E7%9B%B8%E5%AF%B9%E6%AD%A3%E5%BC%8F%E7%82%B9%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="toc-number">2.</span> <span class="toc-text">来一个相对正式点的例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8Ccmake%E6%9D%A5%E4%BA%86"><span class="toc-number">3.</span> <span class="toc-text">二、cmake来了</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95cmakelist"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 简单CMakeList</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cmake%E7%9A%84%E6%8B%93%E5%B1%95"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 cmake的拓展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 静态库和动态库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E6%8E%A5%E5%BA%93%E6%96%87%E4%BB%B6"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 链接库文件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E5%90%AC%E8%AF%B4%E7%9A%84%E7%8E%B0%E4%BB%A3%E7%89%88cmake"><span class="toc-number">4.</span> <span class="toc-text">三、听说的现代版cmake</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

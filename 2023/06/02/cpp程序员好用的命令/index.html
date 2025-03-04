@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概述：cpp在编译链接过程中，会产生很多种类的中间文件和结果文件，这些个文件是否达到预期目标，都是要进行测试的，还有当运行时出现问题，也是需要进行检测的。这里就是一些linux下帮助测试和调试的命令。除了linux系统，在windows中也可以通过安装mingw来获取各种需要的命令，它们的行为是类似的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cpp程序员好用的命令">
+<meta property="og:url" content="https://jack-samu.github.io/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概述：cpp在编译链接过程中，会产生很多种类的中间文件和结果文件，这些个文件是否达到预期目标，都是要进行测试的，还有当运行时出现问题，也是需要进行检测的。这里就是一些linux下帮助测试和调试的命令。除了linux系统，在windows中也可以通过安装mingw来获取各种需要的命令，它们的行为是类似的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-02T02:36:53.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:56.686Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="cpp, linux, shell">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>cpp程序员好用的命令 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">cpp程序员好用的命令</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                cpp程序员好用的命令
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="cpp, linux, shell">cpp, linux, shell</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">9.8k</span>阅读时长: <span class="post-count reading-time">50 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/06/02</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概述：cpp在编译链接过程中，会产生很多种类的中间文件和结果文件，这些个文件是否达到预期目标，都是要进行测试的，还有当运行时出现问题，也是需要进行检测的。这里就是一些linux下帮助测试和调试的命令。除了linux系统，在windows中也可以通过安装mingw来获取各种需要的命令，它们的行为是类似的。</p>
+<span id="more"></span>
+<h2 id="准备">准备</h2>
+<p>针对一个c/cpp代码的可执行文件的生成，通常经历预编译、编译、汇编和链接四步，期中分别使用以下命令获得特定步骤的目标文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">g++ -E hello.cpp -o hello.i</span><br><span class="line">g++ -S hello.i -o hello.s</span><br><span class="line">g++ -c hello.s -o hello.o</span><br><span class="line">g++ hello.o -o hello</span><br><span class="line">./hello</span><br></pre></td></tr></table></figure>
+<p>如下是一个简单的示例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line">using <span class="built_in">std</span>::<span class="built_in">cout</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Hello, world.\n&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上所示，就这么一个简单的hello,world例子，经历预编译、编译、汇编和链接四步就已经产生hello.i、hello.s、hello.o这些个中间文件了，如果确定索要目标已达预期？这就需要检查这些个文件的状态。</p>
+<h2 id="好用的命令">好用的命令</h2>
+<p>在linux当中编程，使用命令来获取文件信息是必不可少的环节，但这里只介绍具体命令的简单使用，其他的一些额外的知识诸如线程进程的都不去过多介绍。</p>
+<h3 id="size命令">size命令</h3>
+<p>从汇编步骤开始，目标文件都已经可以算是成型的linux多段文件，为了查看这些短信息，可以使用size命令查看。针对目标文件，size命令会输出它的段大小和总量大小。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\penta&gt; size -h</span><br><span class="line">Usage: D:\software\mingw-w64\bin\size.exe [option(s)] [file(s)]</span><br><span class="line"> Displays the sizes of sections inside binary files</span><br><span class="line"> If no input file(s) are specified, a.out is assumed</span><br><span class="line"> The options are:</span><br><span class="line">  -A|-B     --format=&#123;sysv|berkeley&#125;  Select output style (default is berkeley)</span><br><span class="line">  -o|-d|-x  --radix=&#123;8|10|16&#125;         Display numbers in octal, decimal or hex</span><br><span class="line">  -t        --totals                  Display the total sizes (Berkeley only)</span><br><span class="line">            --common                  Display total size for *COM* syms</span><br><span class="line">            --target=&lt;bfdname&gt;        Set the binary file format</span><br><span class="line">            @&lt;file&gt;                   Read options from &lt;file&gt;</span><br><span class="line">  -h        --help                    Display this information</span><br><span class="line">  -v        --version                 Display the program&#x27;s version</span><br></pre></td></tr></table></figure>
+<p>上面是安装了mingw以后在windows的powershell下的help结果，可以知道它专门针对[binary
+files]二进制文件，主要是展示它的段大小，如果没有给出目标文件，它就会自动查找当前目录是否有a.out文件。来看一下使用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; g++ hello.cpp -o hello</span><br><span class="line">PS D:\Desktop&gt; size hello.exe</span><br><span class="line">   text    data     bss     dec     hex filename</span><br><span class="line">  10004    2460    2432   14896    3a30 hello.exe</span><br><span class="line">PS D:\Desktop&gt; g++ -c hello.cpp -o hello.o</span><br><span class="line">PS D:\Desktop&gt; size hello.o</span><br><span class="line">   text    data     bss     dec     hex filename</span><br><span class="line">    352       8      16     376     178 hello.o</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>如上，在汇编步骤得到上面简单例子的目标文件以后，可以看到指令就那么点，非常简单，而再链接一下cpp标准库后生成的可执行文件却是它的几十倍。text表示正文段大小(应当是机器指令集)，data表示包含静态变量和已经初始化（可执行文件包含了初始化的值）的全局变量的数据段大小，bss由可执行文件中不含其初始化值的全局变量组成。它默认伯克利方式的输出。不过这个命令只是简单查看段大小，信息还是太少了。</p>
+<p>另外它支持的系统架构也非常多，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">D:\software\mingw-w64\bin\size.exe: supported targets: pe-x86-64 pei-x86-64 pe-bigobj-x86-64 elf64-x86-64 elf64-l1om elf64-k1om pe-i386 pei-i386 elf32-i386 elf32-iamcu elf64-little elf64-big elf32-little elf32-big plugin srec symbolsrec verilog tekhex binary ihex</span><br></pre></td></tr></table></figure>
+<h3 id="nm命令">nm命令</h3>
+<p>这个命令是用来检查文件中符号的，比如函数和全局变量等，比如尚未链接标准库的hello.o文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; nm hello.o</span><br><span class="line">0000000000000000 b .bss</span><br><span class="line">0000000000000000 d .ctors</span><br><span class="line">0000000000000000 d .data</span><br><span class="line">0000000000000000 p .pdata</span><br><span class="line">0000000000000000 r .rdata</span><br><span class="line">0000000000000000 r .rdata$.refptr._ZSt4cout</span><br><span class="line">0000000000000000 r .rdata$zzz</span><br><span class="line">0000000000000000 R .refptr._ZSt4cout</span><br><span class="line">0000000000000000 t .text</span><br><span class="line">0000000000000000 r .xdata</span><br><span class="line">                 U __main</span><br><span class="line">000000000000002b t __tcf_0</span><br><span class="line">0000000000000082 t _GLOBAL__sub_I_main</span><br><span class="line">0000000000000046 t _Z41__static_initialization_and_destruction_0ii</span><br><span class="line">                 U _ZNSt8ios_base4InitC1Ev</span><br><span class="line">                 U _ZNSt8ios_base4InitD1Ev</span><br><span class="line">                 U _ZSt4cout</span><br><span class="line">0000000000000000 r _ZStL19piecewise_construct</span><br><span class="line">0000000000000000 b _ZStL8__ioinit</span><br><span class="line">                 U _ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc</span><br><span class="line">                 U atexit</span><br><span class="line">0000000000000000 T main</span><br></pre></td></tr></table></figure>
+<p>如上，
+信息很多，但是对于现在这里，要关注的其实就是main函数入口而已，这个函数主要是检测一些.o、.a和.so库文件和目标文件，看是否把目标函数或者目标类编译进去了。比如下面这个简单库</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// test.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> std::cout;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">display</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//test.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;test.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">display</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;test.\n&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后编写一个makefile来生成test的静态库，然后再把test静态库链接进test可执行文件中：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">test: libtest.a main.o</span></span><br><span class="line">	g++ main.o -o test -ltest -L .</span><br><span class="line"><span class="section">libtest.a: test.o</span></span><br><span class="line">	ar crs libtest.a test.o</span><br><span class="line"><span class="section">main.o: main.cpp</span></span><br><span class="line">	g++ -c main.cpp -o main.o</span><br><span class="line"><span class="section">test.o: test.h test.cpp</span></span><br><span class="line">	g++ -c test.cpp -o test.o</span><br><span class="line"></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm *.o</span><br></pre></td></tr></table></figure>
+<p>然后使用nm命令来检查这里的test静态库libtest.a是否包含了display这个符号：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop\test&gt; nm .\libtest.a | findstr &quot;display&quot;</span><br><span class="line">0000000000000079 t _GLOBAL__sub_I__Z7displayv</span><br><span class="line">0000000000000000 T _Z7displayv</span><br><span class="line">PS D:\Desktop\test&gt;</span><br><span class="line">PS D:\Desktop\test&gt; nm test.o | findstr &quot;display&quot;</span><br><span class="line">0000000000000079 t _GLOBAL__sub_I__Z7displayv</span><br><span class="line">0000000000000000 T _Z7displayv</span><br><span class="line">PS D:\Desktop\test&gt; nm main.o | findstr &quot;display&quot;</span><br><span class="line">                 U _Z7displayv</span><br><span class="line">PS D:\Desktop\test&gt; nm test.exe | findstr &quot;display&quot;</span><br><span class="line">0000000000401669 t _GLOBAL__sub_I__Z7displayv</span><br><span class="line">00000000004015f0 T _Z7displayv</span><br><span class="line">PS D:\Desktop\test&gt;</span><br></pre></td></tr></table></figure>
+<p>上面有四个命令执行输出，分别是静态库libtest.a、生成静态库的目标文件test.o和生成可执行文件test的main.o和最后可执行文件，分别查看display符号信息。需要说明的是T代表代码段中全局非静态函数，U代表未定义过需要从其他对象文件中链接进来。这也展示了display在库函数中被声明被定义，然后在目标文件中被引入，然后静态文件整体链接到可执行文件中的过程。稍微修改一下，把库函数的简单函数换成一个包含简单函数和虚函数的类：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// test.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> std::cout;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Base</span>&#123;</span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">fun_a</span><span class="params">()</span></span>&#123;a=<span class="number">1</span>;&#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">fun_b</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">fun_c</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//test.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;test.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Base::fun_b</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;aaa\n&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Base::fun_c</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;virtual.\n&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重新make一下，来看看结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop\test&gt; nm test.o | findstr &quot;Base&quot;</span><br><span class="line">0000000000000000 r .rdata$_ZTI4Base</span><br><span class="line">0000000000000000 r .rdata$_ZTS4Base</span><br><span class="line">0000000000000000 r .rdata$_ZTV4Base</span><br><span class="line">00000000000000a3 t _GLOBAL__sub_I__ZN4Base5fun_bEv</span><br><span class="line">0000000000000000 T _ZN4Base5fun_bEv</span><br><span class="line">0000000000000026 T _ZN4Base5fun_cEv</span><br><span class="line">0000000000000000 R _ZTI4Base</span><br><span class="line">0000000000000000 R _ZTS4Base</span><br><span class="line">0000000000000000 R _ZTV4Base</span><br><span class="line">PS D:\Desktop\test&gt; nm .\libtest.a | findstr &quot;Base&quot;</span><br><span class="line">0000000000000000 r .rdata$_ZTI4Base</span><br><span class="line">0000000000000000 r .rdata$_ZTS4Base</span><br><span class="line">0000000000000000 r .rdata$_ZTV4Base</span><br><span class="line">00000000000000a3 t _GLOBAL__sub_I__ZN4Base5fun_bEv</span><br><span class="line">0000000000000000 T _ZN4Base5fun_bEv</span><br><span class="line">0000000000000026 T _ZN4Base5fun_cEv</span><br><span class="line">0000000000000000 R _ZTI4Base</span><br><span class="line">0000000000000000 R _ZTS4Base</span><br><span class="line">0000000000000000 R _ZTV4Base</span><br><span class="line">PS D:\Desktop\test&gt; nm main.o | findstr &quot;Base&quot;</span><br><span class="line">0000000000000000 p .pdata$_ZN4BaseC1Ev</span><br><span class="line">0000000000000000 r .rdata$.refptr._ZTV4Base</span><br><span class="line">0000000000000000 R .refptr._ZTV4Base</span><br><span class="line">0000000000000000 t .text$_ZN4BaseC1Ev</span><br><span class="line">0000000000000000 r .xdata$_ZN4BaseC1Ev</span><br><span class="line">                 U _ZN4Base5fun_bEv</span><br><span class="line">0000000000000000 T _ZN4BaseC1Ev</span><br><span class="line">                 U _ZTV4Base</span><br><span class="line">PS D:\Desktop\test&gt; nm test.exe | findstr &quot;Base&quot;</span><br><span class="line">000000000040506c p .pdata$_ZN4BaseC1Ev</span><br><span class="line">0000000000404340 r .rdata$.refptr._ZTV4Base</span><br><span class="line">00000000004044e0 r .rdata$_ZTI4Base</span><br><span class="line">00000000004044f0 r .rdata$_ZTS4Base</span><br><span class="line">0000000000404500 r .rdata$_ZTV4Base</span><br><span class="line">0000000000404340 R .refptr._ZTV4Base</span><br><span class="line">0000000000402d90 t .text$_ZN4BaseC1Ev</span><br><span class="line">0000000000406078 r .xdata$_ZN4BaseC1Ev</span><br><span class="line">0000000000400000 A __ImageBase</span><br><span class="line">00000000004029e0 T _GetPEImageBase</span><br><span class="line">00000000004016a3 t _GLOBAL__sub_I__ZN4Base5fun_bEv</span><br><span class="line">00000000004027b0 T _ValidateImageBase</span><br><span class="line">0000000000402790 t _ValidateImageBase.part.0</span><br><span class="line">0000000000401600 T _ZN4Base5fun_bEv</span><br><span class="line">0000000000401626 T _ZN4Base5fun_cEv</span><br><span class="line">0000000000402d90 T _ZN4BaseC1Ev</span><br><span class="line">00000000004044e0 R _ZTI4Base</span><br><span class="line">00000000004044f0 R _ZTS4Base</span><br><span class="line">0000000000404500 R _ZTV4Base</span><br><span class="line">PS D:\Desktop\test&gt;</span><br></pre></td></tr></table></figure>
+<p>使用nm命令来研究，对于了解其内存结构很有帮助。另外，不同系统，它的结构也有所区别，对应到nm进行查看的数据也会有区别，比如在ubuntu中：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ nm test.o</span><br><span class="line">                 U __cxa_atexit</span><br><span class="line">                 U __dso_handle</span><br><span class="line">                 U _GLOBAL_OFFSET_TABLE_</span><br><span class="line">00000000000000ae t _GLOBAL__sub_I__ZN4Base5fun_bEv</span><br><span class="line">0000000000000058 t _Z41__static_initialization_and_destruction_0ii</span><br><span class="line">0000000000000000 T _ZN4Base5fun_bEv</span><br><span class="line">000000000000002c T _ZN4Base5fun_cEv</span><br><span class="line">                 U _ZNSt8ios_base4InitC1Ev</span><br><span class="line">                 U _ZNSt8ios_base4InitD1Ev</span><br><span class="line">                 U _ZSt4cout</span><br><span class="line">0000000000000000 b _ZStL8__ioinit</span><br><span class="line">                 U _ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc</span><br><span class="line">0000000000000000 V _ZTI4Base</span><br><span class="line">0000000000000000 V _ZTS4Base</span><br><span class="line">0000000000000000 V _ZTV4Base</span><br><span class="line">                 U _ZTVN10__cxxabiv117__class_type_infoE</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ nm libtest.a </span><br><span class="line"> </span><br><span class="line">test.o:</span><br><span class="line">                 U __cxa_atexit</span><br><span class="line">                 U __dso_handle</span><br><span class="line">                 U _GLOBAL_OFFSET_TABLE_</span><br><span class="line">00000000000000ae t _GLOBAL__sub_I__ZN4Base5fun_bEv</span><br><span class="line">0000000000000058 t _Z41__static_initialization_and_destruction_0ii</span><br><span class="line">0000000000000000 T _ZN4Base5fun_bEv</span><br><span class="line">000000000000002c T _ZN4Base5fun_cEv</span><br><span class="line">                 U _ZNSt8ios_base4InitC1Ev</span><br><span class="line">                 U _ZNSt8ios_base4InitD1Ev</span><br><span class="line">                 U _ZSt4cout</span><br><span class="line">0000000000000000 b _ZStL8__ioinit</span><br><span class="line">                 U _ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc</span><br><span class="line">0000000000000000 V _ZTI4Base</span><br><span class="line">0000000000000000 V _ZTS4Base</span><br><span class="line">0000000000000000 V _ZTV4Base</span><br><span class="line">                 U _ZTVN10__cxxabiv117__class_type_infoE</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ nm main.o</span><br><span class="line">                 U __cxa_atexit</span><br><span class="line">                 U __dso_handle</span><br><span class="line">                 U _GLOBAL_OFFSET_TABLE_</span><br><span class="line">00000000000000a4 t _GLOBAL__sub_I_main</span><br><span class="line">0000000000000000 T main</span><br><span class="line">                 U __stack_chk_fail</span><br><span class="line">000000000000004e t _Z41__static_initialization_and_destruction_0ii</span><br><span class="line">                 U _ZN4Base5fun_bEv</span><br><span class="line">0000000000000000 W _ZN4BaseC1Ev</span><br><span class="line">0000000000000000 W _ZN4BaseC2Ev</span><br><span class="line">0000000000000000 n _ZN4BaseC5Ev</span><br><span class="line">                 U _ZNSt8ios_base4InitC1Ev</span><br><span class="line">                 U _ZNSt8ios_base4InitD1Ev</span><br><span class="line">0000000000000000 b _ZStL8__ioinit</span><br><span class="line">                 U _ZTV4Base</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ nm test</span><br><span class="line">000000000000038c r __abi_tag</span><br><span class="line">0000000000004010 B __bss_start</span><br><span class="line">0000000000004150 b completed.0</span><br><span class="line">                 U __cxa_atexit@GLIBC_2.2.5</span><br><span class="line">                 w __cxa_finalize@GLIBC_2.2.5</span><br><span class="line">0000000000004000 D __data_start</span><br><span class="line">0000000000004000 W data_start</span><br><span class="line">00000000000010f0 t deregister_tm_clones</span><br><span class="line">0000000000001160 t __do_global_dtors_aux</span><br><span class="line">0000000000003d68 d __do_global_dtors_aux_fini_array_entry</span><br><span class="line">0000000000004008 D __dso_handle</span><br><span class="line">0000000000003d98 d _DYNAMIC</span><br><span class="line">0000000000004010 D _edata</span><br><span class="line">0000000000004158 B _end</span><br><span class="line">000000000000134c T _fini</span><br><span class="line">00000000000011a0 t frame_dummy</span><br><span class="line">0000000000003d50 d __frame_dummy_init_array_entry</span><br><span class="line">0000000000002210 r __FRAME_END__</span><br><span class="line">0000000000003f98 d _GLOBAL_OFFSET_TABLE_</span><br><span class="line">000000000000124d t _GLOBAL__sub_I_main</span><br><span class="line">0000000000001332 t _GLOBAL__sub_I__ZN4Base5fun_bEv</span><br><span class="line">                 w __gmon_start__</span><br><span class="line">000000000000201c r __GNU_EH_FRAME_HDR</span><br><span class="line">0000000000001000 T _init</span><br><span class="line">0000000000002000 R _IO_stdin_used</span><br><span class="line">                 w _ITM_deregisterTMCloneTable</span><br><span class="line">                 w _ITM_registerTMCloneTable</span><br><span class="line">                 U __libc_start_main@GLIBC_2.34</span><br><span class="line">00000000000011a9 T main</span><br><span class="line">0000000000001120 t register_tm_clones</span><br><span class="line">                 U __stack_chk_fail@GLIBC_2.4</span><br><span class="line">00000000000010c0 T _start</span><br><span class="line">0000000000004010 D __TMC_END__</span><br><span class="line">00000000000011f7 t _Z41__static_initialization_and_destruction_0ii</span><br><span class="line">00000000000012dc t _Z41__static_initialization_and_destruction_0ii</span><br><span class="line">0000000000001284 T _ZN4Base5fun_bEv</span><br><span class="line">00000000000012b0 T _ZN4Base5fun_cEv</span><br><span class="line">0000000000001266 W _ZN4BaseC1Ev</span><br><span class="line">0000000000001266 W _ZN4BaseC2Ev</span><br><span class="line">                 U _ZNSt8ios_base4InitC1Ev@GLIBCXX_3.4</span><br><span class="line">                 U _ZNSt8ios_base4InitD1Ev@GLIBCXX_3.4</span><br><span class="line">0000000000004040 B _ZSt4cout@GLIBCXX_3.4</span><br><span class="line">0000000000004151 b _ZStL8__ioinit</span><br><span class="line">0000000000004152 b _ZStL8__ioinit</span><br><span class="line">                 U _ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@GLIBCXX_3.4</span><br><span class="line">0000000000003d88 V _ZTI4Base</span><br><span class="line">0000000000002013 V _ZTS4Base</span><br><span class="line">0000000000003d70 V _ZTV4Base</span><br><span class="line">                 U _ZTVN10__cxxabiv117__class_type_infoE@CXXABI_1.3</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<h3 id="readelf命令">readelf命令</h3>
+<p>这个命令使用在linux环境，因为linux中的可执行文件才是elf文件，而windows下的是exe文件，所以是有系统限制的。不过，好像这两个都起源于coff文件，所以是有亲缘关系的。相对于了解简单符号的nm命令，readelf可以说是详细版的nm了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ readelf -a test.o</span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 </span><br><span class="line">  Class:                             ELF64</span><br><span class="line">  Data:                              2&#x27;s complement, little endian</span><br><span class="line">  Version:                           1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI Version:                       0</span><br><span class="line">  Type:                              REL (Relocatable file)</span><br><span class="line">  Machine:                           Advanced Micro Devices X86-64</span><br><span class="line">  Version:                           0x1</span><br><span class="line">  Entry point address:               0x0</span><br><span class="line">  Start of program headers:          0 (bytes into file)</span><br><span class="line">  Start of section headers:          2176 (bytes into file)</span><br><span class="line">  Flags:                             0x0</span><br><span class="line">  Size of this header:               64 (bytes)</span><br><span class="line">  Size of program headers:           0 (bytes)</span><br><span class="line">  Number of program headers:         0</span><br><span class="line">  Size of section headers:           64 (bytes)</span><br><span class="line">  Number of section headers:         24</span><br><span class="line">  Section header string table index: 23</span><br><span class="line"> </span><br><span class="line">Section Headers:</span><br><span class="line">  [Nr] Name              Type             Address           Offset</span><br><span class="line">       Size              EntSize          Flags  Link  Info  Align</span><br><span class="line">  [ 0]                   NULL             0000000000000000  00000000</span><br><span class="line">       0000000000000000  0000000000000000           0     0     0</span><br><span class="line">  [ 1] .group            GROUP            0000000000000000  00000040</span><br><span class="line">       000000000000000c  0000000000000004          21    12     4</span><br><span class="line">  [ 2] .group            GROUP            0000000000000000  0000004c</span><br><span class="line">       000000000000000c  0000000000000004          21    13     4</span><br><span class="line">  [ 3] .group            GROUP            0000000000000000  00000058</span><br><span class="line">       0000000000000008  0000000000000004          21    15     4</span><br><span class="line">  [ 4] .text             PROGBITS         0000000000000000  00000060</span><br><span class="line">       00000000000000c7  0000000000000000  AX       0     0     2</span><br><span class="line">  [ 5] .rela.text        RELA             0000000000000000  000005a8</span><br><span class="line">       0000000000000120  0000000000000018   I      21     4     8</span><br><span class="line">  [ 6] .data             PROGBITS         0000000000000000  00000127</span><br><span class="line">       0000000000000000  0000000000000000  WA       0     0     1</span><br><span class="line">  [ 7] .bss              NOBITS           0000000000000000  00000127</span><br><span class="line">       0000000000000001  0000000000000000  WA       0     0     1</span><br><span class="line">  [ 8] .rodata           PROGBITS         0000000000000000  00000127</span><br><span class="line">       000000000000000f  0000000000000000   A       0     0     1</span><br><span class="line">  [ 9] .data.rel.ro[...] PROGBITS         0000000000000000  00000138</span><br><span class="line">       0000000000000018  0000000000000000 WAG       0     0     8</span><br><span class="line">  [10] .rela.data.r[...] RELA             0000000000000000  000006c8</span><br><span class="line">       0000000000000030  0000000000000018  IG      21     9     8</span><br><span class="line">  [11] .data.rel.ro[...] PROGBITS         0000000000000000  00000150</span><br><span class="line">       0000000000000010  0000000000000000 WAG       0     0     8</span><br><span class="line">  [12] .rela.data.r[...] RELA             0000000000000000  000006f8</span><br><span class="line">       0000000000000030  0000000000000018  IG      21    11     8</span><br><span class="line">  [13] .rodata._ZTS4Base PROGBITS         0000000000000000  00000160</span><br><span class="line">       0000000000000006  0000000000000000  AG       0     0     1</span><br><span class="line">  [14] .init_array       INIT_ARRAY       0000000000000000  00000168</span><br><span class="line">       0000000000000008  0000000000000008  WA       0     0     8</span><br><span class="line">  [15] .rela.init_array  RELA             0000000000000000  00000728</span><br><span class="line">       0000000000000018  0000000000000018   I      21    14     8</span><br><span class="line">  [16] .comment          PROGBITS         0000000000000000  00000170</span><br><span class="line">       0000000000000026  0000000000000001  MS       0     0     1</span><br><span class="line">  [17] .note.GNU-stack   PROGBITS         0000000000000000  00000196</span><br><span class="line">       0000000000000000  0000000000000000           0     0     1</span><br><span class="line">  [18] .note.gnu.pr[...] NOTE             0000000000000000  00000198</span><br><span class="line">       0000000000000020  0000000000000000   A       0     0     8</span><br><span class="line">  [19] .eh_frame         PROGBITS         0000000000000000  000001b8</span><br><span class="line">       0000000000000098  0000000000000000   A       0     0     8</span><br><span class="line">  [20] .rela.eh_frame    RELA             0000000000000000  00000740</span><br><span class="line">       0000000000000060  0000000000000018   I      21    19     8</span><br><span class="line">  [21] .symtab           SYMTAB           0000000000000000  00000250</span><br><span class="line">       00000000000001f8  0000000000000018          22     8     8</span><br><span class="line">  [22] .strtab           STRTAB           0000000000000000  00000448</span><br><span class="line">       0000000000000160  0000000000000000           0     0     1</span><br><span class="line">  [23] .shstrtab         STRTAB           0000000000000000  000007a0</span><br><span class="line">       00000000000000dc  0000000000000000           0     0     1</span><br><span class="line">Key to Flags:</span><br><span class="line">  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),</span><br><span class="line">  L (link order), O (extra OS processing required), G (group), T (TLS),</span><br><span class="line">  C (compressed), x (unknown), o (OS specific), E (exclude),</span><br><span class="line">  D (mbind), l (large), p (processor specific)</span><br><span class="line"> </span><br><span class="line">COMDAT group section [    1] `.group&#x27; [_ZTV4Base] contains 2 sections:</span><br><span class="line">   [Index]    Name</span><br><span class="line">   [    9]   .data.rel.ro.local._ZTV4Base</span><br><span class="line">   [   10]   .rela.data.rel.ro.local._ZTV4Base</span><br><span class="line"> </span><br><span class="line">COMDAT group section [    2] `.group&#x27; [_ZTI4Base] contains 2 sections:</span><br><span class="line">   [Index]    Name</span><br><span class="line">   [   11]   .data.rel.ro._ZTI4Base</span><br><span class="line">   [   12]   .rela.data.rel.ro._ZTI4Base</span><br><span class="line"> </span><br><span class="line">COMDAT group section [    3] `.group&#x27; [_ZTS4Base] contains 1 sections:</span><br><span class="line">   [Index]    Name</span><br><span class="line">   [   13]   .rodata._ZTS4Base</span><br><span class="line"> </span><br><span class="line">There are no program headers in this file.</span><br><span class="line"> </span><br><span class="line">There is no dynamic section in this file.</span><br><span class="line"> </span><br><span class="line">Relocation section &#x27;.rela.text&#x27; at offset 0x5a8 contains 12 entries:</span><br><span class="line">  Offset          Info           Type           Sym. Value    Sym. Name + Addend</span><br><span class="line">000000000013  000500000002 R_X86_64_PC32     0000000000000000 .rodata - 4</span><br><span class="line">00000000001d  000900000002 R_X86_64_PC32     0000000000000000 _ZSt4cout - 4</span><br><span class="line">000000000025  000a00000004 R_X86_64_PLT32    0000000000000000 _ZStlsISt11char_t[...] - 4</span><br><span class="line">00000000003f  000500000002 R_X86_64_PC32     0000000000000000 .rodata + 1</span><br><span class="line">000000000049  000900000002 R_X86_64_PC32     0000000000000000 _ZSt4cout - 4</span><br><span class="line">000000000051  000a00000004 R_X86_64_PLT32    0000000000000000 _ZStlsISt11char_t[...] - 4</span><br><span class="line">00000000007c  000300000002 R_X86_64_PC32     0000000000000000 .bss - 4</span><br><span class="line">000000000084  001000000004 R_X86_64_PLT32    0000000000000000 _ZNSt8ios_base4In[...] - 4</span><br><span class="line">00000000008b  001100000002 R_X86_64_PC32     0000000000000000 __dso_handle - 4</span><br><span class="line">000000000095  000300000002 R_X86_64_PC32     0000000000000000 .bss - 4</span><br><span class="line">00000000009f  00130000002a R_X86_64_REX_GOTP 0000000000000000 _ZNSt8ios_base4In[...] - 4</span><br><span class="line">0000000000a7  001400000004 R_X86_64_PLT32    0000000000000000 __cxa_atexit - 4</span><br><span class="line"> </span><br><span class="line">Relocation section &#x27;.rela.data.rel.ro.local._ZTV4Base&#x27; at offset 0x6c8 contains 2 entries:</span><br><span class="line">  Offset          Info           Type           Sym. Value    Sym. Name + Addend</span><br><span class="line">000000000008  000d00000001 R_X86_64_64       0000000000000000 _ZTI4Base + 0</span><br><span class="line">000000000010  000b00000001 R_X86_64_64       000000000000002c _ZN4Base5fun_cEv + 0</span><br><span class="line"> </span><br><span class="line">Relocation section &#x27;.rela.data.rel.ro._ZTI4Base&#x27; at offset 0x6f8 contains 2 entries:</span><br><span class="line">  Offset          Info           Type           Sym. Value    Sym. Name + Addend</span><br><span class="line">000000000000  000e00000001 R_X86_64_64       0000000000000000 _ZTVN10__cxxabiv1[...] + 10</span><br><span class="line">000000000008  000f00000001 R_X86_64_64       0000000000000000 _ZTS4Base + 0</span><br><span class="line"> </span><br><span class="line">Relocation section &#x27;.rela.init_array&#x27; at offset 0x728 contains 1 entry:</span><br><span class="line">  Offset          Info           Type           Sym. Value    Sym. Name + Addend</span><br><span class="line">000000000000  000200000001 R_X86_64_64       0000000000000000 .text + ae</span><br><span class="line"> </span><br><span class="line">Relocation section &#x27;.rela.eh_frame&#x27; at offset 0x740 contains 4 entries:</span><br><span class="line">  Offset          Info           Type           Sym. Value    Sym. Name + Addend</span><br><span class="line">000000000020  000200000002 R_X86_64_PC32     0000000000000000 .text + 0</span><br><span class="line">000000000040  000200000002 R_X86_64_PC32     0000000000000000 .text + 2c</span><br><span class="line">000000000060  000200000002 R_X86_64_PC32     0000000000000000 .text + 58</span><br><span class="line">000000000080  000200000002 R_X86_64_PC32     0000000000000000 .text + ae</span><br><span class="line">No processor specific unwind information to decode</span><br><span class="line"> </span><br><span class="line">Symbol table &#x27;.symtab&#x27; contains 21 entries:</span><br><span class="line">   Num:    Value          Size Type    Bind   Vis      Ndx Name</span><br><span class="line">     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND </span><br><span class="line">     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS test.cpp</span><br><span class="line">     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 .text</span><br><span class="line">     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 .bss</span><br><span class="line">     4: 0000000000000000     1 OBJECT  LOCAL  DEFAULT    7 _ZStL8__ioinit</span><br><span class="line">     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    8 .rodata</span><br><span class="line">     6: 0000000000000058    86 FUNC    LOCAL  DEFAULT    4 _Z41__static_ini[...]</span><br><span class="line">     7: 00000000000000ae    25 FUNC    LOCAL  DEFAULT    4 _GLOBAL__sub_I__[...]</span><br><span class="line">     8: 0000000000000000    44 FUNC    GLOBAL DEFAULT    4 _ZN4Base5fun_bEv</span><br><span class="line">     9: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZSt4cout</span><br><span class="line">    10: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZStlsISt11char_[...]</span><br><span class="line">    11: 000000000000002c    44 FUNC    GLOBAL DEFAULT    4 _ZN4Base5fun_cEv</span><br><span class="line">    12: 0000000000000000    24 OBJECT  WEAK   DEFAULT    9 _ZTV4Base</span><br><span class="line">    13: 0000000000000000    16 OBJECT  WEAK   DEFAULT   11 _ZTI4Base</span><br><span class="line">    14: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZTVN10__cxxabiv[...]</span><br><span class="line">    15: 0000000000000000     6 OBJECT  WEAK   DEFAULT   13 _ZTS4Base</span><br><span class="line">    16: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZNSt8ios_base4I[...]</span><br><span class="line">    17: 0000000000000000     0 NOTYPE  GLOBAL HIDDEN   UND __dso_handle</span><br><span class="line">    18: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _GLOBAL_OFFSET_TABLE_</span><br><span class="line">    19: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _ZNSt8ios_base4I[...]</span><br><span class="line">    20: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND __cxa_atexit</span><br><span class="line"> </span><br><span class="line">No version information found in this file.</span><br><span class="line"> </span><br><span class="line">Displaying notes found in: .note.gnu.property</span><br><span class="line">  Owner                Data size 	Description</span><br><span class="line">  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0</span><br><span class="line">      Properties: x86 feature: IBT, SHSTK</span><br></pre></td></tr></table></figure>
+<p>-a参数表示所有信息，这里仅是针对test.o这一个目标文件，就已经信息庞大至此(斗宗强者恐怖如斯)，太多信息了，回到readelf的参数使用，然后来了解一下如何阅读它的信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ readelf test.o</span><br><span class="line">Usage: readelf &lt;option(s)&gt; elf-file(s)</span><br><span class="line"> Display information about the contents of ELF format files</span><br><span class="line"> Options are:</span><br><span class="line">  -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I</span><br><span class="line">  -h --file-header       Display the ELF file header</span><br><span class="line">  -l --program-headers   Display the program headers</span><br><span class="line">     --segments          An alias for --program-headers</span><br><span class="line">  -S --section-headers   Display the sections&#x27; header</span><br><span class="line">     --sections          An alias for --section-headers</span><br><span class="line">  -g --section-groups    Display the section groups</span><br><span class="line">  -t --section-details   Display the section details</span><br><span class="line">  -e --headers           Equivalent to: -h -l -S</span><br><span class="line">  -s --syms              Display the symbol table</span><br><span class="line">     --symbols           An alias for --syms</span><br><span class="line">     --dyn-syms          Display the dynamic symbol table</span><br><span class="line">     --lto-syms          Display LTO symbol tables</span><br><span class="line">     --sym-base=[0|8|10|16] </span><br><span class="line">                         Force base for symbol sizes.  The options are </span><br><span class="line">                         mixed (the default), octal, decimal, hexadecimal.</span><br><span class="line">  -C --demangle[=STYLE]  Decode mangled/processed symbol names</span><br><span class="line">                           STYLE can be &quot;none&quot;, &quot;auto&quot;, &quot;gnu-v3&quot;, &quot;java&quot;,</span><br><span class="line">                           &quot;gnat&quot;, &quot;dlang&quot;, &quot;rust&quot;</span><br><span class="line">     --no-demangle       Do not demangle low-level symbol names.  (default)</span><br><span class="line">     --recurse-limit     Enable a demangling recursion limit.  (default)</span><br><span class="line">     --no-recurse-limit  Disable a demangling recursion limit</span><br><span class="line">     -U[dlexhi] --unicode=[default|locale|escape|hex|highlight|invalid]</span><br><span class="line">                         Display unicode characters as determined by the current locale</span><br><span class="line">                          (default), escape sequences, &quot;&lt;hex sequences&gt;&quot;, highlighted</span><br><span class="line">                          escape sequences, or treat them as invalid and display as</span><br><span class="line">                          &quot;&#123;hex sequences&#125;&quot;</span><br><span class="line">  -n --notes             Display the core notes (if present)</span><br><span class="line">  -r --relocs            Display the relocations (if present)</span><br><span class="line">  -u --unwind            Display the unwind info (if present)</span><br><span class="line">  -d --dynamic           Display the dynamic section (if present)</span><br><span class="line">  -V --version-info      Display the version sections (if present)</span><br><span class="line">  -A --arch-specific     Display architecture specific information (if any)</span><br><span class="line">  -c --archive-index     Display the symbol/file index in an archive</span><br><span class="line">  -D --use-dynamic       Use the dynamic section info when displaying symbols</span><br><span class="line">  -L --lint|--enable-checks</span><br><span class="line">                         Display warning messages for possible problems</span><br><span class="line">  -x --hex-dump=&lt;number|name&gt;</span><br><span class="line">                         Dump the contents of section &lt;number|name&gt; as bytes</span><br><span class="line">  -p --string-dump=&lt;number|name&gt;</span><br><span class="line">                         Dump the contents of section &lt;number|name&gt; as strings</span><br><span class="line">  -R --relocated-dump=&lt;number|name&gt;</span><br><span class="line">                         Dump the relocated contents of section &lt;number|name&gt;</span><br><span class="line">  -z --decompress        Decompress section before dumping it</span><br><span class="line">  -w --debug-dump[a/=abbrev, A/=addr, r/=aranges, c/=cu_index, L/=decodedline,</span><br><span class="line">                  f/=frames, F/=frames-interp, g/=gdb_index, i/=info, o/=loc,</span><br><span class="line">                  m/=macro, p/=pubnames, t/=pubtypes, R/=Ranges, l/=rawline,</span><br><span class="line">                  s/=str, O/=str-offsets, u/=trace_abbrev, T/=trace_aranges,</span><br><span class="line">                  U/=trace_info]</span><br><span class="line">                         Display the contents of DWARF debug sections</span><br><span class="line">  -wk --debug-dump=links Display the contents of sections that link to separate</span><br><span class="line">                          debuginfo files</span><br><span class="line">  -P --process-links     Display the contents of non-debug sections in separate</span><br><span class="line">                          debuginfo files.  (Implies -wK)</span><br><span class="line">  -wK --debug-dump=follow-links</span><br><span class="line">                         Follow links to separate debug info files (default)</span><br><span class="line">  -wN --debug-dump=no-follow-links</span><br><span class="line">                         Do not follow links to separate debug info files</span><br><span class="line">  --dwarf-depth=N        Do not display DIEs at depth N or greater</span><br><span class="line">  --dwarf-start=N        Display DIEs starting at offset N</span><br><span class="line">  --ctf=&lt;number|name&gt;    Display CTF info from section &lt;number|name&gt;</span><br><span class="line">  --ctf-parent=&lt;name&gt;    Use CTF archive member &lt;name&gt; as the CTF parent</span><br><span class="line">  --ctf-symbols=&lt;number|name&gt;</span><br><span class="line">                         Use section &lt;number|name&gt; as the CTF external symtab</span><br><span class="line">  --ctf-strings=&lt;number|name&gt;</span><br><span class="line">                         Use section &lt;number|name&gt; as the CTF external strtab</span><br><span class="line">  -I --histogram         Display histogram of bucket list lengths</span><br><span class="line">  -W --wide              Allow output width to exceed 80 characters</span><br><span class="line">  -T --silent-truncation If a symbol name is truncated, do not add [...] suffix</span><br><span class="line">  @&lt;file&gt;                Read options from &lt;file&gt;</span><br><span class="line">  -H --help              Display this information</span><br><span class="line">  -v --version           Display the version number of readelf</span><br></pre></td></tr></table></figure>
+<p>参数太多，所以首选几个通用的适用性强的：a参数表示全部展示，上面已经有例子了，接下来进行细分解析一下。一个elf文件有其独特的header，细分出来它还有着program和section部分，它们都有着自己独特的header，书是记录信息的载体，把一个elf看成一本书的话，header就是重要的目录部分。elf
+header描述的是文件类型、abi还有着到program header表和section
+header表的索引:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ readelf -h test</span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 </span><br><span class="line">  Class:                             ELF64</span><br><span class="line">  Data:                              2&#x27;s complement, little endian</span><br><span class="line">  Version:                           1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI Version:                       0</span><br><span class="line">  Type:                              DYN (Position-Independent Executable file)</span><br><span class="line">  Machine:                           Advanced Micro Devices X86-64</span><br><span class="line">  Version:                           0x1</span><br><span class="line">  Entry point address:               0x10c0</span><br><span class="line">  Start of program headers:          64 (bytes into file)</span><br><span class="line">  Start of section headers:          14904 (bytes into file)</span><br><span class="line">  Flags:                             0x0</span><br><span class="line">  Size of this header:               64 (bytes)</span><br><span class="line">  Size of program headers:           56 (bytes)</span><br><span class="line">  Number of program headers:         13</span><br><span class="line">  Size of section headers:           64 (bytes)</span><br><span class="line">  Number of section headers:         32</span><br><span class="line">  Section header string table index: 31</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ readelf -h test.o</span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 </span><br><span class="line">  Class:                             ELF64</span><br><span class="line">  Data:                              2&#x27;s complement, little endian</span><br><span class="line">  Version:                           1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI Version:                       0</span><br><span class="line">  Type:                              REL (Relocatable file)</span><br><span class="line">  Machine:                           Advanced Micro Devices X86-64</span><br><span class="line">  Version:                           0x1</span><br><span class="line">  Entry point address:               0x0</span><br><span class="line">  Start of program headers:          0 (bytes into file)</span><br><span class="line">  Start of section headers:          2176 (bytes into file)</span><br><span class="line">  Flags:                             0x0</span><br><span class="line">  Size of this header:               64 (bytes)</span><br><span class="line">  Size of program headers:           0 (bytes)</span><br><span class="line">  Number of program headers:         0</span><br><span class="line">  Size of section headers:           64 (bytes)</span><br><span class="line">  Number of section headers:         24</span><br><span class="line">  Section header string table index: 23</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>其后便是关系到执行时信息的program
+header，它只存在于可执行文件和共享库，所以上面test.o的信息中就没有program
+header和dynamic header，这部分信息，可以l参数进行查看：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ readelf -l test</span><br><span class="line"> </span><br><span class="line">Elf file type is DYN (Position-Independent Executable file)</span><br><span class="line">Entry point 0x10c0</span><br><span class="line">There are 13 program headers, starting at offset 64</span><br><span class="line"> </span><br><span class="line">Program Headers:</span><br><span class="line">  Type           Offset             VirtAddr           PhysAddr</span><br><span class="line">                 FileSiz            MemSiz              Flags  Align</span><br><span class="line">  PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040</span><br><span class="line">                 0x00000000000002d8 0x00000000000002d8  R      0x8</span><br><span class="line">  INTERP         0x0000000000000318 0x0000000000000318 0x0000000000000318</span><br><span class="line">                 0x000000000000001c 0x000000000000001c  R      0x1</span><br><span class="line">      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]</span><br><span class="line">  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">                 0x00000000000008e8 0x00000000000008e8  R      0x1000</span><br><span class="line">  LOAD           0x0000000000001000 0x0000000000001000 0x0000000000001000</span><br><span class="line">                 0x0000000000000359 0x0000000000000359  R E    0x1000</span><br><span class="line">  LOAD           0x0000000000002000 0x0000000000002000 0x0000000000002000</span><br><span class="line">                 0x0000000000000214 0x0000000000000214  R      0x1000</span><br><span class="line">  LOAD           0x0000000000002d50 0x0000000000003d50 0x0000000000003d50</span><br><span class="line">                 0x00000000000002c0 0x0000000000000408  RW     0x1000</span><br><span class="line">  DYNAMIC        0x0000000000002d98 0x0000000000003d98 0x0000000000003d98</span><br><span class="line">                 0x0000000000000200 0x0000000000000200  RW     0x8</span><br><span class="line">  NOTE           0x0000000000000338 0x0000000000000338 0x0000000000000338</span><br><span class="line">                 0x0000000000000030 0x0000000000000030  R      0x8</span><br><span class="line">  NOTE           0x0000000000000368 0x0000000000000368 0x0000000000000368</span><br><span class="line">                 0x0000000000000044 0x0000000000000044  R      0x4</span><br><span class="line">  GNU_PROPERTY   0x0000000000000338 0x0000000000000338 0x0000000000000338</span><br><span class="line">                 0x0000000000000030 0x0000000000000030  R      0x8</span><br><span class="line">  GNU_EH_FRAME   0x000000000000201c 0x000000000000201c 0x000000000000201c</span><br><span class="line">                 0x000000000000006c 0x000000000000006c  R      0x4</span><br><span class="line">  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">                 0x0000000000000000 0x0000000000000000  RW     0x10</span><br><span class="line">  GNU_RELRO      0x0000000000002d50 0x0000000000003d50 0x0000000000003d50</span><br><span class="line">                 0x00000000000002b0 0x00000000000002b0  R      0x1</span><br><span class="line"> </span><br><span class="line"> Section to Segment mapping:</span><br><span class="line">  Segment Sections...</span><br><span class="line">   00     </span><br><span class="line">   01     .interp </span><br><span class="line">   02     .interp .note.gnu.property .note.gnu.build-id .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt </span><br><span class="line">   03     .init .plt .plt.got .plt.sec .text .fini </span><br><span class="line">   04     .rodata .eh_frame_hdr .eh_frame </span><br><span class="line">   05     .init_array .fini_array .data.rel.ro .dynamic .got .data .bss </span><br><span class="line">   06     .dynamic </span><br><span class="line">   07     .note.gnu.property </span><br><span class="line">   08     .note.gnu.build-id .note.ABI-tag </span><br><span class="line">   09     .note.gnu.property </span><br><span class="line">   10     .eh_frame_hdr </span><br><span class="line">   11     </span><br><span class="line">   12     .init_array .fini_array .data.rel.ro .dynamic .got </span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ readelf -l test.o</span><br><span class="line"> </span><br><span class="line">There are no program headers in this file.</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>还有关系链接阶段的section
+header，它的表中有着各个section的位置索引，用大写S参数查看。这些个信息非常繁杂，所以一般来说，看这个的都是很习以为常的或者说真的高手了。另外就是，在windows中，如果配置了mingw，那就可以用objdump来替代readelf，来对exe可执行文件进行查看。</p>
+<h3 id="查看依赖的ldd">查看依赖的ldd</h3>
+<p>在linux中，一份可执行文件链接了什么库，可以通过ldd进行查看，有时候运行时显示找不到某某依赖，就可以通过这个命令去查看对应信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ldd test</span><br><span class="line">	linux-vdso.so.1 (0x00007ffc4c1ab000)</span><br><span class="line">	libstdc++.so.6 =&gt; /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f3ace200000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3acde00000)</span><br><span class="line">	libm.so.6 =&gt; /lib/x86_64-linux-gnu/libm.so.6 (0x00007f3ace505000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007f3ace608000)</span><br><span class="line">	libgcc_s.so.1 =&gt; /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f3ace4e5000)</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ldd main.o</span><br><span class="line">	not a dynamic executable</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ldd libtest.a </span><br><span class="line">	not a dynamic executable</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>如上，可以明白地看出，它主要针对包含了[dynamic
+executable]的可执行文件和动态库文件，所以main.cpp的目标文件和test库的静态库都对ldd无感，而可执行文件test则可以看到关于linux动态库、c++动态库和c动态库等等信息，而且上面是缺失无漏的，所以test可执行文件可以正常执行。下面修改一下上面的makefile，把静态库修改成动态库：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">test: libtest.so main.o</span></span><br><span class="line">        g++ main.o libtest.so -o test</span><br><span class="line"><span class="section">libtest.so: test.o</span></span><br><span class="line">        g++ -shared test.o -o libtest.so</span><br><span class="line"><span class="section">main.o: main.cpp</span></span><br><span class="line">        g++ -c main.cpp -o main.o</span><br><span class="line"><span class="section">test.o: test.h test.cpp</span></span><br><span class="line">        g++ -c -fPIC test.cpp -o test.o</span><br><span class="line"> </span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">        rm *.o</span><br></pre></td></tr></table></figure>
+<p>然后用ldd查看一下test可执行文件的情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ldd test</span><br><span class="line">	linux-vdso.so.1 (0x00007fffd747d000)</span><br><span class="line">	libtest.so =&gt; not found</span><br><span class="line">	libstdc++.so.6 =&gt; /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007faa39400000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007faa39000000)</span><br><span class="line">	libm.so.6 =&gt; /lib/x86_64-linux-gnu/libm.so.6 (0x00007faa396d7000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007faa397da000)</span><br><span class="line">	libgcc_s.so.1 =&gt; /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007faa396b7000)</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ./test</span><br><span class="line">./test: error while loading shared libraries: libtest.so: cannot open shared object file: No such file or directory</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ nm libtest.so | grep Base</span><br><span class="line">000000000000115a T _ZN4Base5fun_bEv</span><br><span class="line">0000000000001186 T _ZN4Base5fun_cEv</span><br><span class="line">0000000000003dd8 V _ZTI4Base</span><br><span class="line">000000000000200f V _ZTS4Base</span><br><span class="line">0000000000003dc0 V _ZTV4Base</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ldd libtest.so</span><br><span class="line">	linux-vdso.so.1 (0x00007fff107ae000)</span><br><span class="line">	libstdc++.so.6 =&gt; /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007fe041e00000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe041a00000)</span><br><span class="line">	libm.so.6 =&gt; /lib/x86_64-linux-gnu/libm.so.6 (0x00007fe04206d000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007fe042170000)</span><br><span class="line">	libgcc_s.so.1 =&gt; /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007fe04204d000)</span><br></pre></td></tr></table></figure>
+<p>重点关注刚丢进makefile的libtest.so动态库的实现，在ldd输出中，可以明显看到它没有找到对应刚刚make生成的libtest.so动态库文件，但在当前目录下也是能够明显地看出libtest.so的存在的，所以不出意料的，test可执行文件的执行时报错了的，因为它没有成功加载需要的动态库到内存中，这个缺失对象就是libtest.so，那这是为什么呢？是因为没有成功生成动态库或者动态库内部链接有问题吗？使用nm和ldd查看这个动态库文件，也是没看到有问题，所以是为何？</p>
+<p>问题在于linux下可执行文件的运行，是根据LD_LIBRARY_PATH环境变量去寻找需要的依赖的，但这个变量并不包括当前项目路径，所以还是需要添加环境变量：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="section">test: libtest.so main.o</span></span><br><span class="line">        g++ main.o libtest.so -o test -Wl,-rpath=/home/jam/Desktop/test</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>如上，编译的时候，添加动态库路径到可执行文件中，本来是想在编译动态库的时候修改静态变量的，但发现export的修改，只是针对执行的bash，所以在make执行以后，LD_LIBRARY_PATH又回归原样了，不过本身也不想进行永久修改，所以使用添加编译参数的办法。另外就是在执行make的时候出现，<code>make: 'test' is up to date</code>的提示，这时候需要进行make
+clean操作，然后重新make就可以了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ldd test</span><br><span class="line">	linux-vdso.so.1 (0x00007ffc7b97e000)</span><br><span class="line">	libtest.so =&gt; /home/jam/Desktop/test/libtest.so (0x00007f27313b5000)</span><br><span class="line">	libstdc++.so.6 =&gt; /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f2731000000)</span><br><span class="line">	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f2730c00000)</span><br><span class="line">	libm.so.6 =&gt; /lib/x86_64-linux-gnu/libm.so.6 (0x00007f27312b9000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007f27313c1000)</span><br><span class="line">	libgcc_s.so.1 =&gt; /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f2731299000)</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ./test</span><br><span class="line">aaa</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>好的，ok。</p>
+<h3 id="linux中的打断点--gdb调试">linux中的打断点--gdb调试</h3>
+<p>在windows中，可视化IDE把各种功能都做的很好，比如打断点进行调试，这样可以逐步去查看可能代码运行可能出现的问题，而在linux中，进行端点调试的办法就是gdb了。在ubuntu中，如果没有安装，可以使用apt进行安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install gdb</span><br></pre></td></tr></table></figure>
+<p>而在windows中，要使用gdb，则是要安装了mingw并添加了环境变量以后，才能使用。</p>
+<h4 id="简单尝试">简单尝试</h4>
+<p>使用gdb，首要就是在编译的时候，指定-g参数，这样它就会保留debug
+info了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++ test.cpp main.cpp -o test -g</span><br></pre></td></tr></table></figure>
+<p>然后进入gdb的调试界面(还是使用的上面的例子)：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop\test&gt; gdb test</span><br><span class="line">GNU gdb (GDB) 8.1</span><br><span class="line">Copyright (C) 2018 Free Software Foundation, Inc.</span><br><span class="line">License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;</span><br><span class="line">This is free software: you are free to change and redistribute it.</span><br><span class="line">There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;</span><br><span class="line">and &quot;show warranty&quot; for details.</span><br><span class="line">This GDB was configured as &quot;x86_64-w64-mingw32&quot;.</span><br><span class="line">Type &quot;show configuration&quot; for configuration details.</span><br><span class="line">For bug reporting instructions, please see:</span><br><span class="line">&lt;http://www.gnu.org/software/gdb/bugs/&gt;.</span><br><span class="line">Find the GDB manual and other documentation resources online at:</span><br><span class="line">&lt;http://www.gnu.org/software/gdb/documentation/&gt;.</span><br><span class="line">For help, type &quot;help&quot;.</span><br><span class="line">Type &quot;apropos word&quot; to search for commands related to &quot;word&quot;...</span><br><span class="line">Reading symbols from test...done.</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<p>好，成功进入，然后设置断点，开始调试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">(gdb) b main.cpp:6</span><br><span class="line">Breakpoint 1 at 0x401639: file main.cpp, line 6.</span><br><span class="line">(gdb) r</span><br><span class="line">Starting program: D:\Desktop\test\test.exe</span><br><span class="line">[New Thread 6392.0x5bd0]</span><br><span class="line">[New Thread 6392.0x2630]</span><br><span class="line">[New Thread 6392.0x2330]</span><br><span class="line">[New Thread 6392.0x418c]</span><br><span class="line"></span><br><span class="line">Thread 1 hit Breakpoint 1, main () at main.cpp:6</span><br><span class="line">6           a.fun_b();</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<p>如上，设置断点在main.cpp的第6行，然后r一下，开始运行到断点处，Base类实体变量a准备执行fun_b成员函数。现在可以进行的动作就是next简单执行a.fun_b()语句；或者step进入执行函数中进行调试；或者continue继续执行下去直到下一个断点，没有断点就运行到退出。分别如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">(gdb) break main.cpp:6</span><br><span class="line">Breakpoint 1 at 0x401639: file main.cpp, line 6.</span><br><span class="line">(gdb) r</span><br><span class="line">Starting program: D:\Desktop\test\test.exe</span><br><span class="line">[New Thread 20248.0x3174]</span><br><span class="line">[New Thread 20248.0x59ac]</span><br><span class="line">[New Thread 20248.0xa00]</span><br><span class="line">[New Thread 20248.0x4ae0]</span><br><span class="line"></span><br><span class="line">Thread 1 hit Breakpoint 1, main () at main.cpp:6</span><br><span class="line">6           a.fun_b();</span><br><span class="line">(gdb) next</span><br><span class="line">aaa</span><br><span class="line">8           return 0;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">(gdb) r</span><br><span class="line">Starting program: D:\Desktop\test\test.exe</span><br><span class="line">[New Thread 9768.0x3590]</span><br><span class="line">[New Thread 9768.0x4bd0]</span><br><span class="line">[New Thread 9768.0x3254]</span><br><span class="line">[New Thread 9768.0xea4]</span><br><span class="line"></span><br><span class="line">Thread 1 hit Breakpoint 1, main () at main.cpp:6</span><br><span class="line">6           a.fun_b();</span><br><span class="line">(gdb) step</span><br><span class="line">Base::fun_b (this=0x61fe10) at test.cpp:4</span><br><span class="line">4           cout &lt;&lt; &quot;aaa\n&quot;;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">(gdb) continue</span><br><span class="line">Continuing.</span><br><span class="line">[New Thread 6392.0x19fc]</span><br><span class="line">aaa</span><br><span class="line">[Thread 6392.0x19fc exited with code 0]</span><br><span class="line">[Thread 6392.0x418c exited with code 0]</span><br><span class="line">[Thread 6392.0x2330 exited with code 0]</span><br><span class="line">[Thread 6392.0x2630 exited with code 0]</span><br><span class="line">[Inferior 1 (process 6392) exited normally]</span><br><span class="line">(gdb) next</span><br><span class="line">The program is not being run.</span><br><span class="line">(gdb) quit</span><br><span class="line">PS D:\Desktop\test&gt;</span><br></pre></td></tr></table></figure>
+<p>如上，quit操作，可以退出当前gdb调试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(gdb) quit</span><br><span class="line">A debugging session is active.</span><br><span class="line"></span><br><span class="line">        Inferior 1 [process 9768] will be killed.</span><br><span class="line"></span><br><span class="line">Quit anyway? (y or n) y</span><br><span class="line">PS D:\Desktop\test&gt;</span><br></pre></td></tr></table></figure>
+<p>当然，也可以重新打断点再r跑起来继续调试，不过这样前面添加的和后面不同的断点机会一直存在。另外，在上面的命令中，一个命令可以显式发起也可以简略发起：</p>
+<ul>
+<li>break--b</li>
+<li>continue--c</li>
+<li>next--n</li>
+<li>run--r</li>
+</ul>
+<p>除了上面的命令，还有着重要的backtrace、print、list和info等命令。简单演示一下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">(gdb) break main.cpp:6</span><br><span class="line">Breakpoint 1 at 0x401639: file main.cpp, line 6.</span><br><span class="line">(gdb) r</span><br><span class="line">Starting program: D:\Desktop\test\test.exe</span><br><span class="line">[New Thread 20248.0x3174]</span><br><span class="line">[New Thread 20248.0x59ac]</span><br><span class="line">[New Thread 20248.0xa00]</span><br><span class="line">[New Thread 20248.0x4ae0]</span><br><span class="line"></span><br><span class="line">Thread 1 hit Breakpoint 1, main () at main.cpp:6</span><br><span class="line">6           a.fun_b();</span><br><span class="line">(gdb) backtrace</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">0  main () at main.cpp:6</span></span><br><span class="line">(gdb) step</span><br><span class="line">Base::fun_b (this=0x61fe10) at test.cpp:4</span><br><span class="line">4           cout &lt;&lt; &quot;aaa\n&quot;;</span><br><span class="line">(gdb) backtrace</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">0  Base::fun_b (this=0x61fe10) at test.cpp:4</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">1  0x0000000000401645 <span class="keyword">in</span> main () at main.cpp:6</span></span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">(gdb) r</span><br><span class="line">Starting program: D:\Desktop\test\test.exe</span><br><span class="line">[New Thread 21976.0x2038]</span><br><span class="line">[New Thread 21976.0x13c8]</span><br><span class="line">[New Thread 21976.0x41e4]</span><br><span class="line">[New Thread 21976.0x5a04]</span><br><span class="line"></span><br><span class="line">Thread 1 hit Breakpoint 2, main () at main.cpp:5</span><br><span class="line">5           Base a;</span><br><span class="line">(gdb) print a</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">2 = &#123;_vptr.Base = 0x10b19a0, a = 16&#125;</span></span><br></pre></td></tr></table></figure>
+<p>打印变量或寄存器值的是print，info则是查看断点信息，下面可以添加了那么些个断点，然后使用delet来永久删除。如果print要打印的信息过长，命令默认显示不全，那就可以对其进行<code>set print element 0</code>设置。下面展示info使用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">(gdb) info break</span><br><span class="line">Num     Type           Disp Enb Address            What</span><br><span class="line">1       breakpoint     keep y   0x0000000000401639 in main() at main.cpp:6</span><br><span class="line">        breakpoint already hit 1 time</span><br><span class="line">(gdb) break main.cpp:5</span><br><span class="line">Breakpoint 2 at 0x40162d: file main.cpp, line 5.</span><br><span class="line">(gdb) info break</span><br><span class="line">Num     Type           Disp Enb Address            What</span><br><span class="line">1       breakpoint     keep y   0x0000000000401639 in main() at main.cpp:6</span><br><span class="line">        breakpoint already hit 1 time</span><br><span class="line">2       breakpoint     keep y   0x000000000040162d in main() at main.cpp:5</span><br><span class="line">(gdb) delet breakpoint 1</span><br><span class="line">(gdb) info break</span><br><span class="line">Num     Type           Disp Enb Address            What</span><br><span class="line">2       breakpoint     keep y   0x000000000040162d in main() at main.cpp:5</span><br><span class="line">(gdb) </span><br></pre></td></tr></table></figure>
+<p>list是查看源码的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">(gdb) r</span><br><span class="line">Starting program: D:\Desktop\test\test.exe</span><br><span class="line">[New Thread 15204.0x58ac]</span><br><span class="line">[New Thread 15204.0x5690]</span><br><span class="line">[New Thread 15204.0x4e90]</span><br><span class="line">[New Thread 15204.0x5390]</span><br><span class="line"></span><br><span class="line">Thread 1 hit Breakpoint 1, main () at main.cpp:6</span><br><span class="line">6           a.fun_b();</span><br><span class="line">(gdb) list</span><br><span class="line">1       #include &quot;test.h&quot;</span><br><span class="line">2</span><br><span class="line">3       int main()&#123;</span><br><span class="line">4</span><br><span class="line">5           Base a;</span><br><span class="line">6           a.fun_b();</span><br><span class="line">7</span><br><span class="line">8           return 0;</span><br><span class="line">9       &#125;(gdb)</span><br></pre></td></tr></table></figure>
+<p>如上就够进行简单使用了，但实际上，gdb断点调试，还是更多用来进行coredump的检查，也就是内存泄露问题。还有一件事，使用gdb进行stl容器的调试的使用，print会有点问题，可以使用<a
+href="">stl-views</a>的插件来提供帮助，这个插件可以在GDB官网上去查找并下载安装，也可以到sourceware中进行下载。下面是使用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) source ~/stl-views-1.0.3.gdb</span><br><span class="line">(gdb) help pset</span><br><span class="line">(gdb) help pmap</span><br></pre></td></tr></table></figure>
+<h3 id="gdb读取core-dump文件进行调试">gdb读取core-dump文件进行调试</h3>
+<p>core
+dump是运行程序在奔溃宕机，系统进行清理后留下的一份内存快照，但这个在系统中是默认关闭的，所以需要手动开启，比如在linux中：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看core dump是否开启，如果得到0那就是关闭了</span></span><br><span class="line">ulimit -c</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">当前终端开启core dump</span></span><br><span class="line">ulimit -c unlimited</span><br><span class="line">sudo bash -c &#x27;echo core &gt; /proc/sys/kernal/core_pattern&#x27;</span><br></pre></td></tr></table></figure>
+<p>core文件默认和可执行文件同一路径，并且都命名为core，扩展名为pid，不添加扩展的话就简单的core，后面生成的会把前面的进行覆盖。设计一个内存泄露的例子：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="type">char</span> *p = <span class="string">&quot;test&quot;</span>;</span><br><span class="line">    <span class="built_in">delete</span>(p);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">test</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后编译运行一下，core就生成在当前路径了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ g++ coredump.cpp -o test</span><br><span class="line">coredump.cpp: In function ‘void test()’:</span><br><span class="line">coredump.cpp:4:15: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]</span><br><span class="line">    4 |     char *p = &quot;abaaba&quot;;</span><br><span class="line">      |               ^~~~~~~~</span><br><span class="line">coredump.cpp:5:13: warning: ‘void operator delete(void*, std::size_t)’ called on a pointer to an unallocated object ‘&quot;abaaba&quot;’ [-Wfree-nonheap-object]</span><br><span class="line">    5 |     delete(p);</span><br><span class="line">      |             ^</span><br><span class="line">coredump.cpp:5:12: note: assigned here</span><br><span class="line">    5 |     delete(p);</span><br><span class="line">      |           ~^~</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ./test</span><br><span class="line">free(): invalid pointer</span><br><span class="line">Aborted (core dumped)</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ls</span><br><span class="line">core  coredump.cpp  test</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>如上，core文件就得到了，然后输入<code>gdb test core</code>进行调试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ gdb test core</span><br><span class="line">GNU gdb (Ubuntu 12.1-3ubuntu2) 12.1</span><br><span class="line">Copyright (C) 2022 Free Software Foundation, Inc.</span><br><span class="line">License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;</span><br><span class="line">This is free software: you are free to change and redistribute it.</span><br><span class="line">There is NO WARRANTY, to the extent permitted by law.</span><br><span class="line">Type &quot;show copying&quot; and &quot;show warranty&quot; for details.</span><br><span class="line">This GDB was configured as &quot;x86_64-linux-gnu&quot;.</span><br><span class="line">Type &quot;show configuration&quot; for configuration details.</span><br><span class="line">For bug reporting instructions, please see:</span><br><span class="line">&lt;https://www.gnu.org/software/gdb/bugs/&gt;.</span><br><span class="line">Find the GDB manual and other documentation resources online at:</span><br><span class="line">    &lt;http://www.gnu.org/software/gdb/documentation/&gt;.</span><br><span class="line"> </span><br><span class="line">For help, type &quot;help&quot;.</span><br><span class="line">Type &quot;apropos word&quot; to search for commands related to &quot;word&quot;...</span><br><span class="line">Reading symbols from test...</span><br><span class="line">[New LWP 9563]</span><br><span class="line"> </span><br><span class="line">This GDB supports auto-downloading debuginfo from the following URLs:</span><br><span class="line">https://debuginfod.ubuntu.com </span><br><span class="line">Enable debuginfod for this session? (y or [n]) y</span><br><span class="line">Debuginfod has been enabled.</span><br><span class="line">To make this setting permanent, add &#x27;set debuginfod enabled on&#x27; to .gdbinit.</span><br><span class="line">Downloading 6.01 MB separate debug info for /lib/x86_64-linux-gnu/libstdc++.so.6</span><br><span class="line">Downloading 0.17 MB separate debug info for /lib/x86_64-linux-gnu/libgcc_s.so.1                                                                                </span><br><span class="line">[Thread debugging using libthread_db enabled]                                                                                                                  </span><br><span class="line">Using host libthread_db library &quot;/lib/x86_64-linux-gnu/libthread_db.so.1&quot;.</span><br><span class="line">Core was generated by `./test&#x27;.</span><br><span class="line">Program terminated with signal SIGABRT, Aborted.</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=&lt;optimized out&gt;) at ./nptl/pthread_kill.c:44</span></span><br><span class="line">Download failed: Invalid argument.  Continuing without source file ./nptl/./nptl/pthread_kill.c.</span><br><span class="line">44	./nptl/pthread_kill.c: No such file or directory.</span><br></pre></td></tr></table></figure>
+<p>这就算进入了core的调试界面了，然后输出一下当前堆栈：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">(gdb) bt</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=&lt;optimized out&gt;) at ./nptl/pthread_kill.c:44</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">1  __pthread_kill_internal (signo=6, threadid=&lt;optimized out&gt;) at ./nptl/pthread_kill.c:78</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">2  __GI___pthread_kill (threadid=&lt;optimized out&gt;, signo=signo@entry=6) at ./nptl/pthread_kill.c:89</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">3  0x00007f4b2683bc46 <span class="keyword">in</span> __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">4  0x00007f4b268227fc <span class="keyword">in</span> __GI_abort () at ./stdlib/abort.c:79</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">5  0x00007f4b268850be <span class="keyword">in</span> __libc_message (action=action@entry=do_abort, <span class="built_in">fmt</span>=<span class="built_in">fmt</span>@entry=0x7f4b269b95dc <span class="string">&quot;%s\n&quot;</span>) at ../sysdeps/posix/libc_fatal.c:155</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">6  0x00007f4b2689c3fc <span class="keyword">in</span> malloc_printerr (str=str@entry=0x7f4b269b7234 <span class="string">&quot;free(): invalid pointer&quot;</span>) at ./malloc/malloc.c:5660</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">7  0x00007f4b2689e26c <span class="keyword">in</span> _int_free (av=&lt;optimized out&gt;, p=&lt;optimized out&gt;, have_lock=have_lock@entry=0) at ./malloc/malloc.c:4435</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">8  0x00007f4b268a09e3 <span class="keyword">in</span> __GI___libc_free (mem=&lt;optimized out&gt;) at ./malloc/malloc.c:3385</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">9  0x0000555e50af21b6 <span class="keyword">in</span> <span class="built_in">test</span> () at coredump.cpp:5</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">10 0x0000555e50af21c6 <span class="keyword">in</span> main () at coredump.cpp:9</span></span><br></pre></td></tr></table></figure>
+<p>可以看出main是最后出口，那问题应该就是test函数了，查看一下倒数第二项：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) frame 9</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">9  0x0000555e50af21b6 <span class="keyword">in</span> <span class="built_in">test</span> () at coredump.cpp:5</span></span><br><span class="line">5	    delete(p);</span><br><span class="line">(gdb) </span><br></pre></td></tr></table></figure>
+<p>这里显示在delete操作的时候出错，然后回去看代码逻辑就可以了，这就一个简单使用了。另外，在项目中，还可以修改core_pattern设置，使其定向生成，并且添加一些重要信息在core文件名上：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ sudo bash  -c &#x27;echo &quot;core-%e-%t&quot; &gt; /proc/sys/kernel/core_pattern&#x27;</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ls</span><br><span class="line">core  coredump.cpp test</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ./test</span><br><span class="line">free(): invalid pointer</span><br><span class="line">Aborted (core dumped)</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ls</span><br><span class="line">core  coredump.cpp  core-test-1685784149  test</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>如上，一个包含了时间、发生core
+dump的命令执行这些信息的core文件就生成了，除此以外，还可以在core前面添加路径来指定core文件的生成位置，另外就是上面%e之类的参数解释如下：</p>
+<ul>
+<li>%e，添加命令名</li>
+<li>%g，添加当前gid</li>
+<li>%h，添加主机名</li>
+<li>%p，添加pid</li>
+<li>%s，添加导致core产生的信号</li>
+<li>%t，添加core生成的unix时间</li>
+<li>%u，添加当前uid</li>
+</ul>
+<p>大致上就这样，简单使用是够了的。</p>
+<h3 id="比core-dump简单的检测工具">比core dump简单的检测工具</h3>
+<p>ASan能够很好的检测内存问题，而且它不需要多余的配置，只要gcc版本是4.8以后就行，使用起来就是添加一下编译参数即可：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ g++ -o test -fsanitize=address -g coredump.cpp &amp;&amp; ./test</span><br><span class="line">coredump.cpp: In function ‘void test()’:</span><br><span class="line">coredump.cpp:4:15: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]</span><br><span class="line">    4 |     char *p = &quot;abaaba&quot;;</span><br><span class="line">      |               ^~~~~~~~</span><br><span class="line">coredump.cpp:5:13: warning: ‘void operator delete(void*, std::size_t)’ called on a pointer to an unallocated object ‘&quot;abaaba&quot;’ [-Wfree-nonheap-object]</span><br><span class="line">    5 |     delete(p);</span><br><span class="line">      |             ^</span><br><span class="line">coredump.cpp:5:12: note: assigned here</span><br><span class="line">    5 |     delete(p);</span><br><span class="line">      |           ~^~</span><br><span class="line">AddressSanitizer:DEADLYSIGNAL</span><br><span class="line">=================================================================</span><br><span class="line">==9999==ERROR: AddressSanitizer: SEGV on unknown address 0x564037c48010 (pc 0x7f7a4b82df77 bp 0x000000000002 sp 0x7ffe216af7d0 T0)</span><br><span class="line">==9999==The signal is caused by a WRITE memory access.</span><br><span class="line">    #0 0x7f7a4b82df77 in bool __sanitizer::atomic_compare_exchange_strong&lt;__sanitizer::atomic_uint8_t&gt;(__sanitizer::atomic_uint8_t volatile*, __sanitizer::atomic_uint8_t::Type*, __sanitizer::atomic_uint8_t::Type, __sanitizer::memory_order) ../../../../src/libsanitizer/sanitizer_common/sanitizer_atomic_clang.h:80</span><br><span class="line">    #1 0x7f7a4b82df77 in __asan::Allocator::AtomicallySetQuarantineFlagIfAllocated(__asan::AsanChunk*, void*, __sanitizer::BufferedStackTrace*) ../../../../src/libsanitizer/asan/asan_allocator.cpp:620</span><br><span class="line">    #2 0x7f7a4b82df77 in __asan::Allocator::Deallocate(void*, unsigned long, unsigned long, __sanitizer::BufferedStackTrace*, __asan::AllocType) ../../../../src/libsanitizer/asan/asan_allocator.cpp:696</span><br><span class="line">    #3 0x7f7a4b8c14ec in operator delete(void*, unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:164</span><br><span class="line">    #4 0x564037c47275 in test() /home/jam/Desktop/test/coredump.cpp:5</span><br><span class="line">    #5 0x564037c47285 in main /home/jam/Desktop/test/coredump.cpp:9</span><br><span class="line">    #6 0x7f7a4b02350f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58</span><br><span class="line">    #7 0x7f7a4b0235c8 in __libc_start_main_impl ../csu/libc-start.c:381</span><br><span class="line">    #8 0x564037c47184 in _start (/home/jam/Desktop/test/test+0x1184)</span><br><span class="line"> </span><br><span class="line">AddressSanitizer can not provide additional info.</span><br><span class="line">SUMMARY: AddressSanitizer: SEGV ../../../../src/libsanitizer/sanitizer_common/sanitizer_atomic_clang.h:80 in bool __sanitizer::atomic_compare_exchange_strong&lt;__sanitizer::atomic_uint8_t&gt;(__sanitizer::atomic_uint8_t volatile*, __sanitizer::atomic_uint8_t::Type*, __sanitizer::atomic_uint8_t::Type, __sanitizer::memory_order)</span><br><span class="line">==9999==ABORTING</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>如上添加<code>-fsanitize=address -g</code>，然后运行编译生成的可执行文件就可以直接查看问题堆栈了。如果链接的时候出现找不到<code>/usr/lib64/libasan.so</code>的问题，就需要下载库文件了：<code>sudo apt install libasan</code>。其实windows下也有着windbg这样的工具提供core
+dump之类的使用，不过暂时用不上，留待以后吧。</p>
+<h3 id="网络编程的简单测试命令">网络编程的简单测试命令</h3>
+<p>在网络编程中，常常需要检查的就是服务器进程的状态了，对应的就是netstat和ps这两个常用命令了，比如有一个服务器程序helloserver.exe，然后把它运行起来，然后查看一下它的状态：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\penta&gt; netstat -anop tcp | findstr 8090</span><br><span class="line">  TCP    0.0.0.0:8090           0.0.0.0:0              LISTENING       30428</span><br><span class="line">PS C:\Users\penta&gt; tasklist | findstr 30428</span><br><span class="line">helloserver.exe              30428 Console                    1      3,520 K</span><br><span class="line">PS C:\Users\penta&gt;</span><br></pre></td></tr></table></figure>
+<p>在windows中使用，效果如上，linux里面呢，字符查找就该换一下了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ netstat -lnpt | grep helloserver</span><br><span class="line">(Not all processes could be identified, non-owned process info</span><br><span class="line"> will not be shown, you would have to be root to see it all.)</span><br><span class="line">tcp        0      0 0.0.0.0:8090            0.0.0.0:*               LISTEN      10362/./helloserver </span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ netstat -lnpt | grep 8090</span><br><span class="line">(Not all processes could be identified, non-owned process info</span><br><span class="line"> will not be shown, you would have to be root to see it all.)</span><br><span class="line">tcp        0      0 0.0.0.0:8090            0.0.0.0:*               LISTEN      10362/./helloserver </span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ps -ef | grep helloserver</span><br><span class="line">jam       10362    5746  0 18:11 pts/0    00:00:00 ./helloserver 8090</span><br><span class="line">jam       10580   10363  0 18:15 pts/1    00:00:00 grep --color=auto helloserver</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>没多大问题，想要更复杂点，可以使用wireshark或者其他的抓包工具了。</p>
+<h3 id="多线程多进程调试">多线程多进程调试</h3>
+<p>关于多线程和多进程，在linux中可以使用ps命令查看进程，pstree查看含有父子关系的进程树，如下是一个多进程例子，跑起来，然后阻塞它看看效果：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">pid_t</span> pid = fork();</span><br><span class="line">    <span class="keyword">if</span>(pid == <span class="number">0</span>) &#123; <span class="comment">// 子进程</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;I am child, my pid = %d, my parent pid = %d\n&quot;</span>, getpid(), getppid());</span><br><span class="line">        sleep(<span class="number">20</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(pid &gt; <span class="number">0</span>) &#123; <span class="comment">// 父进程</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;I am parent, my pid = %d, my child pid = %d\n&quot;</span>, getpid(), pid);</span><br><span class="line">        wait(<span class="literal">NULL</span>); <span class="comment">// 等待子进程退出</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        perror(<span class="string">&quot;fork error!\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ps -ef | grep multi_process</span><br><span class="line">jam       11211    5746  0 19:11 pts/0    00:00:00 ./multi_process</span><br><span class="line">jam       11212   11211  0 19:11 pts/0    00:00:00 ./multi_process</span><br><span class="line">jam       11214   10905  0 19:11 pts/1    00:00:00 grep --color=auto multi_process</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ pstree -p | grep multi_process</span><br><span class="line">           |               |-gnome-terminal-(5728)-+-bash(5746)---multi_process(11211)---multi_process(11212)</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>如上，使用ps可以查看进程，但使用pstree展现起来，效果更加好。那么，多线程呢？设计了一个多线程的例子，在进程中新开了两个子线程，线程sleep个10秒，然后再用ps和pstree来查看一下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="comment">//volatile关键字用于通知计算机代理可以改变该值，这里表示共享数据，不加static volatile也行</span></span><br><span class="line"><span class="type">static</span> <span class="keyword">volatile</span> <span class="type">long</span> <span class="type">long</span> sum = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">incr</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] begin\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>;i &lt; <span class="number">1e7</span>; i++)</span><br><span class="line">                sum += <span class="number">1</span>;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] done\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        sleep(<span class="number">10</span>);</span><br><span class="line">        <span class="comment">//线程结束</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">des</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] begin\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1e7</span>; i++)</span><br><span class="line">                sum -= <span class="number">1</span>;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[%s] done\n&quot;</span>, (<span class="type">char</span> *)arg);</span><br><span class="line">        sleep(<span class="number">10</span>);</span><br><span class="line">        <span class="comment">//线程结束</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//创建两个线程，传入不同字符作为another_main的参数</span></span><br><span class="line">        <span class="type">pthread_t</span> p1, p2;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;main begin, sum = %lld\n&quot;</span>, sum);</span><br><span class="line">        pthread_create(&amp;p1, <span class="literal">NULL</span>, incr, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">        pthread_create(&amp;p2, <span class="literal">NULL</span>, des, <span class="string">&quot;B&quot;</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">//等待p1、p2对应的线程结束才结束main运行</span></span><br><span class="line">        pthread_join(p1, <span class="literal">NULL</span>);</span><br><span class="line">        pthread_join(p2, <span class="literal">NULL</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;[main] sum: %lld\n&quot;</span>, sum);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ps -ef | grep multi_pthread</span><br><span class="line">jam       11259    5746  7 19:15 pts/0    00:00:00 ./multi_pthread</span><br><span class="line">jam       11263   10905  0 19:15 pts/1    00:00:00 grep --color=auto multi_pthread</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ pstree -p | grep multi_pthread</span><br><span class="line">           |               |-gnome-terminal-(5728)-+-bash(5746)---multi_pthread(11259)-+-&#123;multi_pthread&#125;(11260)</span><br><span class="line">           |               |                       |                                   `-&#123;multi_pthread&#125;(11261)</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<h4 id="gdb在多线程多进程的调试">gdb在多线程多进程的调试</h4>
+<p>如上，查看效果还是pstree更好用，当然还有更多的进阶版的，但简单使用这里就够了，问题是这些多进程多线程程序的调试。编译gdb调试文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">多进程</span></span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ gcc multi_process.c -o multi_process -g</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ./multi_process </span><br><span class="line">I am parent, my pid = 11211, my child pid = 11212</span><br><span class="line">I am child, my pid = 11212, my parent pid = 11211</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">多线程</span></span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ gcc multi_pthread.c -o multi_pthread -lpthread -g</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ./multi_pthread </span><br><span class="line">main begin, sum = 0</span><br><span class="line">[A] begin</span><br><span class="line">[B] begin</span><br><span class="line">[A] done</span><br><span class="line">[B] done</span><br><span class="line">[main] sum: -7796662</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ </span><br></pre></td></tr></table></figure>
+<p>在gdb中，可以使用info来查看信息，查看进程的命令是<code>info inferiors</code>，查看线程的是<code>info threads</code>，汇总一下这些个命令：</p>
+<table>
+<thead>
+<tr class="header">
+<th>命令</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>info inferiors</td>
+<td>查看所有进程</td>
+</tr>
+<tr class="even">
+<td>inferiors n</td>
+<td>切换到编号为n的进程</td>
+</tr>
+<tr class="odd">
+<td>info threads</td>
+<td>查看所有线程</td>
+</tr>
+<tr class="even">
+<td>thread n</td>
+<td>切换到编号为n的线程</td>
+</tr>
+<tr class="odd">
+<td>detach inferiors n</td>
+<td>detach编号为n的进程</td>
+</tr>
+<tr class="even">
+<td>set schedule-multiple off</td>
+<td>只有当前进程执行，其他进程挂起</td>
+</tr>
+<tr class="odd">
+<td>set schedule-multiple on</td>
+<td>所有进程正常执行</td>
+</tr>
+<tr class="even">
+<td>show schedule-multiple</td>
+<td>查看schedule-multiple的值</td>
+</tr>
+</tbody>
+</table>
+<p>关于多线程调试，其实经常遇到的就是检查死锁问题，如果出现死锁，可以检查进程号，在使用pstack来查看其堆栈，显示效果会如同上面的core
+dump的展示。简单总结就这样吧。</p>
+<p></font></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">https://jack-samu.github.io/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">June 2nd 2023, 10:36:53 am</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">March 2nd 2025, 11:33:56 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/" title="websocket通信以及python应用">
+                    <div class="nextTitle">websocket通信以及python应用</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/" title="python多人聊天室">
+                    <div class="prevTitle">python多人聊天室</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4"><span class="toc-number">2.</span> <span class="toc-text">好用的命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#size%E5%91%BD%E4%BB%A4"><span class="toc-number">2.1.</span> <span class="toc-text">size命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nm%E5%91%BD%E4%BB%A4"><span class="toc-number">2.2.</span> <span class="toc-text">nm命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#readelf%E5%91%BD%E4%BB%A4"><span class="toc-number">2.3.</span> <span class="toc-text">readelf命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E4%BE%9D%E8%B5%96%E7%9A%84ldd"><span class="toc-number">2.4.</span> <span class="toc-text">查看依赖的ldd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#linux%E4%B8%AD%E7%9A%84%E6%89%93%E6%96%AD%E7%82%B9--gdb%E8%B0%83%E8%AF%95"><span class="toc-number">2.5.</span> <span class="toc-text">linux中的打断点--gdb调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%B0%9D%E8%AF%95"><span class="toc-number">2.5.1.</span> <span class="toc-text">简单尝试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gdb%E8%AF%BB%E5%8F%96core-dump%E6%96%87%E4%BB%B6%E8%BF%9B%E8%A1%8C%E8%B0%83%E8%AF%95"><span class="toc-number">2.6.</span> <span class="toc-text">gdb读取core-dump文件进行调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AF%94core-dump%E7%AE%80%E5%8D%95%E7%9A%84%E6%A3%80%E6%B5%8B%E5%B7%A5%E5%85%B7"><span class="toc-number">2.7.</span> <span class="toc-text">比core dump简单的检测工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%9A%84%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95%E5%91%BD%E4%BB%A4"><span class="toc-number">2.8.</span> <span class="toc-text">网络编程的简单测试命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%9A%E8%BF%9B%E7%A8%8B%E8%B0%83%E8%AF%95"><span class="toc-number">2.9.</span> <span class="toc-text">多线程多进程调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#gdb%E5%9C%A8%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%9A%84%E8%B0%83%E8%AF%95"><span class="toc-number">2.9.1.</span> <span class="toc-text">gdb在多线程多进程的调试</span></a></li></ol></li></ol></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

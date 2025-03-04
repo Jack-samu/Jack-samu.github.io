@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="在日常编写程序中，不同PC间的通信，不同进程间的通信，以及程序信息的存储，都是很关键的场景，而这些个程序数据，在转换成能被存储并进行传输的格式的过程，就是序列化，反序列化，就是这个过程的逆序。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="序列化和反序列之c++">
+<meta property="og:url" content="https://jack-samu.github.io/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="在日常编写程序中，不同PC间的通信，不同进程间的通信，以及程序信息的存储，都是很关键的场景，而这些个程序数据，在转换成能被存储并进行传输的格式的过程，就是序列化，反序列化，就是这个过程的逆序。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jack-samu.github.io/images/cmake%E6%B5%81%E7%A8%8B.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/%E7%94%9F%E6%88%90%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/protobuf%E7%BC%96%E8%AF%91%E7%94%9F%E6%88%90%E6%95%88%E6%9E%9C.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/protobuf%E5%BA%93%E9%9B%86%E4%B8%AD%E7%AE%A1%E7%90%86.png">
+<meta property="article:published_time" content="2023-06-25T13:07:54.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:55.780Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="c++ protobuf boost">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jack-samu.github.io/images/cmake%E6%B5%81%E7%A8%8B.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>序列化和反序列之c++ · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">序列化和反序列之c++</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                序列化和反序列之c++
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="c++ protobuf boost">c++ protobuf boost</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">4.6k</span>阅读时长: <span class="post-count reading-time">18 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/06/25</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>在日常编写程序中，不同PC间的通信，不同进程间的通信，以及程序信息的存储，都是很关键的场景，而这些个程序数据，在转换成能被存储并进行传输的格式的过程，就是序列化，反序列化，就是这个过程的逆序。</p>
+<span id="more"></span>
+<h2 id="一基础知识">一、基础知识</h2>
+<p>序列化是程序数据转换为特定的适合存储和传输的格式，反序列化就是这些适合传输、适合存储的数据，转换为程序数据。这个过程落在编程语言中，就是具体对象，转换为字节流，就是序列化了，字节流恢复成适合对象，就是反序列化了。序列化，主要是使得适应各种编程语言而成的对象数据，转换成适合传输、适合存储的通用式数据。简单来说，就是跨语言，一份数据，各种编程语言生成的程序都能懂，然后自适应修改成自己的对象。这个就是我的理解。</p>
+<p>嗯，目前来说，知道的序列化方法，有着google的protobuf(但好像很多人喷)，然后是Boost的Serialization，还有着MFC的序列化以及.Net的序列化。其他的，嗯，暂时没了解，这里主要针对protobuf和Boost的两种方案展开学习。</p>
+<h3 id="protobuf的安装">1.1 protobuf的安装</h3>
+<p>这里的安装，主要是到protobuf的github官方仓进行下载解压安装，<a
+target="_blank" rel="noopener" href="https://github.com/protocolbuffers/protobuf/releases">官方地址</a>，找到系统对应版本然后下载即可。下载解压以后，可以得到protoc的可执行文件在bin目录，以及include目录下的一对proto文件，下载完成后，查看一下信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop&gt; protoc --version</span><br><span class="line">libprotoc 23.3</span><br><span class="line">PS D:\Desktop&gt;</span><br></pre></td></tr></table></figure>
+<p>如上，对应的是23.3版本，不过现在不代表可以在c++中进行使用了，还需要一些额外的支持，当前在windows系统中，所以采用cmake来进行依赖的编译安装，源码就是之前的下载地址中的protobuf-23.3.zip，前者是可执行文件支持，后者是源码，提供的支持是不同层面的。笔者这边把它们分出来，一个在protoc目录放可执行文件，一个在protobuf文件放依赖库。接下来就是cmake的活了。不过在实际操作中，发现还有着一些问题，就是googletest和abseil的依赖缺失，需要切换到protobuf的third_party中进行这两个的仓库clone：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/abseil/abseil-cpp.git</span><br><span class="line">git clone https://github.com/google/googletest.git</span><br></pre></td></tr></table></figure>
+<p>abseil-cpp因为网络问题，命令行clone不太行，所以用的是下载压缩包并解压，所以需要进行后续的改名，然后再来进行cmake，要注意取消BUILD_TESTS选项，如果要使用动态库，可以勾选SHARED_LIBS一项：</p>
+<figure>
+<img src="/images/cmake流程.png" alt="cmake一下" />
+<figcaption aria-hidden="true">cmake一下</figcaption>
+</figure>
+<p>然后用vs打开build目录，然后进行[生成解决方案]即可，要注意的是，如果仅仅是学习用，debug模式就够了，但如果是生产研发，那就需要进行release了，切换一下模式再来[生成解决方案]吧：</p>
+<figure>
+<img src="/images/生成解决方案.png" alt="操作" />
+<figcaption aria-hidden="true">操作</figcaption>
+</figure>
+<p>整个debug生成过程，花了4分钟，嗯。。。。。4分钟，跟我boost库一样，长。生成文件都在build下bin目录中的debug和Release目录中，要么就直接是build下面的Debug和Release中，试了一下Release的方案生成，最后生成的基本一样，除了debug中多了几个pdb文件，嗯，还有个protoc可执行文件，有点意思，要不用它算了？好的，windows下的安装就这样。</p>
+<p>嗯，如果碰到说ALL_BUILD无法运行，权限受限的问题，那就在解决方案中，右键ALL_BUILD，设置为启动项目即可，如果无效就进行[重新生成解决方案]，最后生成效果如下：</p>
+<figure>
+<img src="/images/protobuf编译生成效果.png" alt="编译效果" />
+<figcaption aria-hidden="true">编译效果</figcaption>
+</figure>
+<blockquote>
+<p>如果遇到一些error LNK2038: 检测到“RuntimeLibrary”的不匹配项:
+值“MTd_StaticDebug”不匹配值“MDd_DynamicDebug”类的问题，就是库项目在编译的时候和测试项目中的配置不一样，对应修改的地方，就是[项目属性]-[c/c++]-[代码生成]中的[运行时库]不同，照理来说，把测试项目的这个选项设置为多线程MTd就行，奇怪的是protobuf编译前，看了很多项目属性，它们对应项都是多线程调试DLL/(MDd)，这个和项目属性默认是一样的啊，真是奇怪。</p>
+</blockquote>
+<h3 id="ubuntu中的protobuf安装">1.2 ubuntu中的protobuf安装</h3>
+<p>首先是protoc的安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install protobuf-compiler</span><br><span class="line">protoc --version</span><br></pre></td></tr></table></figure>
+<p>然后就来编译安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/google/protobuf.git</span><br><span class="line">cd protobuf</span><br><span class="line">git submodule update --init --recursive</span><br><span class="line">cmake -B build -Dprotobuf-BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=ON</span><br><span class="line">cd build</span><br><span class="line">make &amp;&amp; sudo make install</span><br><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure>
+<p>这里是直接clone它这个仓库，然后git
+submodule是依赖的下载，之前是采用的和windows一样的方式，进行压缩包的下载，然后解压拼凑absel和googletest等，不过用它指定的来，至少版本上应该是相匹配的。不过这样操作以后，发现进行make的时间特别长，这算是走对路了吗？另外途中太久，看了很多的warning，心里也七上八下的。</p>
+<p>嗯，总结一下，就是googletest的使用，在这里面是google实现自家产品使用自家的测试框架，所以就是为了进行测试，如果不需要，可以在总CMakeLists.txt中，添加<code>option(protobuf_BUILD_TESTS "Build tests" OFF)</code>，因为在文件里面有不少options项，找对位置插进去就行。最后生成的头文件在/usr/local/include中的google下，另外的库文件在/usr/local/lib中。</p>
+<p>ok，安装到此就告一段落。</p>
+<h3 id="protobuf在c中的应用">1.3 protobuf在c++中的应用</h3>
+<p>protobuf比xml要更好，这个是很多都这么想的，不过性能方面的确没有测试过，无法确定，唯一确定的是，xml很早之前就被应用了，相比之下，json在web的应用更广泛所以笔者对json更能接受。</p>
+<p>回归正题，开始protobuf的使用吧。第一步就是创建通用数据结构，也就是proto文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// student.proto</span><br><span class="line">package student;</span><br><span class="line"></span><br><span class="line">message Student&#123;</span><br><span class="line">    required int32 id=1;</span><br><span class="line">    required string name=2;</span><br><span class="line">    required int32 score=3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上，就是一个简单的proto文件，结构很简单，开篇命名包名为student，然后定义Student的信息格式，定义了三个信息项，id、名字和成绩；proto文件ok以后，开始编译读写接口，这一步是为了生成的接口代码，在c++中，也就是.h头文件和.cpp文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">PS D:\Desktop\test&gt; protoc student.proto --cpp_out=.</span><br><span class="line">PS D:\Desktop\test&gt; ls</span><br><span class="line"></span><br><span class="line">    Directory: D:\Desktop\test</span><br><span class="line"></span><br><span class="line">Mode                 LastWriteTime         Length Name</span><br><span class="line">----                 -------------         ------ ----</span><br><span class="line">-a----         2023/6/24     17:38          15908 student.pb.cc</span><br><span class="line">-a----         2023/6/24     17:38          12858 student.pb.h</span><br><span class="line">-a----         2023/6/24     17:38            141 student.proto</span><br></pre></td></tr></table></figure>
+<p>如上，在windows中，执行结果就这样，其实protc的命令执行样式是这样的：<code>protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/xxx.proto</code>，SRC_DIR是proto所在目录，--cpp_out是用cpp方式生成，不过这里生成的是cc文件，也是很特色了。这一步，就生成了c++专用的，对应上面proto定义的消息结构的库，这里的使用，主要是操作这个库，嗯，另外protobuf库和一些必要库也干脆给它放一块吧，把protobuf安装目录下src中的google目录和third_party中的abseil-cpp和googletest以及utf8_range都集中放protoc的include中，另外Debug和Release的库文件都集中放protoc的libs中。大致如下：</p>
+<figure>
+<img src="/images/protobuf库集中管理.png" alt="库管理" />
+<figcaption aria-hidden="true">库管理</figcaption>
+</figure>
+<p>这样，在vs中新建protobuf_test项目，在[外部包含目录]添加include中对应包路径，在[库目录]中引入libs路径，因为是debug测试，所以引入对应的Debug库，还有一件事，就是因为这里用的是动态库，而windows中动态库一般是包含lib和dll两部分，lib是符号表，需要引入，dll需要和编译后可执行文件放在一起方便运行起来加载：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;student.pb.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;libprotobufd.lib&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;abseil_dll.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	student::Student stu;</span><br><span class="line">	stu.<span class="built_in">set_id</span>(<span class="number">1</span>);</span><br><span class="line">	stu.<span class="built_in">set_name</span>(<span class="string">&quot;Lily&quot;</span>);</span><br><span class="line">	stu.<span class="built_in">set_score</span>(<span class="number">100</span>);</span><br><span class="line"></span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;id: &quot;</span> &lt;&lt; stu.<span class="built_in">id</span>() &lt;&lt; <span class="string">&quot; name: &quot;</span> &lt;&lt; stu.<span class="built_in">name</span>() &lt;&lt; <span class="string">&quot; score: &quot;</span> &lt;&lt; stu.<span class="built_in">score</span>() &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">	std::string tmp;</span><br><span class="line">	stu.<span class="built_in">SerializePartialToString</span>(&amp;tmp);</span><br><span class="line">	std::cout &lt;&lt; <span class="string">&quot;序列化字符串：&quot;</span> &lt;&lt; tmp &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>测试代码如上，试了一遍又一遍，才发现，protobuf对于c++中STL的支持是真的差，之前想直接输出字符串的，所以用的SerializePartialAsString一类接口来直接cout，但直接就炸了，运行时报了<code>Expression: _act_first_block==header</code>的错误，其实仔细看文件信息，就发现它是堆分配，应该是属于vs调试中信息的一部分，反正就是资源释放的问题，哇，难受。还有一件事就是PROTOBUF_USE_DLLS的宏定义可以免去很多麻烦，但之前是用在main.cpp中的，但后来才发现，定义在protoc生成的信息头.h中，才有用，巴拉巴拉一大堆麻烦。最后一个问题就是protobuf的编码格式问题，在上面进行SerializePartialToString转换为显式string来保存以后，输出发现是乱码的，目前估计是格式问题。</p>
+<h3 id="protobuf在linux中的c应用">1.4 protobuf在linux中的c++应用</h3>
+<p>上面遇到的一大堆问题，让我坚定了windows的很多不适合，简直吐了。来看看linux中什么表现吧，毕竟是编译安装到环境路径的。嗯。。。。。。装机的ubuntu炸裂了，编译不通过的情况下给我搞出幺蛾子，想要重新拉包下来看看是不是库安装有问题，结果访问不了了！这个该死的dns。下面换成在ubuntu虚拟机吧。</p>
+<p>有一点就是，如果系统很久没怎么更新软件了，可以省去upgrade，不然给所有可更新软件来一把，就太久了。这次加点料，除了字符串对象和字符串的序列化和反序列化，再加上二进制信息的序列化和反序列化：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;student.pb.h&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> student;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line"> </span><br><span class="line">    Student stu;</span><br><span class="line">    stu.<span class="built_in">set_id</span>(<span class="number">2</span>);</span><br><span class="line">    stu.<span class="built_in">set_name</span>(<span class="string">&quot;Jam&quot;</span>);</span><br><span class="line">    stu.<span class="built_in">set_score</span>(<span class="number">87.9</span>);</span><br><span class="line"> </span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;id: &quot;</span> &lt;&lt; stu.<span class="built_in">id</span>() &lt;&lt; <span class="string">&quot; name: &quot;</span> &lt;&lt; stu.<span class="built_in">name</span>() &lt;&lt; <span class="string">&quot; score: &quot;</span> &lt;&lt; stu.<span class="built_in">score</span>() &lt;&lt; std::endl;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 反序列化，从字符串到字符对象</span></span><br><span class="line">    std::string tmp;</span><br><span class="line">    stu.<span class="built_in">SerializePartialToString</span>(&amp;tmp);</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;序列化字符串：&quot;</span> &lt;&lt; tmp &lt;&lt; std::endl;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 二进制序列化，从对象到文件</span></span><br><span class="line">    <span class="function">std::fstream <span class="title">out</span><span class="params">(<span class="string">&quot;studentinfo.txt&quot;</span>, std::ios::out|std::ios::binary|std::ios::trunc)</span></span>;</span><br><span class="line">    stu.<span class="built_in">SerializeToOstream</span>(&amp;out);</span><br><span class="line">    out.<span class="built_in">close</span>();</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 二进制序列化，从文件到对象</span></span><br><span class="line">    Student temp;</span><br><span class="line">    <span class="function">std::fstream <span class="title">in</span><span class="params">(<span class="string">&quot;studentinfo.txt&quot;</span>, std::ios::in|std::ios::binary)</span></span>;</span><br><span class="line">    <span class="keyword">if</span>(!temp.<span class="built_in">ParseFromIstream</span>(&amp;in))&#123;</span><br><span class="line">        std::cerr &lt;&lt; <span class="string">&quot;二进制序列化失败\n&quot;</span>;</span><br><span class="line">        in.<span class="built_in">close</span>();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;id: &quot;</span> &lt;&lt; stu.<span class="built_in">id</span>() &lt;&lt; <span class="string">&quot; name: &quot;</span> &lt;&lt; stu.<span class="built_in">name</span>() &lt;&lt; <span class="string">&quot; score: &quot;</span> &lt;&lt; stu.<span class="built_in">score</span>() &lt;&lt; std::endl;</span><br><span class="line">    in.<span class="built_in">close</span>();</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为上面在编译protobuf的时候，选择的动态库生成，所以这里就引入动态库依赖算了，环境也配置好了的，所以，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ protoc -I . --cpp_out=. student.proto </span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ls</span><br><span class="line">student.pb.cc  student.pb.h  student.proto  test.cpp</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ g++ test.cpp student.pb.cc -o test `pkg-config --cflags --libs protobuf`</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ./test</span><br><span class="line">id: 2 name: Jam score: 87.9</span><br><span class="line">序列化字符串 Jam�̯B</span><br><span class="line">id: 2 name: Jam score: 87.9</span><br><span class="line">jam@jam-S1-Pro-Series:~/Desktop/test$ ls</span><br><span class="line">error.log  studentinfo.txt  student.pb.cc  student.pb.h  student.proto  test  test.cpp</span><br></pre></td></tr></table></figure>
+<p>如上，使用protoc进行对应的student.pb.cc和student.pb.h的生成，然后引入，而且，编译用的是动态库依赖，不过中间错误了好几次的，这里展示的是成功的最后一次，所以仅供参考。</p>
+<blockquote>
+<p>上面的乱码的输出，是反序列化得到的std::string对象，然后输出的结果，所以编码格式还是要注意；
+另外一件事，在前面多次的失败中，g++编译的错误信息都是成片成片的，shell窗口根本没法来回追踪，这时候把错误信息给重定向到文件慢慢查看就很有必要，采取的做法就是<code>cmd 2&gt;error.log</code>，这样可以回头来看输出
+最后一件事，就是在编译的时候对于很多错误都要关注编译所用的cpp版本，因为这个问题笔者就栽了很多很多次，std::string_view都出来搞事过，这可是c++17的标准，对于个人来说可以说是很新了，对标这些个项目的时候，一定要注意它们是否紧跟cpp版本开发。</p>
+</blockquote>
+<h2
+id="总结好累啊protobuf被人骂不是没道理的关于proto文件语法可以查看博客园推文">总结，好累啊，protobuf被人骂不是没道理的。关于proto文件语法可以查看：<a
+target="_blank" rel="noopener" href="https://www.cnblogs.com/sherlock-lin/p/16522652.html">博客园推文</a></h2>
+<h2 id="二boost">二、boost</h2>
+<p>boost是c++标准库，相对于protobuf来说，和c++更为契合，不过不像protobuf那么通用就是了，而且，protobuf的各种毛病。。。。。。真想骂人，网上的各种资料也是对不上的，难顶。</p>
+<h3 id="windows中的boost">2.1 windows中的boost</h3>
+<p>要在windows中使用boost，那就需要到<a
+target="_blank" rel="noopener" href="https://sourceforge.net/projects/boost/files/boost-binaries/">sourceforge</a>中去下载对应版本，这里用的是较新的1.82，如果下载的时候比较慢，那就在点击对应包在它执行下载操作的时候，点击[problem
+downloading]，然后选择[Auto-select]就能自适应选择渠道了，这样就快一点。</p>
+<p>下载好的是一个可执行文件，其实过程也是一个解压过程，选好路径，它就会进行对应的解压了，嗯，如果出现不让你运行的一些个警告，那就点击[更多信息]，就有[继续运行]的按钮出现了。然后选好路径，就是后续持续的解压了。</p>
+<p>解压好的boost目录下，嗯，使用vs自带的[Developer command
+prompt]，切换到boost目录下，执行bootstrap.bat来生成b2可执行文件即可，然后就是b2和bjam的执行，因为是打开的vs的cmd，所以环境方面应该会自适配的。另外，关于上面的那个cmd，可以在开始菜单中的vs所在找到。</p>
+<p>因为是命令行执行，可以看到有用的输出，比如执行完以后可以看到进行include和链接lib的提示目录，include可以直接在boost的安装目录，lib链接可以在安装目录的stage的lib中找到。如果没有bjam那就表明对应boost是新版本，执行到这就行了，如果存在bjam，那就继续执行bjam继续编译。</p>
+<p>测试代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/version.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/config.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> std::cout;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	cout &lt;&lt; BOOST_VERSION &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	cout &lt;&lt; BOOST_LIB_VERSION &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	cout &lt;&lt; BOOST_PLATFORM &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	cout &lt;&lt; BOOST_COMPILER &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	cout &lt;&lt; BOOST_STDLIB &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个测试代码，添加了lib路径和boost安装路径，就可以正常运行了的，主要是输出一个版本库的一些简单信息。</p>
+<h3 id="ubuntu-中boost">2.2 ubuntu 中boost</h3>
+<p>在ubuntu中的安装，比较简单：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update &amp;&amp; sudo apt upgrade</span><br><span class="line">sudo apt install libboost-all-dev</span><br><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure>
+<p>这样就够了，然后拿上面的测试代码来试一下就好。</p>
+<h3 id="boost序列化和反序列化">2.3 boost序列化和反序列化</h3>
+<p>使用boost来进行序列化，主要是使用Boost.Serialization来进行操作，比如序列化信息到文件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/archive/text_oarchive.hpp&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/archive/text_iarchive.hpp&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fstream&gt;</span> </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 序列化信息到文本，进行保存</span></span><br><span class="line">	<span class="function">std::ofstream <span class="title">out</span><span class="params">(<span class="string">&quot;archiv.txt&quot;</span>)</span></span>;</span><br><span class="line">	boost::<span class="function">archive::text_oarchive <span class="title">oa</span><span class="params">(out)</span></span>;</span><br><span class="line">	<span class="type">int</span> i = <span class="number">1</span>;</span><br><span class="line">	oa &lt;&lt; i;</span><br><span class="line">	out.<span class="built_in">close</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 从序列化文本获取信息，反序列化</span></span><br><span class="line">	<span class="function">std::ifstream <span class="title">in</span><span class="params">(<span class="string">&quot;archiv.txt&quot;</span>)</span></span>;</span><br><span class="line">	boost::<span class="function">archive::text_iarchive <span class="title">ia</span><span class="params">(in)</span></span>;</span><br><span class="line">	ia &gt;&gt; i;</span><br><span class="line">	std::cout &lt;&lt; i &lt;&lt; std::endl;</span><br><span class="line">	in.<span class="built_in">close</span>();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上，就是简单的序列化和反序列化，然后再来深入点。</p>
+<h3 id="自定义对象的序列化和反序列化">2.3
+自定义对象的序列化和反序列化</h3>
+<p>如下，是一个简单的自定义class：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Student</span> &#123;</span><br><span class="line">	<span class="type">int</span> id_;</span><br><span class="line">	<span class="type">float</span> score_;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">Student</span>() &#123;&#125;</span><br><span class="line">	<span class="built_in">Student</span>(<span class="type">int</span> a, <span class="type">float</span> b) :<span class="built_in">id_</span>(a), <span class="built_in">score_</span>(b) &#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">inline</span> <span class="type">int</span> <span class="title">id</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;id_; &#125;</span><br><span class="line">	<span class="function"><span class="keyword">inline</span> <span class="type">float</span> <span class="title">score</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;score_; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>比如，上面这个class，可以存储id和score两种数据成员，用来序列化和反序列化是很好的对象，如何进行？如下添加boost::serialization::access和serialize的声明，可以在序列化和反序列化的时候调用:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/archive/text_oarchive.hpp&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;boost/archive/text_iarchive.hpp&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fstream&gt;</span> </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Student</span> &#123;</span><br><span class="line">	<span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">boost</span>::serialization::access;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> archive&gt;</span></span><br><span class="line"><span class="function">	<span class="type">void</span> <span class="title">serialize</span><span class="params">(archive&amp; arch, <span class="type">const</span> <span class="type">unsigned</span> <span class="type">int</span> version)</span> </span>&#123;</span><br><span class="line">		arch&amp; id_;</span><br><span class="line">		arch&amp; score_;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> id_;</span><br><span class="line">	<span class="type">float</span> score_;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">Student</span>() &#123;&#125;</span><br><span class="line">	<span class="built_in">Student</span>(<span class="type">int</span> a, <span class="type">float</span> b) :<span class="built_in">id_</span>(a), <span class="built_in">score_</span>(b) &#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">inline</span> <span class="type">int</span> <span class="title">id</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;id_; &#125;</span><br><span class="line">	<span class="function"><span class="keyword">inline</span> <span class="type">float</span> <span class="title">score</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;score_; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 序列化信息到文本，进行保存</span></span><br><span class="line">	<span class="function">std::ofstream <span class="title">out</span><span class="params">(<span class="string">&quot;archiv.txt&quot;</span>)</span></span>;</span><br><span class="line">	boost::<span class="function">archive::text_oarchive <span class="title">oa</span><span class="params">(out)</span></span>;</span><br><span class="line">	<span class="function">Student <span class="title">stu</span><span class="params">(<span class="number">1</span>, <span class="number">80.9</span>)</span></span>;</span><br><span class="line">	oa &lt;&lt; stu;</span><br><span class="line">	out.<span class="built_in">close</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 从序列化文本获取信息，反序列化</span></span><br><span class="line">	<span class="function">std::ifstream <span class="title">in</span><span class="params">(<span class="string">&quot;archiv.txt&quot;</span>)</span></span>;</span><br><span class="line">	boost::<span class="function">archive::text_iarchive <span class="title">ia</span><span class="params">(in)</span></span>;</span><br><span class="line">	ia &gt;&gt; stu;</span><br><span class="line">	std::cout &lt;&lt; stu.<span class="built_in">id</span>() &lt;&lt; <span class="string">&quot;, &quot;</span> &lt;&lt; stu.<span class="built_in">score</span>() &lt;&lt; std::endl;</span><br><span class="line">	in.<span class="built_in">close</span>();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>像上面这种，就叫侵入式序列化，而非侵入式序列化，就是serialize的使用，不能修改现有类，所以就需要在serialize友元声明的时候，传入这个类的对象：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Student</span> &#123;</span><br><span class="line">	<span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">boost</span>::serialization::access;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> archive&gt;</span></span><br><span class="line"><span class="function">	<span class="type">void</span> <span class="title">serialize</span><span class="params">(archive&amp; arch, Student &amp;stu, <span class="type">const</span> <span class="type">unsigned</span> <span class="type">int</span> version)</span> </span>&#123;</span><br><span class="line">		arch&amp; stu.id_;</span><br><span class="line">		arch&amp; stu.score_;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> id_;</span><br><span class="line">	<span class="type">float</span> score_;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">Student</span>() &#123;&#125;</span><br><span class="line">	<span class="built_in">Student</span>(<span class="type">int</span> a, <span class="type">float</span> b) :<span class="built_in">id_</span>(a), <span class="built_in">score_</span>(b) &#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">inline</span> <span class="type">int</span> <span class="title">id</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;id_; &#125;</span><br><span class="line">	<span class="function"><span class="keyword">inline</span> <span class="type">float</span> <span class="title">score</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> <span class="keyword">this</span>-&gt;score_; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这种就是非侵入式序列化，还有着针对STL的序列化，这也是boost的特色，这种序列化使用，就需要使用boost特有的stl容器，比如list，要使用的，就该是：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;boost/serialization/base_object.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;boost/serialization/list.hpp&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>&#123;</span><br><span class="line">    std::list&lt;<span class="type">int</span>&gt; list;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">boost</span>::serialization::access;</span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> archive&gt;</span></span><br><span class="line"><span class="function">    <span class="type">void</span> <span class="title">serialize</span><span class="params">(archive&amp; arch, <span class="type">const</span> <span class="type">unsigned</span> <span class="type">int</span> version)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        arch&amp; list;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"> </span><br><span class="line">    <span class="built_in">A</span>(<span class="type">int</span> a = <span class="number">0</span>, <span class="type">int</span> b = <span class="number">0</span>) :<span class="built_in">list</span>(a, b) &#123;&#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> i : list) &#123;</span><br><span class="line">            std::cout &lt;&lt; i &lt;&lt; <span class="string">&#x27; &#x27;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>大致上就这样，啊，就这样吧。休息一下。</p>
+<p></font></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">https://jack-samu.github.io/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">June 25th 2023, 9:07:54 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">March 2nd 2025, 11:33:55 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/" title="sql基础使用">
+                    <div class="nextTitle">sql基础使用</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/" title="sqlite在c/c++中的应用">
+                    <div class="prevTitle">sqlite在c/c++中的应用</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">一、基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#protobuf%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 protobuf的安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ubuntu%E4%B8%AD%E7%9A%84protobuf%E5%AE%89%E8%A3%85"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 ubuntu中的protobuf安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#protobuf%E5%9C%A8c%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 protobuf在c++中的应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#protobuf%E5%9C%A8linux%E4%B8%AD%E7%9A%84c%E5%BA%94%E7%94%A8"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 protobuf在linux中的c++应用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%E5%A5%BD%E7%B4%AF%E5%95%8Aprotobuf%E8%A2%AB%E4%BA%BA%E9%AA%82%E4%B8%8D%E6%98%AF%E6%B2%A1%E9%81%93%E7%90%86%E7%9A%84%E5%85%B3%E4%BA%8Eproto%E6%96%87%E4%BB%B6%E8%AF%AD%E6%B3%95%E5%8F%AF%E4%BB%A5%E6%9F%A5%E7%9C%8B%E5%8D%9A%E5%AE%A2%E5%9B%AD%E6%8E%A8%E6%96%87"><span class="toc-number">2.</span> <span class="toc-text">总结，好累啊，protobuf被人骂不是没道理的。关于proto文件语法可以查看：博客园推文</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8Cboost"><span class="toc-number">3.</span> <span class="toc-text">二、boost</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#windows%E4%B8%AD%E7%9A%84boost"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 windows中的boost</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ubuntu-%E4%B8%ADboost"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 ubuntu 中boost</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#boost%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 boost序列化和反序列化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="toc-number">3.4.</span> <span class="toc-text">2.3
+自定义对象的序列化和反序列化</span></a></li></ol></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>

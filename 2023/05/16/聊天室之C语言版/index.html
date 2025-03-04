@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+<!-- keywords -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Jack">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Jack">
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    <meta name="description" content="小杰的技术博客">
+    <meta name="description" content="概述：网络编程的C语言知识要点记录，主要涉及socket编程，IO并发，多进程多线程的实现，又根据所在系统分出了windows的实现和linux的实现，但并不全都进行了实现。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="聊天室之C语言版">
+<meta property="og:url" content="https://jack-samu.github.io/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/index.html">
+<meta property="og:site_name" content="Jack &#39;s Studio">
+<meta property="og:description" content="概述：网络编程的C语言知识要点记录，主要涉及socket编程，IO并发，多进程多线程的实现，又根据所在系统分出了windows的实现和linux的实现，但并不全都进行了实现。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jack-samu.github.io/images/tcp%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/tcp%E5%9B%9B%E6%AC%A1%E5%88%86%E6%89%8B.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/tcp%E9%80%9A%E4%BF%A1%E7%9A%84api%E6%B5%81%E7%A8%8B.png">
+<meta property="og:image" content="https://jack-samu.github.io/images/tcp%E5%A4%9A%E8%BF%9B%E7%A8%8B%E6%9C%8D%E5%8A%A1%E7%AB%AF.png">
+<meta property="article:published_time" content="2023-05-16T12:18:29.000Z">
+<meta property="article:modified_time" content="2025-03-02T15:33:54.820Z">
+<meta property="article:author" content="Jack">
+<meta property="article:tag" content="c, socket, windows, linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jack-samu.github.io/images/tcp%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B.png">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/avatar/takashi.jpg">
+    <title>聊天室之C语言版 · Jack&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .footer-fixed-btn,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(
+            -45deg,
+            #444 0,
+            #444 80px,
+            #333 80px,
+            #333 160px
+        );
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link id="stylesheet-fancybox" rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-base" rel="preload" href="/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="stylesheet-mobile" rel="preload" href="/css/mobile.css" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 960px)'">
+    <link id="stylesheet-theme-dark" rel="preload" href="/css/dark.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    <!-- 百度统计  -->
+    <!-- 谷歌统计  -->
+    <!-- Google tag (gtag.js) -->
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+        <body class="post-body">
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        <div class="header-sidebar-menu">
+            <div style="padding-left: 1px;">&#xe775;</div>
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href="/">Jack's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner -->
+    <div class="banner">
+        <div class="blog-title header-element">
+            <a href="/">Jack&#39;s Studio.</a>
+        </div>
+        <div class="post-title header-element">
+            <a href="#" class="post-name">聊天室之C语言版</a>
+        </div>
+    </div>
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- donate button -->
+
+    <!-- back to top button -->
+    <div class="footer-fixed-btn footer-fixed-btn--hidden back-top">
+        <div>&#xe639;</div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="    height:50vh;
+">
+    <!-- 主页  -->
+    <!-- 404页  -->
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/detail-head.png)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+                聊天室之C语言版
+            <!-- 404 -->
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            <!-- 404 -->
+        </p>
+        <!-- 文章页 meta -->
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                    <div class="post-intro-tags" >
+        <a class="post-tag" href="javascript:void(0);" data-tags="c, socket, windows, linux">c, socket, windows, linux</a>
+</div>
+
+                <!-- 文章字数统计 -->
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">7.6k</span>阅读时长: <span class="post-count reading-time">30 min</span></span>
+                    </div>
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2023/05/16</span>
+                    <!-- busuanzi -->
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" alt="loading">
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <p><font face="楷体"></p>
+<p>概述：网络编程的C语言知识要点记录，主要涉及socket编程，IO并发，多进程多线程的实现，又根据所在系统分出了windows的实现和linux的实现，但并不全都进行了实现。</p>
+<span id="more"></span>
+<h2 id="准备知识">准备知识</h2>
+<p>实现的主要技术是tcp技术，所以要准备一下网络层和传输层技术协议。首先是网络，根据网络层次的划分，网络分为广域网和局域网，或者说，广域网是一个特别大的局域网。为了在这些个网络中进行通信，首要的就是明确目标主机和通信发起主机所在，ip地址就是为此而存在的。ip地址分为网络号和主机号，先是网络号划分所处网络，再由主机号确定该网络中唯一主机，但如果存在同一网络号且主机号相同的两台主机，ip冲突就来了。ip地址就是二进制数，32位ipv4地址就是32位二进制数，64位ipv6就是64位二进制数。</p>
+<p>在日常生活中，连上wifi的我们的手机或者电脑，共同构成一个局域网，局域网内的终端就都有着同一个网关了，经常会有个ABCDE五类网络的ip分配概念，为了防止ip不够用，就在32位ipv4的基础上有了个ipv6，这样就不用怕ip不够用了，结果一直都是存于案板之上，实际我没见过多少，历史遗留的问题太多了。</p>
+<p>以上是网络层面的准备知识，为的是有个概念，除此以外还有着语言编程方面的准备知识，下面的编程实现觉得部分实现难以理解的可以看看<a
+href="">编程方面的准备知识</a></p>
+<h3 id="网络层的ip">网络层的ip</h3>
+<p>局域网中，比较特殊的ip有127.0.0.1表示本机回流地址，访问该地址也就是访问本机，想要知道所处网络，往往要知道掩码位数，然后将ip与之按位与运算，得到的ip就是网络地址；而两个主机ip，想要确定它们是否处于同一网段，也是上面的方法得到网络地址，网络地址相同就是处于同一网段。</p>
+<p>回归到编程中，针对ip地址这些信息的存储，在c语言中与之相对的往往是一个个结构体，所以很多学习linux系统编程的都会和很多这样的结构体打交道，它们就像一个个数据表。如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//bind函数适用的地址信息</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> &#123;</span></span><br><span class="line">	<span class="type">sa_family_t</span>		sin_family;			<span class="comment">//地址族</span></span><br><span class="line">	<span class="type">uint16_t</span>		sin_port;			<span class="comment">//16位TCP/UDP端口号</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">in_addr</span>	<span class="title">sin_addr</span>;</span>			<span class="comment">//32位IP地址</span></span><br><span class="line">	<span class="type">char</span>			sin_zero[<span class="number">8</span>];		<span class="comment">//不使用</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//存储32位ip地址</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">in_addr</span> &#123;</span></span><br><span class="line">    <span class="type">in_addr_t</span>       s_addr;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr</span> &#123;</span></span><br><span class="line">    <span class="type">sa_family_t</span>     sin_family;          <span class="comment">// 地址族信息</span></span><br><span class="line">    <span class="type">char</span>            sa_data[<span class="number">14</span>];         <span class="comment">// 存储ip和端口号的地址信息</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="传输层">传输层</h3>
+<p>继续往上，来到传输层，传输层的重要协议就是tcp和udp了，这两个协议几乎囊括了现下的所有通信。前者是可靠的、按序传递的、基于字节的建立连接的传输层协议，后者则是不可靠的、不按序传递的强调快速传输的传输层协议。许多应用层协议的实现，都是建立在建立连接的tcp的基础上，就像http协议，在此之上，http为了保证安全，又实现了tls的安全传输。不过，udp也是可以实现可靠传输的，听说早年的qq使用的传输协议就是udp，可靠传输实现了是真的牛，除此以外，还有现在很受关注的http3的底层quic协议也是使用的udp实现(个人意见是，一项技术发展到了瓶颈，其他技术就有可能龙抬头，但那么多技术，能掌握在手的有实实在在的用处的才有真切感)。</p>
+<p><strong>三次握手</strong></p>
+<p>tcp的实现，需要格外关注建立连接和断开连接，它们因为其特殊性分别被称为三次握手和四次分手，三次握手流程如下：</p>
+<figure>
+<img src="/images/tcp三次握手.png" alt="三次握手" />
+<figcaption aria-hidden="true">三次握手</figcaption>
+</figure>
+<p>如上所示，服务器一直在监听来自客户端的连接，当监听到连接建立的请求，就回应一个包含确认信息和请求建立连接的报文，在客户端回应确认报文后，连接建立。回归到编程就是，服务端调用listen函数，针对已建立的socket进行监听，这个socket就是监听socket；然后客户端创建socket(后面称为客户端socket)，然后调用connect函数，以该socket为源头向目标服务端发起通信连接；目标服务器的监听socket监听到连接请求，就调用accept函数把一个空闲的已创建的socket和连接绑定，已连接socket和客户端socket就可以通信了。服务端调用api如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//服务端</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 把已创建的socket和服务器的地址信息进行绑定，为listen做准备</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">bind</span><span class="params">(<span class="type">int</span> socket, <span class="keyword">struct</span> sockaddr* serv_addr, <span class="type">socklen_t</span> addr_len)</span>;</span><br><span class="line"><span class="comment">// 把前面绑定了服务器信息的socket传进来，函数调用以后，这个socket就是监听socket了，</span></span><br><span class="line"><span class="comment">// 函数调用以后，内核会创建一个连接队列，里面都是来自客户端的连接请求，queue_len就是这个队列的长度</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">listen</span><span class="params">(<span class="type">int</span> socket, <span class="type">int</span> queue_len)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接受连接请求，传入函数的socket就是监听socket，函数调用成功以后就返回通信socket</span></span><br><span class="line"><span class="comment">// clnt_addr，传入前是空的，accept函数调用成功后，该结构体就存储了客户端的各种连接信息，包括ip地址和端口号</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">accept</span><span class="params">(<span class="type">int</span> socket, <span class="keyword">struct</span> sockaddr* clnt_addr, <span class="type">socklen_t</span>* addr_len)</span>;</span><br></pre></td></tr></table></figure>
+<p>客户端调用api很简单，就一个connect，而且客户端只需要建立一个socket用来发起连接，然后负责连接建立后的通信即可：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//客户端</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// serv_addr要预先保存好服务端信息，这样才好方便发起连接</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">connect</span><span class="params">(<span class="type">int</span> socket, <span class="keyword">struct</span> sockaddr* serv_addr, <span class="type">socklen_t</span> addr_len)</span>;</span><br></pre></td></tr></table></figure>
+<p><strong>四次分手</strong></p>
+<p>三次握手比较简单，但四次分手比较麻烦，在一方发起连接断开(一般是客户端)FIN报文，对端收到报文后回应一个确认ack报文并也发一个FIN断开连接报文，这边在收到确认和断开FIN以后就回确认ack报文然后进入等待time-wait状态，2MSL以后结束连接，而对端在收到确认ack就结束连接。四次报文，所以是四次分手，其实中间的ack和FIN一起发，就是三次分手了。流程如下：</p>
+<figure>
+<img src="/images/tcp四次分手.png" alt="四次分手" />
+<figcaption aria-hidden="true">四次分手</figcaption>
+</figure>
+<p>针对连接的断开，api的调用倒是很简单，直接调用close就行，里面传入对应socket，不过这里就有一个问题，close是针对文件描述符的关闭，那针对socket调用close，也就表明，它也是一个文件描述符(这是linux的概念，windows中叫句柄)。</p>
+<blockquote>
+<p>引入，文件描述符，file
+descriptor，经常使用的场合就是用来读写文件，经常是open一个文件，定性读写权限，然后就进行write或者read操作。在奉行一切皆文件的linux中，socket当然也是文件的一种，所以可以进行close操作。用户的操作往往是建立在系统之上的，系统是对硬件的保护也是对用户的便利，因为它提供了方便操作底层硬件的接口api，也分出了系统管理员权限和用户权限，用户想要修改底层信息，就要通过向系统申请，这就是系统调用。</p>
+</blockquote>
+<p>前面介绍了流程，但有个重要的东西，就是socket，这个是所有操作的基础，所有的操作都要建立在socket的基础上。抛开连接的建立和连接的断开，两台pc间的通信，其实也就是通过socket进行read和write之类的操作，从这个角度来看，它们和文件也没有什么区别。那么，如何获取这么一个socket呢？一个是调用socket函数来发起“系统调用”，如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">socket</span><span class="params">(<span class="type">int</span> domain, <span class="type">int</span> type, <span class="type">int</span> protocol)</span>;</span><br></pre></td></tr></table></figure>
+<p>因为传输层是由tcp和udp两种协议为主，所以对外socket也分出两种，type参数传入SOCK_STREAM，也就是要创立tcp通信的socket，传入SOCK_DGRAM就是要建立udp传输的socket，除此以外，其实还有着其他特殊的socket可以创建，不过不属于这里要关注的点；除此以外，上面的domain是定性传输的网络层类型，到底是创建用于ipv4传输的socket还是ipv6的socket，这两种类型分别对应PF_INET和PF_INET6两种参数。socket函数调用成功，就会返回对应的文件描述符，这个，就是后面操作的socket了，服务器的监听socket和客户端的客户端socket都是这么创建，但服务端还有个通信socket，这个只有在accept调用成功以后才创建，accept调用成功返回的就是该socket的文件描述符。好，整理一下，大致流程如下：</p>
+<figure>
+<img src="/images/tcp通信的api流程.png" alt="tcp通信的api流程" />
+<figcaption aria-hidden="true">tcp通信的api流程</figcaption>
+</figure>
+<h3 id="简单实现一下">简单实现一下</h3>
+<p>再来一个简单hello,world例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//hello_server_linux.c</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> serv_sock, clnt_sock;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">serv_addr</span>, <span class="title">clnt_addr</span>;</span></span><br><span class="line">    <span class="type">socklen_t</span> clnt_addr_size;</span><br><span class="line">    <span class="type">char</span> msg[MAX];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(argc != <span class="number">2</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Usage: %s port.\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    serv_sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    bzero(&amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">    serv_addr.sin_family = AF_INET;</span><br><span class="line">    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);</span><br><span class="line">    serv_addr.sin_port = htons(atoi(argv[<span class="number">2</span>]));</span><br><span class="line"></span><br><span class="line">    bind(serv_sock, (<span class="keyword">struct</span> sockaddr*)&amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">    listen(serv_sock, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    clnt_addr_size = <span class="keyword">sizeof</span>(clnt_addr);</span><br><span class="line">    bzero(&amp;clnt_addr, <span class="keyword">sizeof</span>(clnt_addr));</span><br><span class="line">    clnt_sock = accept(serv_sock, (<span class="keyword">struct</span> sockaddr*)&amp;clnt_addr, &amp;clnt_addr_size);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;connected client: %s\n&quot;</span>, inet_ntoa(clnt_addr.sin_addr));</span><br><span class="line">    write(clnt_sock, <span class="string">&quot;Hello, world.&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;Hello, world.&quot;</span>));</span><br><span class="line"></span><br><span class="line">    close(clnt_sock);</span><br><span class="line">    close(serv_sock);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//hello_clnt_linux.c</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> sock;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">serv_addr</span>;</span></span><br><span class="line">    <span class="type">char</span> msg[MAX];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(argc != <span class="number">3</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Usage: %s ip port.\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    bzero(&amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">    serv_addr.sin_family = AF_INET;</span><br><span class="line">    inet_pton(AF_INET, argv[<span class="number">1</span>], &amp;serv_addr.sin_addr);</span><br><span class="line">    serv_addr.sin_port = htons(atoi(argv[<span class="number">2</span>]));</span><br><span class="line"></span><br><span class="line">    connect(sock, (<span class="keyword">struct</span> sockaddr*)&amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line"></span><br><span class="line">    str_len = read(sock, msg, MAX);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;server:%s\n&quot;</span>, msg);</span><br><span class="line"></span><br><span class="line">    close(sock);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>开着服务端看看后台情况：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">terminal1</span></span><br><span class="line">jack@jack-ubuntu:~/Desktop$ ./hello_server 8090</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">terminal2</span></span><br><span class="line">jack@jack-ubuntu:~/Desktop$ netstat -ano | grep 8090</span><br><span class="line">tcp        0      0 0.0.0.0:8090            0.0.0.0:*               LISTEN      off (0.00/0/0)</span><br><span class="line">jack@jack-ubuntu:~/Desktop$ ps -ef | grep hello_server</span><br><span class="line">jack        2593    2526  0 10:55 pts/0    00:00:00 ./hello_server 8090</span><br><span class="line">jack        2748    2603  0 10:56 pts/1    00:00:00 grep --color=auto hello_server</span><br><span class="line">jack@jack-ubuntu:~/Desktop$ </span><br></pre></td></tr></table></figure>
+<p>客户端连接一下，结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">server</span></span><br><span class="line"><span class="meta prompt_">jam@jam$ </span><span class="language-bash">gcc hello_server.c -o hello_server</span></span><br><span class="line"><span class="meta prompt_">jam@jam$ </span><span class="language-bash">./hello_server 9999</span></span><br><span class="line">connected client: 127.0.0.1</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">client</span></span><br><span class="line"><span class="meta prompt_">jam@jam$ </span><span class="language-bash">gcc hello_client.c -o hello_client</span></span><br><span class="line"><span class="meta prompt_">jam@jam$ </span><span class="language-bash">./hello_client 172.26.182.175 9999</span></span><br><span class="line">server: Hello, world!</span><br></pre></td></tr></table></figure>
+<p><strong>windows的不同</strong></p>
+<p>要注意的是，上面的都是linux的posix规范下的api，而windows不同，windows的网络编程需要调用Winsock2.h头文件和引入ws2_32.lib库这是第一步：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;ws2_32.lib&quot;</span>)</span></span><br></pre></td></tr></table></figure>
+<p>进行winsock编程，还需要进行初始化和注销：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// wVersion，要使用的winsock版本，lpWSAData， WSADATA结构体变量地址</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">WSAStartup</span><span class="params">(WORD wVersion, LPWSADATA lpWSAData)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">WSACleanup</span><span class="params">(<span class="type">void</span>)</span>;</span><br></pre></td></tr></table></figure>
+<p>针对前面用到的各种api在windows中样式如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;winsock2.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">SOCKET <span class="title function_">socket</span><span class="params">(<span class="type">int</span> af, <span class="type">int</span> type, <span class="type">int</span> protocol)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">bind</span><span class="params">(SOCKET s, <span class="type">const</span> <span class="keyword">struct</span> sockaddr* addr, <span class="type">int</span> addrLen)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">listen</span><span class="params">(SOCKET s, <span class="type">int</span> queueLen)</span>;</span><br><span class="line">SOCKET <span class="title function_">accept</span><span class="params">(SOCKET s, <span class="keyword">struct</span> sockaddr* addr, <span class="type">int</span>* addrLen)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">connect</span><span class="params">(SOCKET s, <span class="type">const</span> <span class="keyword">struct</span> sockaddr* addr, <span class="type">int</span> addrLen)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">closesocket</span><span class="params">(SOCKET s)</span>;</span><br></pre></td></tr></table></figure>
+<p>好，同样的hello,world也在windows实现一下，使用vs来编译，拿到可执行文件后在cmd执行。如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//hello_server_win.c</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span> &#123;</span><br><span class="line"></span><br><span class="line">	WSADATA wsaDdata;</span><br><span class="line">	SOCKET servSock, clntSock;</span><br><span class="line">	SOCKADDR_IN servAddr, clntAddr;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> addrSize;</span><br><span class="line">	<span class="keyword">if</span> (argc != <span class="number">2</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Usage: %s port\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	WSAStartup(MAKEWORD(<span class="number">2</span>, <span class="number">2</span>), &amp;wsaDdata);</span><br><span class="line">	servSock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">memset</span>(&amp;servAddr, <span class="number">0</span>, <span class="keyword">sizeof</span>(servAddr));</span><br><span class="line">	<span class="built_in">memset</span>(&amp;clntAddr, <span class="number">0</span>, <span class="keyword">sizeof</span>(clntAddr));</span><br><span class="line">	servAddr.sin_family = AF_INET;</span><br><span class="line">	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);</span><br><span class="line">	servAddr.sin_port = htons(atoi(argv[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">	bind(servSock, (SOCKADDR*)&amp;servAddr, <span class="keyword">sizeof</span>(servAddr));</span><br><span class="line">	listen(servSock, <span class="number">5</span>);</span><br><span class="line">	addrSize = <span class="keyword">sizeof</span>(clntAddr);</span><br><span class="line"></span><br><span class="line">	clntSock = accept(servSock, (SOCKADDR*)&amp;clntAddr, &amp;addrSize);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;connected client: %s\n&quot;</span>, inet_ntoa(clntAddr.sin_addr));</span><br><span class="line">	send(clntSock, <span class="string">&quot;Hello, world.&quot;</span>, <span class="keyword">sizeof</span>(<span class="string">&quot;Hello, world.&quot;</span>), <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	closesocket(clntSock);</span><br><span class="line">	closesocket(servSock);</span><br><span class="line">	WSACleanup();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//hello_clnt_win.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF 30</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> &#123;</span><br><span class="line"></span><br><span class="line">	WSADATA wsaDdata;</span><br><span class="line">	SOCKET sock;</span><br><span class="line">	SOCKADDR_IN servAddr;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> addrSize;</span><br><span class="line">	<span class="type">char</span> msg[BUF];</span><br><span class="line">	<span class="keyword">if</span> (argc != <span class="number">3</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Usage: %s ip port\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	WSAStartup(MAKEWORD(<span class="number">2</span>, <span class="number">2</span>), &amp;wsaDdata);</span><br><span class="line">	sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">memset</span>(&amp;servAddr, <span class="number">0</span>, <span class="keyword">sizeof</span>(servAddr));</span><br><span class="line">	servAddr.sin_family = AF_INET;</span><br><span class="line">	inet_pton(AF_INET, argv[<span class="number">1</span>], &amp;servAddr.sin_addr);</span><br><span class="line">	servAddr.sin_port = htons(atoi(argv[<span class="number">2</span>]));</span><br><span class="line"></span><br><span class="line">	connect(sock, (SOCKADDR*)&amp;servAddr, <span class="keyword">sizeof</span>(servAddr));</span><br><span class="line">	recv(sock, msg, <span class="keyword">sizeof</span>(msg)<span class="number">-1</span>, <span class="number">0</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;server:%s\n&quot;</span>, msg);</span><br><span class="line"></span><br><span class="line">	closesocket(sock);</span><br><span class="line">	WSACleanup();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>和上面同样的效果，然后linux版本和windows版本的互为服务端或者客户端进行测试，效果ok(不知道为啥以前windows作为服务端的时候总是出错)，只要处于同一局域网，指定ip即可。在windows里面命令行查看一下进程具体情况：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">powershell</span></span><br><span class="line">PS D:\Desktop&gt; ps hello_server</span><br><span class="line"></span><br><span class="line">Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName</span><br><span class="line">-------  ------    -----      -----     ------     --  -- -----------</span><br><span class="line">     69       6      716       3928       0.00  21380   1 hello_server</span><br><span class="line"></span><br><span class="line">PS D:\Desktop&gt;  netstat -ano | findstr &quot;8090&quot;</span><br><span class="line">  TCP    0.0.0.0:8090           0.0.0.0:0              LISTENING       21380</span><br><span class="line">PS D:\Desktop&gt; </span><br></pre></td></tr></table></figure>
+<p>具体代码可访问 <a
+target="_blank" rel="noopener" href="https://gitee.com/jacksamu/network-programming/tree/master/c/helloworld_version">代码地址</a></p>
+<h2
+id="服务端循环处理对客户端提供服务">服务端循环处理，对客户端提供服务</h2>
+<p>前面的例子说明了一个简单的服务端监听，客户端监听发起连接获取信息的流程，实际上的服务端是一直都在监听连接的。另外，上面的实现也只是单对单的例子，相对现代服务器单对多的情况来说太简单了，所以下面引入不停处理的服务端，并且实现单对多的服务。</p>
+<p>首先，引入多进程技术来实现服务端的单对多处理，其具体模型如下：</p>
+<figure>
+<img src="/images/tcp多进程服务端.png" alt="多进程服务端模型" />
+<figcaption aria-hidden="true">多进程服务端模型</figcaption>
+</figure>
+<blockquote>
+<p>要明白不引入并发技术就不能实现单个服务器去服务多个客户端的原因，首要明了等待请求队列和等待连接请求的状态。在前面有使用到listen函数，服务器在跑起来以后，listen函数的调用，表示服务器进程针对特定端口进行监听，在受理客户端的连接之前，它都处于等待连接的状态。针对来自外界连接的监听，就是通过服务器socket担当门卫的角色，在有监听的时候，它就会把连接引入到请求队列里，一直等到正式受理连接，这也是服务器有两种socket的原因。一个是门卫，一个是通信的跑腿小哥。</p>
+</blockquote>
+<p><a
+target="_blank" rel="noopener" href="https://gitee.com/jacksamu/network-programming/tree/master/c/%E5%A4%9A%E8%BF%9B%E7%A8%8B">实现代码</a></p>
+<p>这里的实现，是父进程在accept了连接以后，就进行子进程的创建，同时删除掉父进程中关于连接socket的拷贝，使得只保留一份在子进程中，而子进程则负责对客户端进行服务，在客户端断开的时候，也执行清理操作。此处的技术主要是多进程和信号机制的引入，其中后者更多是为了保证子进程的正常结束。如果需要在这个多进程实现的回声服务，在客户间信息隔绝的情况下，实现多人聊天，那就要使用进程间通信了，毕竟这种情况的造成本质上就是子进程间相互独立形成的。相对于linux中多进程，似乎windows中的多进程还是比较少实现，这里暂不明优劣，所以windows的多进程就不加以实现了。</p>
+<h2 id="io复用">IO复用</h2>
+<p>前面说过，因为存在请求队列，所以C代码只能照着流程来一个一个地进行处理，后面引入了多进程，才把对应的连接socket分派出去，才实现了单个服务进程同时对多个客户端的并发处理。但实际上，这是因为socket这种文件描述符，或者说IO是处于同步阻塞状态才造成的，简单来说，就是这么socket需要等待数据到来才能进行后续处理不然就会阻塞整个进程，所以才分出那么些个子进程，要阻塞就阻塞子进程好了，反正单对单，是吧。可能不是很明了，简单看平时调用的read操作，其实都是发起系统调用，在read要读取的数据到来之前，用户进程会一直阻塞在read这个操作这里。</p>
+<p>但如果因为来一个客户就新开一个子进程，后续子进程间还可能会进行通信，这种情况对于系统的要求太高了，一个大量的请求就会把系统给干翻的，而且开进程只为了发一句话，不值当。所以使用多路复用来对这种情况进行优化：select会对纳入监视的文件描述符表单进行问询，而且是阻塞当前进程，如果里面有哪些个文件描述符是发生了可读事件、可写就绪事件或者异常的，select都会停止问询，进入后面的处理。像这种模拟CPU切割时间片运行进程的做法，就是复用，它一个时间段内只做一件事，只处理一个文件描述符，对于这里当然就是socket。</p>
+<h3 id="select使用">select使用</h3>
+<p>select的调用api如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/select.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/time.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">select</span><span class="params">(<span class="type">int</span> maxfd, fd_set *readset, fd_set *writeset, fd_set *exceptset,</span></span><br><span class="line"><span class="params">		<span class="type">const</span> <span class="keyword">struct</span> timeval *timeout)</span>;</span><br><span class="line"><span class="comment">//成功返回正整数，失败返回-1，超时回0</span></span><br></pre></td></tr></table></figure>
+<p>select接口主要关注fd_set位数组，它是用来存储需要进行监视的文件描述符的，简单的说就是文件描述符们的监视列表，怎么存进去？要知道的是文件描述符是一个非负整数，正好可以对应这个数组的index，使用特定的操作宏可以把对应的数组中的特定位置1，这样就算这个文件描述符纳入监视列表了。其实select中的readset、writeset和exceptset都是对应同一个内核列表，这个列表和系统有关，这个就是select的上限。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 操作fd_set</span></span><br><span class="line">FD_SET(<span class="type">int</span> fd, fd_set *fds);<span class="comment">//在fds文件描述符集合中注册文件描述符fd，就是第fd个位，置1</span></span><br><span class="line">FD_CLR(<span class="type">int</span> fd, fd_set *fds);<span class="comment">//在fds文件描述符集合中清除文件描述符fd，该位置置0</span></span><br><span class="line">FD_ZERO(fd_set *fds);<span class="comment">//fds文件描述符集合中所有位置0</span></span><br><span class="line">FD_ISSET(<span class="type">int</span> fd, fd_set *fds);<span class="comment">//检查fds中文件描述符fd是否注册</span></span><br></pre></td></tr></table></figure>
+<p>select只负责监听，在监听到事件发生后，还需要进行迭代查询，确定事件发生的确切文件描述符，这些操作都依托于fd_set数组，操作fd_set数组的就是上面的宏。另外还有一件事，就是timeval结构体，是用来确定select阻塞的时间的，当然也可以设置持续阻塞。</p>
+<p>好的，实现一下，看<a
+href="">代码仓</a>，如上所示，在select进行阻塞监听，有对应事件发生，select结束阻塞，返回结果，然后进行迭代，次数为当前最大文件描述符数值，在其中使用fd_set的特定操作宏来确定发生事件的socket，再判断socket类型，从而执行后续或发送或接受的处理。这种实现也是回声服务器，因为它只在确定有来自客户端的数据以后，就马上回送给发送信息的客户端，可谓应声虫，而这种要实现多人聊天，就是维持一个客户端数组，数组中每一个值都是连接socket的值，在收到信息的情况，for迭代这个数组然后逐个进行write操作就可以了。</p>
+<p>除此以外，在windows中也是有select的实现函数的，windows中的select相关数据，除了使用typedef声明，其他的和linux中的一致，所以写法上，除了要引入外部Ws2_32.lib外部库和初始化WSA以外，就没什么区别了，对应代码在代码仓。</p>
+<h3 id="优化的epoll和windows下的iocp">优化的epoll和windows下的IOCP</h3>
+<p>select的调用，会陷入内核，把fd_set参数传入内核中，执行完毕又会从内核中拷贝回来，在并发中是不小的开销；另外在select执行完毕后，不会定向到发生事件的文件描述符，为了定位这个事件发生主体，往往需要不少的迭代次数去确定；最后就是前面提过的，它受限于内核中某个相关数据，导致能监听的描述符数量过少，往往是1024或者2048，这个数据肯定改了，但不会变动太大。</p>
+<p>以上是select的缺点，所以就有了poll，不过它的实现也只是把fd_set换成了polld而已，使得它没有了最大文件描述符的限制，因此重点关注epoll。epoll的优越在于它在内核中使用红黑树进行了文件描述符的存储，每个关键描述符只需要在初始阶段传入一次即可，省去了进进出出内核的花销，通过异步机制确定就绪的文件描述符，重点关注的数据结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">eventpoll</span> &#123;</span></span><br><span class="line"> <span class="type">wait_queue_head_t</span> wq;      <span class="comment">// 等待队列链表，存放阻塞的进程</span></span><br><span class="line"></span><br><span class="line"> <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">rdllist</span>;</span>  <span class="comment">// 数据就绪的文件描述符都会放到这里</span></span><br><span class="line"></span><br><span class="line"> <span class="class"><span class="keyword">struct</span> <span class="title">rb_root</span> <span class="title">rbr</span>;</span>        <span class="comment">// 红黑树，管理用户进程下添加进来的所有 socket 连接</span></span><br><span class="line">        ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面结构体就是重要的内核对象，针对这种在内核中的数据结构的函数镞，往往有着那么些个类似的函数操作：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/epoll.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">epoll_create</span><span class="params">(<span class="type">int</span> size)</span>;</span><br><span class="line"><span class="comment">//成功时返回epoll文件描述符，失败返回-1</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">epoll_ctl</span><span class="params">(<span class="type">int</span> epofd, <span class="type">int</span> flags, <span class="type">int</span> fd, <span class="keyword">struct</span> epoll_event *event)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败返回-1</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">epoll_wait</span><span class="params">(<span class="type">int</span> epofd, <span class="keyword">struct</span> epoll_event *events, <span class="type">int</span> maxevents, <span class="type">int</span> time)</span>;</span><br><span class="line"><span class="comment">//成功时返回发生事件的文件描述符数量，失败返回-1</span></span><br></pre></td></tr></table></figure>
+<p>创建、操作、发起问询，有的内核对象甚至有更多操作，进程间通信的信号量、消息队列、共享内存都是范例。那么针对epoll发起监听后，事件就绪的文件描述符列表就存于epoll_event中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span> &#123;</span></span><br><span class="line">	<span class="type">__uint32_t</span> events;</span><br><span class="line">	<span class="type">epoll_data_t</span> data;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//这里只是表明原型，并不代表其声明顺序</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">union</span> <span class="title">epoll_data</span> &#123;</span></span><br><span class="line">	<span class="type">void</span> *ptr;</span><br><span class="line">	<span class="type">int</span> fd;</span><br><span class="line">	<span class="type">__uint32_t</span> u32;</span><br><span class="line">	<span class="type">__uint64_t</span> u64;</span><br><span class="line">&#125;<span class="type">epoll_data_t</span>;</span><br></pre></td></tr></table></figure>
+<p>重要的标记常量：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">EPOLLIN：监听fd的读事件；</span><br><span class="line">EPOLLOUT：监听fd的写事件，要求其对应的发送数据缓冲区不能满了</span><br><span class="line">EPOLLRDHUP：断开连接或半关闭情况</span><br><span class="line">EPOLLPRI：收到OOB数据，即紧急数据可读事件</span><br><span class="line">EPOLLERR：发生错误</span><br><span class="line">EPOLLET：边缘触发的方式得到事件通知</span><br><span class="line">EPOLLONESHOT：发生一次事件，相应文件描述符不再收到通知</span><br></pre></td></tr></table></figure>
+<p>好，进行实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/epoll.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF 100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EPOLLSIZE 50</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span> *message)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> serv_sock, clnt_sock;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">serv_addr</span>, <span class="title">clnt_addr</span>;</span></span><br><span class="line">    <span class="type">socklen_t</span> addr_size;</span><br><span class="line">    <span class="type">int</span> str_len, i;</span><br><span class="line">    <span class="type">char</span> buf[BUF];</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span> *<span class="title">events</span>, <span class="title">event</span>;</span></span><br><span class="line">    <span class="type">int</span> epoll_fd, event_num;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Usage: %s &lt;port&gt;\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    serv_sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">memset</span>(&amp;serv_addr, <span class="number">0</span>, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">    serv_addr.sin_family = AF_INET;</span><br><span class="line">    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);</span><br><span class="line">    serv_addr.sin_port = htons(atoi(argv[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (bind(serv_sock, (<span class="keyword">struct</span> sockaddr*) &amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr)) == <span class="number">-1</span>)</span><br><span class="line">        errorHandling(<span class="string">&quot;bind() error!&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (listen(serv_sock, <span class="number">5</span>) == <span class="number">-1</span>)</span><br><span class="line">        errorHandling(<span class="string">&quot;listen() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//addition</span></span><br><span class="line">    epoll_fd = epoll_create(EPOLLSIZE);</span><br><span class="line">    <span class="comment">//保存发生变化的套接字集合，申请动态内存</span></span><br><span class="line">    events = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> epoll_event) *EPOLLSIZE);</span><br><span class="line">    <span class="comment">//注册用来关注读事件的epoll_event变量</span></span><br><span class="line">    event.events = EPOLLIN;</span><br><span class="line">    event.data.fd = serv_sock;</span><br><span class="line">    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, serv_sock, &amp;event);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        event_num = epoll_wait(epoll_fd, events, EPOLLSIZE, <span class="number">-1</span>);</span><br><span class="line">        <span class="keyword">if</span> (event_num == <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="built_in">puts</span>(<span class="string">&quot;epoll_wait() error!&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (i =<span class="number">0</span>; i &lt; event_num; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (events[i].data.fd == serv_sock) &#123;</span><br><span class="line">                addr_size = <span class="keyword">sizeof</span>(clnt_addr);</span><br><span class="line">                clnt_sock = accept(serv_sock, (<span class="keyword">struct</span> sockaddr*) &amp;clnt_addr, &amp;addr_size);</span><br><span class="line">                <span class="comment">//注册clnt_sock对应客户端连接文件描述符</span></span><br><span class="line">                event.events = EPOLLIN;</span><br><span class="line">                event.data.fd = clnt_sock;</span><br><span class="line">                epoll_ctl(epoll_fd, EPOLL_CTL_ADD, clnt_sock, &amp;event);</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;已连接客户端:%d\n&quot;</span>, clnt_sock);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                str_len = read(events[i].data.fd, buf, BUF);</span><br><span class="line">                <span class="keyword">if</span> (str_len == <span class="number">0</span>) &#123;</span><br><span class="line">                    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, <span class="literal">NULL</span>);</span><br><span class="line">                    close(events[i].data.fd);</span><br><span class="line">                    <span class="built_in">printf</span>(<span class="string">&quot;客户端%d关闭\n&quot;</span>, events[i].data.fd);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    write(events[i].data.fd, buf, str_len);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    close(serv_sock);</span><br><span class="line">    close(epoll_fd);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span> *message)</span> &#123;</span><br><span class="line">    <span class="built_in">fputs</span>(message, <span class="built_in">stderr</span>);</span><br><span class="line">    fputc(<span class="string">&#x27;\n&#x27;</span>, <span class="built_in">stderr</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>epoll和select相互补充，并不代表什么时候都是最优解。</p>
+<h2 id="多线程">多线程</h2>
+<p>相对于进程相互独立，线程就只是执行分支独立，但数据还是同一进程内共用一份数据的。所以多线程的使用，很多时候都要考虑数据同步的问题。所以经常性地需要使用到锁：比如互斥量mutex和信号量sem，在windows中，多线程也应用广泛。不过因为系统理念的不同，上升到上层就会有各种差异：比如linux一切皆文件，所以所有都可以用文件描述符来表示，但windows是句柄，句柄的整数值在不同进程间可以重复，所以为了区别，线程ID在不同进程之间不会重复，所以线程ID用来区分系统创建的所有线程，句柄则是区分内核对象。</p>
+<p>在linux中，使用pthread接口来对线程进行操作：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pthread_create</span><span class="params">(<span class="type">pthread_t</span> * thread, <span class="type">const</span> <span class="type">pthread_attr_t</span> *attr, </span></span><br><span class="line"><span class="params">			<span class="type">void</span> *(*start_routine)(<span class="type">void</span> *), <span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败返回出错编号</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">pthread_join</span><span class="params">(<span class="type">pthread_t</span> thread, <span class="type">void</span> **status)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败时返回错误号</span></span><br></pre></td></tr></table></figure>
+<p>当一个进程内分多个线程的时候，它们使用同一份数据就有机会出现竞争，尤其是当数据呈现唯一性的时候，这种时候就需要同步来发挥作用了。api如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 互斥量</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_lock</span><span class="params">(<span class="type">pthread_mutex_t</span> *lock)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_unlock</span><span class="params">(<span class="type">pthread_mutex_t</span> *lock)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败返回其他值</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//信号量</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sem_init</span><span class="params">(<span class="type">sem_t</span> *sem, <span class="type">int</span> pshared, <span class="type">unsigned</span> <span class="type">int</span> value)</span>;</span><br><span class="line"><span class="comment">//sem，创建信号量时保存信号量变量地址值</span></span><br><span class="line"><span class="comment">//pshared，值为0表示只允许进程内部使用，其他值表示多个进程间共享</span></span><br><span class="line"><span class="comment">//value，新创建信号量初始值</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sem_destroy</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">sem_post</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">sem_wait</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br><span class="line"><span class="comment">//成功时返回0，失败返回其他值</span></span><br><span class="line"><span class="comment">//sem为保存信号量变量，传递给sem_post加一，传递给sem_wait时减一</span></span><br></pre></td></tr></table></figure>
+<p>直接实现一个多线程的服务器程序：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> *<span class="title function_">sendMsg</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="type">void</span> *<span class="title function_">readMsg</span><span class="params">(<span class="type">void</span> *arg)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span> *message)</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF 100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NAME 20</span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span> name[NAME] = <span class="string">&quot;[DEFAULT]&quot;</span>;</span><br><span class="line"><span class="type">char</span> msg[BUF];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> sock;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">serv_addr</span>;</span></span><br><span class="line">    <span class="type">pthread_t</span> send_thread, recv_thread;</span><br><span class="line">    <span class="type">void</span> *thread_back;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">4</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Usage: %s &lt;IP&gt; &lt;port&gt; &lt;ID&gt;\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">sprintf</span>(name, <span class="string">&quot;[%s]&quot;</span>, argv[<span class="number">3</span>]);</span><br><span class="line">    sock = socket(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (sock == <span class="number">-1</span>)</span><br><span class="line">        errorHandling(<span class="string">&quot;socket() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">memset</span>(&amp;serv_addr, <span class="number">0</span>, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">    serv_addr.sin_family = AF_INET;</span><br><span class="line">    serv_addr.sin_addr.s_addr = inet_addr(argv[<span class="number">1</span>]);</span><br><span class="line">    serv_addr.sin_port = htons(atoi(argv[<span class="number">2</span>]));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (connect(sock, (<span class="keyword">struct</span> sockaddr*) &amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr)) == <span class="number">-1</span>)</span><br><span class="line">        errorHandling(<span class="string">&quot;connect() error!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    pthread_create(&amp;send_thread, <span class="literal">NULL</span>, sendMsg, (<span class="type">void</span>*)&amp;sock);</span><br><span class="line">    pthread_create(&amp;recv_thread, <span class="literal">NULL</span>, readMsg, (<span class="type">void</span>*)&amp;sock);</span><br><span class="line">    pthread_join(send_thread, &amp;thread_back);</span><br><span class="line">    pthread_join(recv_thread, &amp;thread_back);</span><br><span class="line"></span><br><span class="line">    close(sock);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送信息给客户端</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">sendMsg</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">    <span class="type">int</span> sock = *((<span class="type">int</span> *)arg);</span><br><span class="line">    <span class="type">char</span> message[NAME + BUF];</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        fgets(msg, BUF, <span class="built_in">stdin</span>);</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(msg, <span class="string">&quot;q\n&quot;</span>)||!<span class="built_in">strcmp</span>(msg, <span class="string">&quot;Q\n&quot;</span>)) &#123;</span><br><span class="line">            close(sock);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">sprintf</span>(message, <span class="string">&quot;%s %s&quot;</span>, name, msg);</span><br><span class="line">        write(sock, message, <span class="built_in">strlen</span>(message));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//接收服务端信息</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">readMsg</span><span class="params">(<span class="type">void</span> *arg)</span> &#123;</span><br><span class="line">    <span class="type">int</span> sock = *((<span class="type">int</span> *)arg);</span><br><span class="line">    <span class="type">char</span> message[BUF + NAME];</span><br><span class="line">    <span class="type">int</span> str_len;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        str_len = read(sock, message, NAME + BUF <span class="number">-1</span>);</span><br><span class="line">        <span class="keyword">if</span> (str_len == <span class="number">-1</span>)</span><br><span class="line">            <span class="keyword">return</span> (<span class="type">void</span>*)<span class="number">-1</span>;</span><br><span class="line">        message[str_len] = <span class="number">0</span>;</span><br><span class="line">        <span class="built_in">fputs</span>(message, <span class="built_in">stdout</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">errorHandling</span><span class="params">(<span class="type">char</span> *message)</span> &#123;</span><br><span class="line">    <span class="built_in">fputs</span>(message, <span class="built_in">stderr</span>);</span><br><span class="line">    fputc(<span class="string">&#x27;\n&#x27;</span>, <span class="built_in">stderr</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上是使用了mutex互斥量进行同步的一个样式，那么在windows中呢？早期用的最多的应该是CreateThread吧，然后现在有了个安全版本：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;process.h&gt;</span></span></span><br><span class="line"><span class="type">uintptr_t</span> _beginthreadex(</span><br><span class="line">	<span class="type">void</span> *security,</span><br><span class="line">	<span class="type">unsigned</span> stack_size,</span><br><span class="line">	<span class="type">unsigned</span> (*start_address)(<span class="type">void</span> *),</span><br><span class="line">	<span class="type">void</span> *arg_list,</span><br><span class="line">	<span class="type">unsigned</span> initflag,</span><br><span class="line">	<span class="type">unsigned</span> *threadaddr</span><br><span class="line">);</span><br><span class="line"><span class="comment">//成功返回线程句柄，失败返回0</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">DWORD <span class="title function_">WaitForSingleObject</span><span class="params">(HANDLE hHandle, DWORD dwMilliseconds)</span>;</span><br><span class="line"><span class="comment">//进入signaled状态就返回WAIT_OBJECT_0，超时返回WAIT_FAILED</span></span><br><span class="line">DWORD <span class="title function_">WaitForMultipleObjects</span><span class="params">(DWORD count, <span class="type">const</span> HANDLE *lpHandleds, BOOL bWaitAll, DWORD dwMilliseconds)</span>;</span><br><span class="line"><span class="comment">//失败返回WAIT_FAILED，成功则返回事件信息</span></span><br></pre></td></tr></table></figure>
+<p>同步问题主要因为用户进程和内核进程分出了两种同步方式：CRITICAL_SECTION同步</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 基于CRITICAL_SECTION</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="comment">//简单上锁解锁</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">EnterCriticalSection</span><span class="params">(LPCRITICAL_SECTION lpCriticalSection)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">LeaveCriticalSection</span><span class="params">(LPCRITICAL_SECTION lpCriticalSection)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//简单初始化和销毁</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">InitializeCriticalSection</span><span class="params">(LPCRITICAL_SECTION lpCriticalSection)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">DeleteCriticalSection</span><span class="params">(LPCRITICAL_SECTION lpCriticalSection)</span>;</span><br></pre></td></tr></table></figure>
+<p>以及内核模式下的同步：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">HANDLE <span class="title function_">CreateMutex</span><span class="params">(LPSECURITY_ATTRIBUTES lpMutexAttributes, </span></span><br><span class="line"><span class="params">		BOOL bInitialOwner, LPCTSTR lpName)</span>;</span><br><span class="line"><span class="comment">//成功时返回创建的互斥量对象句柄，失败返回NULL</span></span><br><span class="line"><span class="comment">//lpMutexAttributes为NULL默认安全设置</span></span><br><span class="line"><span class="comment">//lpName为NULL默认创建无名互斥量对象</span></span><br><span class="line"><span class="comment">//bInitialOwner为TRUE，创建互斥量属于调用函数线程，为non-signaled状态；</span></span><br><span class="line"><span class="comment">//为FALSE，创建的互斥量对象不属于任何线程，状态为signaled</span></span><br><span class="line"></span><br><span class="line">BOOL <span class="title function_">ReleaseMutex</span><span class="params">(HANDLE hMutex)</span>;</span><br><span class="line"><span class="comment">//成功时返回TRUE， 失败时返回FALSE</span></span><br><span class="line"><span class="comment">//这个函数用来释放互斥量，对应WaitForSingleObject的获取互斥量，这样就相当于上锁了</span></span><br><span class="line"></span><br><span class="line">BOOL <span class="title function_">CloseHandle</span><span class="params">(HANDLE hObject)</span>;</span><br><span class="line"><span class="comment">//成功时返回TRUE， 失败返回FALSE</span></span><br><span class="line"><span class="comment">//用来销毁内核对象，可用于销毁互斥量和后面的信号量</span></span><br></pre></td></tr></table></figure>
+<p>CRITICAL_SECTION同步方式基于用户模式，无需系统的支持，所以它快，没有系统的支持，它的功能就比较有限；与之相对的内核模式的同步，功能就比较丰富了，上面就是一个互斥量的内核模式同步方式，当然还有信号量的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">HANDLE <span class="title function_">CreateSemaphore</span><span class="params">(</span></span><br><span class="line"><span class="params">	LPSECURITY_ATTRIBUTES lpSemaphoreAttributes,</span></span><br><span class="line"><span class="params">	LONG lInitialCount,</span></span><br><span class="line"><span class="params">	LONG lMaximumCount,</span></span><br><span class="line"><span class="params">	LPCT STRlpName</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line"><span class="comment">//成功时返回信号量对象的句柄，失败返回NULL</span></span><br><span class="line"><span class="comment">//lpSemaphoreAttributes传入NULL默认安全</span></span><br><span class="line"><span class="comment">//lInitialCount，指定信号量初始值；lMaximumCount指定信号量最大值</span></span><br><span class="line"><span class="comment">//STRlpName命名信号量对象，默认传入NULL</span></span><br><span class="line"></span><br><span class="line">BOOL <span class="title function_">ReleaseSemaphore</span><span class="params">(</span></span><br><span class="line"><span class="params">	HANDLE hSemaphore,</span></span><br><span class="line"><span class="params">	LONG lReleaseCount,</span></span><br><span class="line"><span class="params">	LPLONG lpPreviousCount</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line"><span class="comment">//成功时返回TRUE，失败时返回FALSE</span></span><br><span class="line"><span class="comment">//hSemaphore，释放信号量对象</span></span><br><span class="line"><span class="comment">//lReleaseCount，可以指定信号量增加的值，不能大于前面设定的信号量最大值</span></span><br><span class="line"><span class="comment">//lpPreviousCount，保存修改之前值的变量地址，不需要就传入NULL</span></span><br></pre></td></tr></table></figure>
+<p>篇幅有限，放在<a
+target="_blank" rel="noopener" href="https://gitee.com/jacksamu/network-programming/tree/master/c/%E5%A4%9A%E7%BA%BF%E7%A8%8B">代码仓</a>。</p>
+<h2 id="发问">发问</h2>
+<p><strong>访问127.0.0.1回流地址，到底是个怎样的流程，经过网卡吗？</strong></p>
+<p><strong>quic协议到底是个怎样的协议？udp在里面到底扮演着什么角色？</strong></p>
+<p></font></p>
+
+    </article>
+    <!-- license -->
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://Jack-samu.github.io">Jack</a>
+            <p>原文链接：<a href="https://jack-samu.github.io/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">https://jack-samu.github.io/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/</a>
+            <p>发表日期：<a href="https://jack-samu.github.io/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">May 16th 2023, 8:18:29 pm</a>
+            <p>更新日期：<a href="https://jack-samu.github.io/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">March 2nd 2025, 11:33:54 pm</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/" title="从c代码到可执行文件">
+                    <div class="nextTitle">从c代码到可执行文件</div>
+                </a>
+        </li>
+        <li class="previous">
+                <div class="prevSlogan">Previous Post</div>
+                <a href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/" title="cpp总结">
+                    <div class="prevTitle">cpp总结</div>
+                </a>
+        </li>
+    </ul>
+    <!-- comment -->
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+            
+            
+            
+            <!-- utteranc评论 -->
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+            
+            
+            
+        </div>
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    <!-- Mathjax -->
+</main>
+
+                <!-- profile -->
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+        <div class="social">
+                            <a href="mailto:pentaJack@163.com" class="iconfont-archer email" title="email" ></a>
+                <a href="//github.com/jack-samu" class="iconfont-archer github" target="_blank" title="github"></a>
+                <span class="iconfont-archer wechat" title="wechat">
+                    <img class="profile-qr" src="/assets/gongzhong.jpg" />
+                </span>
+                <a href="https://www.zhihu.com/people/JackNUO/posts" class="iconfont-archer zhihu" target="_blank" title="zhihu"></a>
+
+        </div>
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    <!-- 不蒜子  -->
+        <div class="busuanzi-container">
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+        </div>
+</footer>
+
+        </div>
+        <!-- toc -->
+            <div class="toc-wrapper toc-wrapper-loding" style=    top:50vh;
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">准备知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E5%B1%82%E7%9A%84ip"><span class="toc-number">1.1.</span> <span class="toc-text">网络层的ip</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%A0%E8%BE%93%E5%B1%82"><span class="toc-number">1.2.</span> <span class="toc-text">传输层</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%8B"><span class="toc-number">1.3.</span> <span class="toc-text">简单实现一下</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%BE%AA%E7%8E%AF%E5%A4%84%E7%90%86%E5%AF%B9%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%8F%90%E4%BE%9B%E6%9C%8D%E5%8A%A1"><span class="toc-number">2.</span> <span class="toc-text">服务端循环处理，对客户端提供服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#io%E5%A4%8D%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">IO复用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#select%E4%BD%BF%E7%94%A8"><span class="toc-number">3.1.</span> <span class="toc-text">select使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E7%9A%84epoll%E5%92%8Cwindows%E4%B8%8B%E7%9A%84iocp"><span class="toc-number">3.2.</span> <span class="toc-text">优化的epoll和windows下的IOCP</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">多线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%91%E9%97%AE"><span class="toc-number">5.</span> <span class="toc-text">发问</span></a></li></ol>
+            </div>
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 52
+        </div>
+        <!-- search  -->
+    </div>
+    <div class="post-archive">
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/04</span>
+            <a class="archive-post-title" href="/2025/03/04/%E6%B5%8B%E8%AF%95%E7%94%A8/">测试用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/02</span>
+            <a class="archive-post-title" href="/2025/03/02/ubuntu%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu安装及配置记录</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2023 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span>
+            <a class="archive-post-title" href="/2023/08/02/websocket%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%80%E4%B8%AA%E8%81%8A%E5%A4%A9%E9%80%9A%E4%BF%A1/">websocket实现的一个聊天通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2023/07/22/%E7%88%AC%E8%99%AB%E6%97%B6%E7%A2%B0%E5%88%B0br%E5%8A%A0%E8%A7%A3%E5%AF%86/">爬虫时碰到br加解密</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">linux网络编程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span>
+            <a class="archive-post-title" href="/2023/07/17/ffmpeg%E7%AE%80%E5%8D%95%E6%80%BB%E7%BB%93/">ffmpeg简单总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/12</span>
+            <a class="archive-post-title" href="/2023/07/12/%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%BB%E9%A1%B5%E8%AE%BE%E8%AE%A1/">导航栏主页设计</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/11</span>
+            <a class="archive-post-title" href="/2023/07/11/%E5%8D%95%E9%A1%B5%E9%9D%A2blog%E5%85%A8%E6%A0%88%E5%AE%8C%E5%96%84/">单页面blog全栈完善</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/09</span>
+            <a class="archive-post-title" href="/2023/07/09/%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91%E4%B9%8B%E5%8D%95%E9%A1%B5%E9%9D%A2blog/">全栈开发之单页面blog</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span>
+            <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/26</span>
+            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/25</span>
+            <a class="archive-post-title" href="/2023/06/25/%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E4%B9%8Bc/">序列化和反序列之c++</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/23</span>
+            <a class="archive-post-title" href="/2023/06/23/sqlite%E5%9C%A8c-c-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/">sqlite在c/c++中的应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/linux%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8hook/">linux系统调用hook</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/21</span>
+            <a class="archive-post-title" href="/2023/06/21/c++11%E7%BA%BF%E7%A8%8B%E7%89%B9%E6%80%A7/">c++11线程特性</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/20</span>
+            <a class="archive-post-title" href="/2023/06/20/python%E5%92%8Cc-%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%AE%80%E5%8D%95%E9%80%9A%E4%BF%A1/">python和c++的中间件简单通信</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/19</span>
+            <a class="archive-post-title" href="/2023/06/19/python%E5%92%8Cc++%E4%BA%A4%E4%BA%92/">python和c++交互</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/16</span>
+            <a class="archive-post-title" href="/2023/06/16/cpp%E5%87%BD%E6%95%B0%E8%87%AA%E5%BA%95%E8%80%8C%E4%B8%8A/">cpp函数自底而上</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span>
+            <a class="archive-post-title" href="/2023/06/12/%E5%8D%81%E5%A4%A7%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">十大排序算法(fake)</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span>
+            <a class="archive-post-title" href="/2023/06/11/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E5%8D%8F%E7%A8%8B/">进程、线程、协程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/10</span>
+            <a class="archive-post-title" href="/2023/06/10/cpp%E5%A4%9A%E6%80%81/">cpp多态</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/06</span>
+            <a class="archive-post-title" href="/2023/06/06/cpp%E4%B8%80%E4%BA%9B%E7%B1%BB%E6%A6%82%E5%BF%B5/">cpp一些类概念</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span>
+            <a class="archive-post-title" href="/2023/06/04/cpp%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B-boost%E5%AE%9E%E7%8E%B0/">cpp网络编程-boost实现</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span>
+            <a class="archive-post-title" href="/2023/06/03/websocket%E9%80%9A%E4%BF%A1%E4%BB%A5%E5%8F%8Apython%E5%BA%94%E7%94%A8/">websocket通信以及python应用</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/02</span>
+            <a class="archive-post-title" href="/2023/06/02/cpp%E7%A8%8B%E5%BA%8F%E5%91%98%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4/">cpp程序员好用的命令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/python%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">python多人聊天室</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/31</span>
+            <a class="archive-post-title" href="/2023/05/31/cpp%E9%A2%84%E7%BC%96%E8%AF%91%E6%8C%87%E4%BB%A4/">cpp预编译指令</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span>
+            <a class="archive-post-title" href="/2023/05/30/%E4%BB%8Emake%E5%88%B0cmake/">从make到cmake</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span>
+            <a class="archive-post-title" href="/2023/05/26/%E4%BB%8Ec%E4%BB%A3%E7%A0%81%E5%88%B0%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6/">从c代码到可执行文件</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/%E8%81%8A%E5%A4%A9%E5%AE%A4%E4%B9%8BC%E8%AF%AD%E8%A8%80%E7%89%88/">聊天室之C语言版</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/16</span>
+            <a class="archive-post-title" href="/2023/05/16/cpp%E6%80%BB%E7%BB%93/">cpp总结</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/hexo%E8%87%AA%E5%BB%BA%E4%B8%BB%E9%A2%98/">hexo自建主题</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/14</span>
+            <a class="archive-post-title" href="/2023/05/14/%E8%87%AA%E9%80%82%E5%BA%94%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1html%E7%AF%87/">自适应网页设计html篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/13</span>
+            <a class="archive-post-title" href="/2023/05/13/ubuntu%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E8%AE%B0%E5%BD%95/">ubuntu系统配置记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span>
+            <a class="archive-post-title" href="/2023/05/03/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%BA%8C/">基础web之二</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/29</span>
+            <a class="archive-post-title" href="/2023/04/29/%E5%9F%BA%E7%A1%80web%E4%B9%8B%E4%B8%80/">基础web之一</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/26</span>
+            <a class="archive-post-title" href="/2023/04/26/python%E7%9A%84sql%E8%BF%9E%E6%8E%A5/">python的sql连接</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/24</span>
+            <a class="archive-post-title" href="/2023/04/24/smtp%E5%92%8Cpop3/">smtp和pop3</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/20</span>
+            <a class="archive-post-title" href="/2023/04/20/golang%E7%9A%84CLI%E5%BA%94%E7%94%A8/">golang的CLI应用</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2022 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/02</span>
+            <a class="archive-post-title" href="/2022/12/02/opencv%E7%9A%84%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/">opencv的学习记录</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span>
+            <a class="archive-post-title" href="/2022/12/01/c%E5%A4%9A%E8%BF%9B%E7%A8%8B/">c中多进程</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/14</span>
+            <a class="archive-post-title" href="/2022/11/14/openGL%E5%BA%93%E7%8E%AF%E5%A2%83%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/09</span>
+            <a class="archive-post-title" href="/2022/11/09/c%E6%95%B0%E7%BB%84%E5%92%8C%E7%BB%93%E6%9E%84%E4%BD%93/">c数组和结构体</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/02</span>
+            <a class="archive-post-title" href="/2022/11/02/c%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6/">c流程控制</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/27</span>
+            <a class="archive-post-title" href="/2022/10/27/c%E4%B8%AD%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/">c中输入输出</a>
+        </li>
+                </ul>
+            <div class="archive-year"> 2021 </div>
+            <ul class="year-list">
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/19</span>
+            <a class="archive-post-title" href="/2021/12/19/c++%E7%B1%BB%E5%A4%8D%E4%B9%A0/">c++类复习</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/12</span>
+            <a class="archive-post-title" href="/2021/12/12/Boost%E5%BA%93%E5%AD%A6%E4%B9%A0_%E6%97%B6%E9%97%B4%E5%A4%84%E7%90%86%E7%AF%87/">Boost库学习_时间处理篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/06</span>
+            <a class="archive-post-title" href="/2021/12/06/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E5%9B%9B/">tcp/udp底层实操第四篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/05</span>
+            <a class="archive-post-title" href="/2021/12/05/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%89/">tcp/udp底层实操第三篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/04</span>
+            <a class="archive-post-title" href="/2021/12/04/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%BA%8C/">tcp/udp底层实操第二篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span>
+            <a class="archive-post-title" href="/2021/12/03/tcp&udp%E5%BA%95%E5%B1%82%E5%AE%9E%E6%93%8D%E4%B9%8B%E4%B8%80/">tcp/udp底层实操第一篇</a>
+        </li>
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/22</span>
+            <a class="archive-post-title" href="/2021/07/22/c++%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88/">cpp智能指针</a>
+        </li>
+            </ul>
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+            <span class="sidebar-tag-name" data-tags="c/cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, c++11">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, c++11
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, GNU, llvm">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, GNU, llvm
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 函数, gdb">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 函数, gdb
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, 面向对象, 多态">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, 面向对象, 多态
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, linux, shell">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, linux, shell
+            </span>
+            <span class="sidebar-tag-name" data-tags="cpp, boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                cpp, boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="c">
+                <span class="iconfont-archer">&#xe606;</span>
+                c
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 多进程">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 多进程
+            </span>
+            <span class="sidebar-tag-name" data-tags="ffmpeg c">
+                <span class="iconfont-archer">&#xe606;</span>
+                ffmpeg c
+            </span>
+            <span class="sidebar-tag-name" data-tags="golang, CLI">
+                <span class="iconfont-archer">&#xe606;</span>
+                golang, CLI
+            </span>
+            <span class="sidebar-tag-name" data-tags="安防">
+                <span class="iconfont-archer">&#xe606;</span>
+                安防
+            </span>
+            <span class="sidebar-tag-name" data-tags="socket c/c++ python">
+                <span class="iconfont-archer">&#xe606;</span>
+                socket c/c++ python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, openGL, glfw">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, openGL, glfw
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, opencv">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, opencv
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, unix-socket, c++">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, unix-socket, c++
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, cpp">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, cpp
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, flask, flask-sockets-io">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, flask, flask-sockets-io
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, sql">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, sql
+            </span>
+            <span class="sidebar-tag-name" data-tags="python, smtplib, poplib">
+                <span class="iconfont-archer">&#xe606;</span>
+                python, smtplib, poplib
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ sqlite">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ sqlite
+            </span>
+            <span class="sidebar-tag-name" data-tags="mysql">
+                <span class="iconfont-archer">&#xe606;</span>
+                mysql
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, TCP/UDP">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, TCP/UDP
+            </span>
+            <span class="sidebar-tag-name" data-tags="ubuntu, docker">
+                <span class="iconfont-archer">&#xe606;</span>
+                ubuntu, docker
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket
+            </span>
+            <span class="sidebar-tag-name" data-tags="websocket, python">
+                <span class="iconfont-archer">&#xe606;</span>
+                websocket, python
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, 编译原理">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, 编译原理
+            </span>
+            <span class="sidebar-tag-name" data-tags="c/cpp, makefile">
+                <span class="iconfont-archer">&#xe606;</span>
+                c/cpp, makefile
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue flask supervisor django">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue flask supervisor django
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask django vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask django vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="数据结构，算法">
+                <span class="iconfont-archer">&#xe606;</span>
+                数据结构，算法
+            </span>
+            <span class="sidebar-tag-name" data-tags="flask vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                flask vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css
+            </span>
+            <span class="sidebar-tag-name" data-tags="vue">
+                <span class="iconfont-archer">&#xe606;</span>
+                vue
+            </span>
+            <span class="sidebar-tag-name" data-tags="c++ protobuf boost">
+                <span class="iconfont-archer">&#xe606;</span>
+                c++ protobuf boost
+            </span>
+            <span class="sidebar-tag-name" data-tags="爬虫 br">
+                <span class="iconfont-archer">&#xe606;</span>
+                爬虫 br
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, socket, windows, linux">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, socket, windows, linux
+            </span>
+            <span class="sidebar-tag-name" data-tags="html, css, js">
+                <span class="iconfont-archer">&#xe606;</span>
+                html, css, js
+            </span>
+            <span class="sidebar-tag-name" data-tags="c, cpp, python, 并发">
+                <span class="iconfont-archer">&#xe606;</span>
+                c, cpp, python, 并发
+            </span>
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "https://Jack-samu.github.io",
+        root: siteMetaRoot,
+        author: "Jack"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+        <!-- main func -->
+        <script src="/scripts/main.js"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js" onload="window.Fancybox.bind('[data-fancybox]')" defer></script>
+        <!-- algolia -->
+        <!-- busuanzi -->
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        <!-- async load share.js -->
+            <script src="/scripts/share.js" async></script>
+        <!-- mermaid -->
+            <script src='https://cdn.jsdelivr.net/npm/mermaid@8.11.0/dist/mermaid.min.js' onload="window.mermaid.initialize({theme: 'dark'})" async></script>
+    </body>
+</html>
