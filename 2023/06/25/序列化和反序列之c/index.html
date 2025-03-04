@@ -583,7 +583,26 @@ prompt]，切换到boost目录下，执行bootstrap.bat来生成b2可执行文�
 
             
             
-            
+                <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
+    <script>
+        let idOption = '1687698474000'
+            idOption = location.pathname
+        const gitalk = new Gitalk({
+            clientID: 'Ov23lip8ZhRIqbSSgHJ9',
+            clientSecret: '2a7c5c44e970a6ca9da7a343bcec542a91418c99',
+            repo: 'blogcomment',
+            owner: 'JackSama',
+            admin: "JackSama",
+            id: idOption,
+            distractionFreeMode: false,
+            createIssueManually: true,
+        })
+        gitalk.render('gitalk-container')
+    </script>
+    <noscript>为正常使用 Gitalk 评论功能，您需要激活 JavaScript</noscript>
+
             <!-- utteranc评论 -->
 
             <!-- partial('_partial/comment/changyan') -->
