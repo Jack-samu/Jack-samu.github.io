@@ -486,6 +486,15 @@ sqlite3.exe三个文件，把安装路径配置进环境变量，就能使用sql
 <p>有sqlite3_prepare_v2这种使用，是因为sqlite3_exec有着执行效率问题，因为它的内部执行，分成三步：解析sqli语句，编译sql语句，最后才是执行，因此将它的功能分解，由sqlite3_prepare_v2负责对sql进行解析和编译，生成可以被执行的sql实例，也就是一个sqlite3_stmt()对应数据结构，这个结构在sqlite3_step中执行，这往往是一个while循环，在里面进行sqlite3_colunm_*一类函数镞中进行操作，程序的最后，通过finalize销毁prepare准备的上下文，还有close掉句柄资源。</p>
 <p></font></p>
 
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            if (window.Gitalk) {
+              const gitalk = new Gitalk(/* 配置同上 */);
+              gitalk.render('gitalk-container');
+            }
+          });
+        </script>
+      
     </article>
     <!-- license -->
         <div class="license-wrapper">
@@ -650,20 +659,15 @@ sqlite3.exe三个文件，把安装路径配置进环境变量，就能使用sql
         
         
         
-        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 58
+        Total : 57
         </div>
         <!-- search  -->
     </div>
     <div class="post-archive">
             <div class="archive-year"> 2025 </div>
             <ul class="year-list">
-        <li class="archive-post-item">
-            <span class="archive-post-date">04/03</span>
-            <a class="archive-post-title" href="/2025/04/03/test%E6%B5%8B%E8%AF%95/">test测试</a>
-        </li>
         <li class="archive-post-item">
             <span class="archive-post-date">03/23</span>
             <a class="archive-post-title" href="/2025/03/23/python%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83/">python虚拟环境</a>

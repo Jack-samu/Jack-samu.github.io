@@ -530,6 +530,15 @@ alt="api流程" />
 1进入TIME_WAIT状态，服务端接收到确认报文后进入CLOSED状态，客户端经过一段时间等待也就进入CLOSED状态。</p>
 <p>但对于我们来说，就只看到了close调用了而已，这个是作为补充知识，而且断开连接流程并不严格按照上面分得条条道道那样进行，有时候FIN报文会跟着最后发送的信息一起发送，也就是第一次分手融进消息发送里，有时候第二步和第三步连在一起发送，就是服务端收到FIN报文就回复确认报文和调用close发送FIN了。</p>
 
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            if (window.Gitalk) {
+              const gitalk = new Gitalk(/* 配置同上 */);
+              gitalk.render('gitalk-container');
+            }
+          });
+        </script>
+      
     </article>
     <!-- license -->
         <div class="license-wrapper">
@@ -694,20 +703,15 @@ alt="api流程" />
         
         
         
-        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 58
+        Total : 57
         </div>
         <!-- search  -->
     </div>
     <div class="post-archive">
             <div class="archive-year"> 2025 </div>
             <ul class="year-list">
-        <li class="archive-post-item">
-            <span class="archive-post-date">04/03</span>
-            <a class="archive-post-title" href="/2025/04/03/test%E6%B5%8B%E8%AF%95/">test测试</a>
-        </li>
         <li class="archive-post-item">
             <span class="archive-post-date">03/23</span>
             <a class="archive-post-title" href="/2025/03/23/python%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83/">python虚拟环境</a>

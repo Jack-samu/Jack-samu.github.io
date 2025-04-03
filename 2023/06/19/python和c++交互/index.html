@@ -515,6 +515,15 @@ socket相对网络socket，它不需要经过网络协议栈，不用打包拆�
 <p>大致样式就是这样，之所以用c语言编写，主要还是因为接口都是系统调用，貌似cpp还没有对unix这种专属系统的socket提供支持，所以就使用c来实现，也不用过多的功能。还有就是，其实也可以通过共享内存来进行实现，或者说消息队列，把它们的使用，组装成一个动态库，这样无论是上层接口的python还是底层逻辑处理的c/c++，都能进行调用。</p>
 <p></font></p>
 
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            if (window.Gitalk) {
+              const gitalk = new Gitalk(/* 配置同上 */);
+              gitalk.render('gitalk-container');
+            }
+          });
+        </script>
+      
     </article>
     <!-- license -->
         <div class="license-wrapper">
@@ -679,20 +688,15 @@ socket相对网络socket，它不需要经过网络协议栈，不用打包拆�
         
         
         
-        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 58
+        Total : 57
         </div>
         <!-- search  -->
     </div>
     <div class="post-archive">
             <div class="archive-year"> 2025 </div>
             <ul class="year-list">
-        <li class="archive-post-item">
-            <span class="archive-post-date">04/03</span>
-            <a class="archive-post-title" href="/2025/04/03/test%E6%B5%8B%E8%AF%95/">test测试</a>
-        </li>
         <li class="archive-post-item">
             <span class="archive-post-date">03/23</span>
             <a class="archive-post-title" href="/2025/03/23/python%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83/">python虚拟环境</a>
