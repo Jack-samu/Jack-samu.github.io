@@ -681,10 +681,10 @@ DLL"。后来看代码才发现，哦豁，数组访问越界了，handles数组
                 <div class="toc-catalog">
                     <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
                 </div>
-                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80linux%E4%B8%8B%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">一、linux下的多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 多线程的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E9%94%80%E6%AF%81"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 线程的创建和销毁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 线程同步</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E4%BA%92%E6%96%A5%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.3.1 基于互斥量的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">1.3.2.</span> <span class="toc-text">1.3.2 基于信号量的同步</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E8%81%8A%E5%A4%A9%E5%AE%A4"><span class="toc-number">2.</span> <span class="toc-text">二、多线程服务器的实现：简单聊天室</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89windows%E4%B8%8B%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">三、windows下多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%A5%E6%9F%84%E5%92%8C%E5%86%85%E6%A0%B8%E5%AF%B9%E8%B1%A1"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 句柄和内核对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%88%9B%E5%BB%BA"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 线程创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E4%BC%BCpthread_join%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-number">3.3.</span> <span class="toc-text">3.3类似pthread_join的函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5-1"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 线程同步</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Ecritical_section%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">3.4.1.</span> <span class="toc-text">3.4.1
-基于CRITICAL_SECTION的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%AD%E5%9F%BA%E4%BA%8E%E4%BA%92%E6%96%A5%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">3.4.2.</span> <span class="toc-text">3.4.2
-内核模式中基于互斥量的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%AD%E5%9F%BA%E4%BA%8E%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-number">3.4.3.</span> <span class="toc-text">3.4.3
-内核模式中基于信号量的同步</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#windows%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.5.</span> <span class="toc-text">3.5 windows多线程服务器的实现</span></a></li></ol></li></ol>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80linux%E4%B8%8B%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-text">一、linux下的多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">1.1 多线程的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E9%94%80%E6%AF%81"><span class="toc-text">1.2 线程的创建和销毁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5"><span class="toc-text">1.3 线程同步</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E4%BA%92%E6%96%A5%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-text">1.3.1 基于互斥量的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-text">1.3.2 基于信号量的同步</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%AE%80%E5%8D%95%E8%81%8A%E5%A4%A9%E5%AE%A4"><span class="toc-text">二、多线程服务器的实现：简单聊天室</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89windows%E4%B8%8B%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-text">三、windows下多线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%A5%E6%9F%84%E5%92%8C%E5%86%85%E6%A0%B8%E5%AF%B9%E8%B1%A1"><span class="toc-text">3.1 句柄和内核对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%88%9B%E5%BB%BA"><span class="toc-text">3.2 线程创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E4%BC%BCpthread_join%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-text">3.3类似pthread_join的函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5-1"><span class="toc-text">3.4 线程同步</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Ecritical_section%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-text">3.4.1
+基于CRITICAL_SECTION的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%AD%E5%9F%BA%E4%BA%8E%E4%BA%92%E6%96%A5%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-text">3.4.2
+内核模式中基于互斥量的同步</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E6%A8%A1%E5%BC%8F%E4%B8%AD%E5%9F%BA%E4%BA%8E%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%90%8C%E6%AD%A5"><span class="toc-text">3.4.3
+内核模式中基于信号量的同步</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#windows%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">3.5 windows多线程服务器的实现</span></a></li></ol></li></ol>
             </div>
         <!-- sidebar -->
         <div class="sidebar sidebar-hide">
@@ -750,10 +750,9 @@ DLL"。后来看代码才发现，哦豁，数组访问越界了，handles数组
         
         
         
-        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 55
+        Total : 54
         </div>
         <!-- search  -->
     </div>
@@ -814,10 +813,6 @@ DLL"。后来看代码才发现，哦豁，数组访问越界了，handles数组
         <li class="archive-post-item">
             <span class="archive-post-date">07/05</span>
             <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
-        </li>
-        <li class="archive-post-item">
-            <span class="archive-post-date">06/26</span>
-            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
         </li>
         <li class="archive-post-item">
             <span class="archive-post-date">06/25</span>
@@ -1130,10 +1125,6 @@ DLL"。后来看代码才发现，哦豁，数组访问越界了，handles数组
             <span class="sidebar-tag-name" data-tags="sqlite">
                 <span class="iconfont-archer">&#xe606;</span>
                 sqlite
-            </span>
-            <span class="sidebar-tag-name" data-tags="mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                mysql
             </span>
             <span class="sidebar-tag-name" data-tags="TCP/UDP">
                 <span class="iconfont-archer">&#xe606;</span>

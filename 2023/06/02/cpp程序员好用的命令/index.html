@@ -754,7 +754,7 @@ dump的展示。简单总结就这样吧。</p>
                 <div class="toc-catalog">
                     <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
                 </div>
-                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4"><span class="toc-number">2.</span> <span class="toc-text">好用的命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#size%E5%91%BD%E4%BB%A4"><span class="toc-number">2.1.</span> <span class="toc-text">size命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nm%E5%91%BD%E4%BB%A4"><span class="toc-number">2.2.</span> <span class="toc-text">nm命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#readelf%E5%91%BD%E4%BB%A4"><span class="toc-number">2.3.</span> <span class="toc-text">readelf命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E4%BE%9D%E8%B5%96%E7%9A%84ldd"><span class="toc-number">2.4.</span> <span class="toc-text">查看依赖的ldd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#linux%E4%B8%AD%E7%9A%84%E6%89%93%E6%96%AD%E7%82%B9--gdb%E8%B0%83%E8%AF%95"><span class="toc-number">2.5.</span> <span class="toc-text">linux中的打断点--gdb调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%B0%9D%E8%AF%95"><span class="toc-number">2.5.1.</span> <span class="toc-text">简单尝试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gdb%E8%AF%BB%E5%8F%96core-dump%E6%96%87%E4%BB%B6%E8%BF%9B%E8%A1%8C%E8%B0%83%E8%AF%95"><span class="toc-number">2.6.</span> <span class="toc-text">gdb读取core-dump文件进行调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AF%94core-dump%E7%AE%80%E5%8D%95%E7%9A%84%E6%A3%80%E6%B5%8B%E5%B7%A5%E5%85%B7"><span class="toc-number">2.7.</span> <span class="toc-text">比core dump简单的检测工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%9A%84%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95%E5%91%BD%E4%BB%A4"><span class="toc-number">2.8.</span> <span class="toc-text">网络编程的简单测试命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%9A%E8%BF%9B%E7%A8%8B%E8%B0%83%E8%AF%95"><span class="toc-number">2.9.</span> <span class="toc-text">多线程多进程调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#gdb%E5%9C%A8%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%9A%84%E8%B0%83%E8%AF%95"><span class="toc-number">2.9.1.</span> <span class="toc-text">gdb在多线程多进程的调试</span></a></li></ol></li></ol></li></ol>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87"><span class="toc-text">准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4"><span class="toc-text">好用的命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#size%E5%91%BD%E4%BB%A4"><span class="toc-text">size命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nm%E5%91%BD%E4%BB%A4"><span class="toc-text">nm命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#readelf%E5%91%BD%E4%BB%A4"><span class="toc-text">readelf命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E4%BE%9D%E8%B5%96%E7%9A%84ldd"><span class="toc-text">查看依赖的ldd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#linux%E4%B8%AD%E7%9A%84%E6%89%93%E6%96%AD%E7%82%B9--gdb%E8%B0%83%E8%AF%95"><span class="toc-text">linux中的打断点--gdb调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%B0%9D%E8%AF%95"><span class="toc-text">简单尝试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gdb%E8%AF%BB%E5%8F%96core-dump%E6%96%87%E4%BB%B6%E8%BF%9B%E8%A1%8C%E8%B0%83%E8%AF%95"><span class="toc-text">gdb读取core-dump文件进行调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AF%94core-dump%E7%AE%80%E5%8D%95%E7%9A%84%E6%A3%80%E6%B5%8B%E5%B7%A5%E5%85%B7"><span class="toc-text">比core dump简单的检测工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%9A%84%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95%E5%91%BD%E4%BB%A4"><span class="toc-text">网络编程的简单测试命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%9A%E8%BF%9B%E7%A8%8B%E8%B0%83%E8%AF%95"><span class="toc-text">多线程多进程调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#gdb%E5%9C%A8%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%9A%84%E8%B0%83%E8%AF%95"><span class="toc-text">gdb在多线程多进程的调试</span></a></li></ol></li></ol></li></ol>
             </div>
         <!-- sidebar -->
         <div class="sidebar sidebar-hide">
@@ -820,10 +820,9 @@ dump的展示。简单总结就这样吧。</p>
         
         
         
-        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 55
+        Total : 54
         </div>
         <!-- search  -->
     </div>
@@ -884,10 +883,6 @@ dump的展示。简单总结就这样吧。</p>
         <li class="archive-post-item">
             <span class="archive-post-date">07/05</span>
             <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
-        </li>
-        <li class="archive-post-item">
-            <span class="archive-post-date">06/26</span>
-            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
         </li>
         <li class="archive-post-item">
             <span class="archive-post-date">06/25</span>
@@ -1200,10 +1195,6 @@ dump的展示。简单总结就这样吧。</p>
             <span class="sidebar-tag-name" data-tags="sqlite">
                 <span class="iconfont-archer">&#xe606;</span>
                 sqlite
-            </span>
-            <span class="sidebar-tag-name" data-tags="mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                mysql
             </span>
             <span class="sidebar-tag-name" data-tags="TCP/UDP">
                 <span class="iconfont-archer">&#xe606;</span>

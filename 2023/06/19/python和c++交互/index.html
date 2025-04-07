@@ -624,7 +624,7 @@ socket相对网络socket，它不需要经过网络协议栈，不用打包拆�
                 <div class="toc-catalog">
                     <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
                 </div>
-                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%BC%A0%E7%BB%9F%E7%9A%84python%E5%92%8Cc%E4%BA%A4%E4%BA%92%E6%96%B9%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">一、传统的python和c++交互方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#python-%E8%B0%83%E7%94%A8c%E5%BA%93"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 python 调用c++库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E5%B0%9D%E8%AF%95"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 在windows中的尝试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%9C%A8cc%E4%B8%AD%E5%8E%BB%E8%B0%83%E7%94%A8python"><span class="toc-number">2.</span> <span class="toc-text">二、在c&#x2F;c++中去调用python</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#cc%E4%B8%AD%E8%B0%83%E7%94%A8python%E6%A0%87%E5%87%86%E5%BA%93"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 c&#x2F;c++中调用python标准库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cc%E4%B8%AD%E8%B0%83%E7%94%A8python%E8%84%9A%E6%9C%AC%E5%86%85%E5%87%BD%E6%95%B0"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 c&#x2F;c++中调用python脚本内函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cc%E8%BF%90%E8%A1%8Cpython%E8%84%9A%E6%9C%AC"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 c&#x2F;c++运行python脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cc%E5%92%8Cpython%E4%BA%A4%E4%BA%92"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 c&#x2F;c++和python交互</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89python%E5%92%8Cc%E7%9B%B4%E6%8E%A5%E4%BA%A4%E4%BA%92"><span class="toc-number">3.</span> <span class="toc-text">三、python和c++直接交互</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87unix%E5%9F%9F%E5%A5%97%E6%8E%A5%E5%AD%97%E8%BF%9B%E8%A1%8C%E9%80%9A%E4%BF%A1"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 通过unix域套接字进行通信</span></a></li></ol></li></ol>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%BC%A0%E7%BB%9F%E7%9A%84python%E5%92%8Cc%E4%BA%A4%E4%BA%92%E6%96%B9%E5%BC%8F"><span class="toc-text">一、传统的python和c++交互方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#python-%E8%B0%83%E7%94%A8c%E5%BA%93"><span class="toc-text">1.1 python 调用c++库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8windows%E4%B8%AD%E7%9A%84%E5%B0%9D%E8%AF%95"><span class="toc-text">1.2 在windows中的尝试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E5%9C%A8cc%E4%B8%AD%E5%8E%BB%E8%B0%83%E7%94%A8python"><span class="toc-text">二、在c&#x2F;c++中去调用python</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#cc%E4%B8%AD%E8%B0%83%E7%94%A8python%E6%A0%87%E5%87%86%E5%BA%93"><span class="toc-text">2.1 c&#x2F;c++中调用python标准库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cc%E4%B8%AD%E8%B0%83%E7%94%A8python%E8%84%9A%E6%9C%AC%E5%86%85%E5%87%BD%E6%95%B0"><span class="toc-text">2.2 c&#x2F;c++中调用python脚本内函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cc%E8%BF%90%E8%A1%8Cpython%E8%84%9A%E6%9C%AC"><span class="toc-text">2.3 c&#x2F;c++运行python脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cc%E5%92%8Cpython%E4%BA%A4%E4%BA%92"><span class="toc-text">2.4 c&#x2F;c++和python交互</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89python%E5%92%8Cc%E7%9B%B4%E6%8E%A5%E4%BA%A4%E4%BA%92"><span class="toc-text">三、python和c++直接交互</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87unix%E5%9F%9F%E5%A5%97%E6%8E%A5%E5%AD%97%E8%BF%9B%E8%A1%8C%E9%80%9A%E4%BF%A1"><span class="toc-text">3.1 通过unix域套接字进行通信</span></a></li></ol></li></ol>
             </div>
         <!-- sidebar -->
         <div class="sidebar sidebar-hide">
@@ -690,10 +690,9 @@ socket相对网络socket，它不需要经过网络协议栈，不用打包拆�
         
         
         
-        
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 55
+        Total : 54
         </div>
         <!-- search  -->
     </div>
@@ -754,10 +753,6 @@ socket相对网络socket，它不需要经过网络协议栈，不用打包拆�
         <li class="archive-post-item">
             <span class="archive-post-date">07/05</span>
             <a class="archive-post-title" href="/2023/07/05/%E5%85%A8%E6%A0%88%E4%BC%8A%E5%A7%8B/">全栈伊始</a>
-        </li>
-        <li class="archive-post-item">
-            <span class="archive-post-date">06/26</span>
-            <a class="archive-post-title" href="/2023/06/26/sql%E5%9F%BA%E7%A1%80%E4%BD%BF%E7%94%A8/">sql基础使用</a>
         </li>
         <li class="archive-post-item">
             <span class="archive-post-date">06/25</span>
@@ -1070,10 +1065,6 @@ socket相对网络socket，它不需要经过网络协议栈，不用打包拆�
             <span class="sidebar-tag-name" data-tags="sqlite">
                 <span class="iconfont-archer">&#xe606;</span>
                 sqlite
-            </span>
-            <span class="sidebar-tag-name" data-tags="mysql">
-                <span class="iconfont-archer">&#xe606;</span>
-                mysql
             </span>
             <span class="sidebar-tag-name" data-tags="TCP/UDP">
                 <span class="iconfont-archer">&#xe606;</span>
