@@ -520,15 +520,6 @@ days d1(3), d2(-3), d3(333);
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@DESKTOP-SJO8SMG samu]# ./timerp</span><br><span class="line">12:12:12.000012</span><br><span class="line">07:17:06.006666</span><br><span class="line">09:42:56.888000</span><br><span class="line">has 34976secs.</span><br><span class="line">请输入时间：</span><br><span class="line">23:33:33.10</span><br><span class="line">输入的时间：</span><br><span class="line">23:33:33.100000</span><br><span class="line">233333.100000</span><br><span class="line">23:33:33</span><br><span class="line">[root@DESKTOP-SJO8SMG samu]# ./timerp</span><br><span class="line">12:12:12.000012</span><br><span class="line">07:17:06.006666</span><br><span class="line">09:42:56.888000</span><br><span class="line">has 34976secs.</span><br><span class="line">请输入时间：</span><br><span class="line">23:46:46</span><br><span class="line">输入的时间：</span><br><span class="line">23:46:46</span><br><span class="line">234646</span><br><span class="line">23:46:46</span><br></pre></td></tr></table></figure>
 <p>使用还是很简单的，这里不做赘述了，因为只是简单了解使用，并不打算详细学习，所以就先到这吧。</p>
 
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            if (window.Gitalk) {
-              const gitalk = new Gitalk(/* 配置同上 */);
-              gitalk.render('gitalk-container');
-            }
-          });
-        </script>
-      
     </article>
     <!-- license -->
         <div class="license-wrapper">
@@ -559,27 +550,16 @@ days d1(3), d2(-3), d3(333);
 
             
             
-                <div id="gitalk-container"></div>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
-    <script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
-    <script>
-        let idOption = '1639278773000'
-            idOption = decodeURI(location.pathname)
-        const gitalk = new Gitalk({
-            clientID: 'Ov23lip8ZhRIqbSSgHJ9',
-            clientSecret: '2a7c5c44e970a6ca9da7a343bcec542a91418c99',
-            repo: 'comment',
-            owner: 'jack-samu',
-            admin: "jack-samu",
-            id: idOption,
-            distractionFreeMode: false,
-            createIssueManually: true,
-        })
-        gitalk.render('gitalk-container')
-    </script>
-    <noscript>为正常使用 Gitalk 评论功能，您需要激活 JavaScript</noscript>
-
+            
             <!-- utteranc评论 -->
+    <script src='https://utteranc.es/client.js'
+        repo='Jack-samu/comment'
+        issue-term='title'
+        label='Comment'
+        theme='github-light'
+        crossorigin='anonymous'
+        async>
+    </script>
 
             <!-- partial('_partial/comment/changyan') -->
             <!--PC版-->

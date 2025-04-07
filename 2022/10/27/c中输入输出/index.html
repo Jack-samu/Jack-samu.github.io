@@ -672,15 +672,6 @@ fseek函数能够在文件指针f指定文件，在origin指定位置进行或�
 <p>实际上，C程序处理的是流(一个实际输入输出的映射)，而不是直接文件，所以很多函数原型中关于文件指针，在很多地方也可解读成stream，比如上面的fprintf和fscanf，当传入的文件指针是为标准输入和标准输出时，它们也可等同于printf和scanf，这就是一种统一，也可以说是C针对系统的一个抽象和封装，呈现给用户一种样子。</p>
 <p>流的处理其实在c++中相对更成型，c中因为历史原因并没有什么完整的一套，暂时我找到的资料是这样的。</p>
 
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            if (window.Gitalk) {
-              const gitalk = new Gitalk(/* 配置同上 */);
-              gitalk.render('gitalk-container');
-            }
-          });
-        </script>
-      
     </article>
     <!-- license -->
         <div class="license-wrapper">
@@ -711,27 +702,16 @@ fseek函数能够在文件指针f指定文件，在origin指定位置进行或�
 
             
             
-                <div id="gitalk-container"></div>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
-    <script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
-    <script>
-        let idOption = '1666805474000'
-            idOption = decodeURI(location.pathname)
-        const gitalk = new Gitalk({
-            clientID: 'Ov23lip8ZhRIqbSSgHJ9',
-            clientSecret: '2a7c5c44e970a6ca9da7a343bcec542a91418c99',
-            repo: 'comment',
-            owner: 'jack-samu',
-            admin: "jack-samu",
-            id: idOption,
-            distractionFreeMode: false,
-            createIssueManually: true,
-        })
-        gitalk.render('gitalk-container')
-    </script>
-    <noscript>为正常使用 Gitalk 评论功能，您需要激活 JavaScript</noscript>
-
+            
             <!-- utteranc评论 -->
+    <script src='https://utteranc.es/client.js'
+        repo='Jack-samu/comment'
+        issue-term='title'
+        label='Comment'
+        theme='github-light'
+        crossorigin='anonymous'
+        async>
+    </script>
 
             <!-- partial('_partial/comment/changyan') -->
             <!--PC版-->

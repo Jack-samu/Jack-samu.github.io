@@ -293,7 +293,7 @@
 
                 <!-- 文章字数统计 -->
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">2.1k</span>阅读时长: <span class="post-count reading-time">8 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">2.1k</span>阅读时长: <span class="post-count reading-time">7 min</span></span>
                     </div>
                 <div class="post-intro-meta">
                     <!-- 撰写日期 -->
@@ -507,15 +507,6 @@ alt="在这里插入图片描述" />
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;GL/glew.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;glfw/glfw3.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;glew32.lib&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;glfw3.lib&quot;</span>)</span></span><br><span class="line"><span class="comment">//作为标准提供在windows SDK中，但需要引入</span></span><br><span class="line"><span class="meta">#<span class="keyword">pragma</span> comment(lib, <span class="string">&quot;opengl32.lib&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">//绘制window窗体内容</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">display</span><span class="params">(GLFWwindow *window, <span class="type">double</span> currentTime)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//绘制红色背景</span></span><br><span class="line">	<span class="built_in">glClearColor</span>(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>);</span><br><span class="line">	<span class="built_in">glClear</span>(GL_COLOR_BUFFER_BIT);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//初始化GLFW库</span></span><br><span class="line">	<span class="keyword">if</span> (!<span class="built_in">glfwInit</span>())</span><br><span class="line">		<span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建GLFW窗口和相关openGL上下文，并指定机器主次版本兼容openGL4.3</span></span><br><span class="line">	<span class="built_in">glfwWindowHint</span>(GLFW_CONTEXT_VERSION_MAJOR, <span class="number">4</span>);</span><br><span class="line">	<span class="built_in">glfwWindowHint</span>(GLFW_CONTEXT_VERSION_MAJOR, <span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建一个宽高都为600像素的标题为none的、后面两个参数设置全屏显示和资源共享，暂时用NULL参数替代</span></span><br><span class="line">	GLFWwindow *window = <span class="built_in">glfwCreateWindow</span>(<span class="number">600</span>, <span class="number">600</span>, <span class="string">&quot;none&quot;</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="comment">//把windows对象和当前openGL上下文相关联</span></span><br><span class="line">	<span class="built_in">glfwMakeContextCurrent</span>(window);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//初始化GLEW库</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">glewInit</span>() != GLEW_OK)</span><br><span class="line">		<span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">	<span class="comment">//开启垂直同步</span></span><br><span class="line">	<span class="built_in">glfwSwapInterval</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//简单的渲染循环</span></span><br><span class="line">	<span class="keyword">while</span> (!<span class="built_in">glfwWindowShouldClose</span>(window)) &#123;</span><br><span class="line">		<span class="built_in">display</span>(window, <span class="built_in">glfwGetTime</span>());</span><br><span class="line">		<span class="comment">//绘制屏幕</span></span><br><span class="line">		<span class="built_in">glfwSwapBuffers</span>(window);</span><br><span class="line">		<span class="comment">//等待事件的处理，比如按键点击退出</span></span><br><span class="line">		<span class="built_in">glfwPollEvents</span>();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//逐一操作以释放窗口对象</span></span><br><span class="line">	<span class="built_in">glfwDestroyWindow</span>(window);</span><br><span class="line">	<span class="built_in">glfwTerminate</span>();</span><br><span class="line">	<span class="built_in">exit</span>(EXIT_SUCCESS);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//openGL上下文，openGL实例及状态信息等，包括颜色缓冲区等</span></span><br></pre></td></tr></table></figure>
 <p>因为已经提前把glew.dll放在项目路径下了，所以基本是没啥问题了的，运行结束就会出现一个红色窗口。</p>
 
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            if (window.Gitalk) {
-              const gitalk = new Gitalk(/* 配置同上 */);
-              gitalk.render('gitalk-container');
-            }
-          });
-        </script>
-      
     </article>
     <!-- license -->
         <div class="license-wrapper">
@@ -546,27 +537,16 @@ alt="在这里插入图片描述" />
 
             
             
-                <div id="gitalk-container"></div>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
-    <script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
-    <script>
-        let idOption = '1668398474000'
-            idOption = decodeURI(location.pathname)
-        const gitalk = new Gitalk({
-            clientID: 'Ov23lip8ZhRIqbSSgHJ9',
-            clientSecret: '2a7c5c44e970a6ca9da7a343bcec542a91418c99',
-            repo: 'comment',
-            owner: 'jack-samu',
-            admin: "jack-samu",
-            id: idOption,
-            distractionFreeMode: false,
-            createIssueManually: true,
-        })
-        gitalk.render('gitalk-container')
-    </script>
-    <noscript>为正常使用 Gitalk 评论功能，您需要激活 JavaScript</noscript>
-
+            
             <!-- utteranc评论 -->
+    <script src='https://utteranc.es/client.js'
+        repo='Jack-samu/comment'
+        issue-term='title'
+        label='Comment'
+        theme='github-light'
+        crossorigin='anonymous'
+        async>
+    </script>
 
             <!-- partial('_partial/comment/changyan') -->
             <!--PC版-->

@@ -520,15 +520,6 @@ shm_addr非空，shmflag没有设置SHM_RND，共享内存关联到shm_addr指�
 <p>暂时先写就这么点吧，后面再来更新</p>
 <p>一些相关的内核数据结构： <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//system v信号量</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/sem.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//描述IPC对象权限</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ipc_perm</span> &#123;</span></span><br><span class="line">    <span class="type">key_t</span> key;                      <span class="comment">//键值</span></span><br><span class="line">    <span class="type">uid_t</span> uid;                      <span class="comment">//持有者的有效用户ID</span></span><br><span class="line">    <span class="type">gid_t</span> gid;                      <span class="comment">//持有者的组ID</span></span><br><span class="line">    <span class="type">uid_t</span> cuid;                     <span class="comment">//创建者的用户ID</span></span><br><span class="line">    <span class="type">gid_t</span> cgid;                     <span class="comment">//创建者的组ID</span></span><br><span class="line">    <span class="type">mode_t</span> mode;                    <span class="comment">//访问权限</span></span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//system v信号量的内核数据结构</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">semid_ds</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">ipc_perm</span> <span class="title">sem_perm</span>;</span>            <span class="comment">//重点关注信号量的操作权限</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> <span class="type">int</span> sem_nsems;         <span class="comment">//信号量集的信号量数</span></span><br><span class="line">    <span class="type">time_t</span> sem_otime;                    <span class="comment">//最后一次调用semop时间</span></span><br><span class="line">    <span class="type">time_t</span> sem_ctime;                    <span class="comment">//最后一次调用semctl时间</span></span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/shm.h&gt;</span></span></span><br><span class="line"><span class="comment">//共享内存的内核数据结构</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">shmid_ds</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">ipc_perm</span> <span class="title">shm_perm</span>;</span>            <span class="comment">//共享内存操作权限</span></span><br><span class="line">    <span class="type">size_t</span> shm_segsz;                    <span class="comment">//共享内存大小，以字节为单位</span></span><br><span class="line">    <span class="type">__time_t</span> shm_atime;                  <span class="comment">//对共享内存最后一次调用shmat的时间</span></span><br><span class="line">    <span class="type">__time_t</span> shm_dtime;                  <span class="comment">//对共享内存最后一次调用shmdt的时间</span></span><br><span class="line">    <span class="type">__time_t</span> shm_ctime;                  <span class="comment">//对共享内存最后一次调用shmctl的时间</span></span><br><span class="line">    <span class="type">__pid_t</span> shm_cpid;                    <span class="comment">//创建者PID</span></span><br><span class="line">    <span class="type">__pid_t</span> shm_lpid;                    <span class="comment">//最后一次执行shmat或者shmdt的进程PID</span></span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/msg.h&gt;</span></span></span><br><span class="line"><span class="comment">//消息队列的内核数据结构</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">msqid_ds</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">ipc_perm</span> <span class="title">msg_perm</span>;</span>            <span class="comment">//消息队列操作权限</span></span><br><span class="line">    <span class="type">time_t</span> msg_stime;                    <span class="comment">//最后一次调用msgsnd时间</span></span><br><span class="line">    <span class="type">time_t</span> msg_rtime;                    <span class="comment">//最后一次调用msgrcv时间</span></span><br><span class="line">    <span class="type">time_t</span> msg_ctime;                    <span class="comment">//最后一次被修改时间</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> __msg_cbytes;          <span class="comment">//消息队列中已有的字节数</span></span><br><span class="line">    <span class="type">msgqnum_t</span> msg_qnum;                  <span class="comment">//消息队列已有消息数</span></span><br><span class="line">    <span class="type">msglen_t</span> msg_qbytes;                 <span class="comment">//消息队列允许的最大字节数</span></span><br><span class="line">    <span class="type">pid_t</span> msg_lspid;                     <span class="comment">//最后执行msgsnd的进程PID</span></span><br><span class="line">    <span class="type">pid_t</span> msg_lrpid;                     <span class="comment">//最后执行msgrcv的进程PID</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
 
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            if (window.Gitalk) {
-              const gitalk = new Gitalk(/* 配置同上 */);
-              gitalk.render('gitalk-container');
-            }
-          });
-        </script>
-      
     </article>
     <!-- license -->
         <div class="license-wrapper">
@@ -559,27 +550,16 @@ shm_addr非空，shmflag没有设置SHM_RND，共享内存关联到shm_addr指�
 
             
             
-                <div id="gitalk-container"></div>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
-    <script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
-    <script>
-        let idOption = '1669899194000'
-            idOption = decodeURI(location.pathname)
-        const gitalk = new Gitalk({
-            clientID: 'Ov23lip8ZhRIqbSSgHJ9',
-            clientSecret: '2a7c5c44e970a6ca9da7a343bcec542a91418c99',
-            repo: 'comment',
-            owner: 'jack-samu',
-            admin: "jack-samu",
-            id: idOption,
-            distractionFreeMode: false,
-            createIssueManually: true,
-        })
-        gitalk.render('gitalk-container')
-    </script>
-    <noscript>为正常使用 Gitalk 评论功能，您需要激活 JavaScript</noscript>
-
+            
             <!-- utteranc评论 -->
+    <script src='https://utteranc.es/client.js'
+        repo='Jack-samu/comment'
+        issue-term='title'
+        label='Comment'
+        theme='github-light'
+        crossorigin='anonymous'
+        async>
+    </script>
 
             <!-- partial('_partial/comment/changyan') -->
             <!--PC版-->

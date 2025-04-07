@@ -289,7 +289,7 @@
 
                 <!-- 文章字数统计 -->
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">485</span>阅读时长: <span class="post-count reading-time">2 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">466</span>阅读时长: <span class="post-count reading-time">2 min</span></span>
                     </div>
                 <div class="post-intro-meta">
                     <!-- 撰写日期 -->
@@ -464,15 +464,6 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run -d --restart=always -p 3306:3306 \</span><br><span class="line">-v /opt/services/mysql/conf:/etc/mysql/conf.d \</span><br><span class="line">-v /opt/services/mysql/logs:/var/log \</span><br><span class="line">-v /opt/services/mysql/data:/var/lib \</span><br><span class="line">--name mysql_service \</span><br><span class="line">-e MYSQL_ROOT_PASSWORD=123456</span><br></pre></td></tr></table></figure>
 <p>这种情况得到的mysql容器在python的连接使用中问题连连，也是被我放弃了。</p>
 
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            if (window.Gitalk) {
-              const gitalk = new Gitalk(/* 配置同上 */);
-              gitalk.render('gitalk-container');
-            }
-          });
-        </script>
-      
     </article>
     <!-- license -->
         <div class="license-wrapper">
@@ -503,27 +494,16 @@
 
             
             
-                <div id="gitalk-container"></div>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css">
-    <script src="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js"></script>
-    <script>
-        let idOption = '1741764280000'
-            idOption = decodeURI(location.pathname)
-        const gitalk = new Gitalk({
-            clientID: 'Ov23lip8ZhRIqbSSgHJ9',
-            clientSecret: '2a7c5c44e970a6ca9da7a343bcec542a91418c99',
-            repo: 'comment',
-            owner: 'jack-samu',
-            admin: "jack-samu",
-            id: idOption,
-            distractionFreeMode: false,
-            createIssueManually: true,
-        })
-        gitalk.render('gitalk-container')
-    </script>
-    <noscript>为正常使用 Gitalk 评论功能，您需要激活 JavaScript</noscript>
-
+            
             <!-- utteranc评论 -->
+    <script src='https://utteranc.es/client.js'
+        repo='Jack-samu/comment'
+        issue-term='title'
+        label='Comment'
+        theme='github-light'
+        crossorigin='anonymous'
+        async>
+    </script>
 
             <!-- partial('_partial/comment/changyan') -->
             <!--PC版-->
